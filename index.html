@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- ★ 検索エンジン避け（Google検索等にヒットしなくなります） -->
+  <meta name="robots" content="noindex, nofollow">
+  
   <title>【OtterCompany】魔物襲来ダッシュボード</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -75,18 +79,6 @@
       <!-- ================= ランキングエリア ================= -->
       <div id="view-ranking" class="block">
         
-        <!-- ★ 効率などの解説（復活） -->
-        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-5 text-xs text-indigo-200 leading-relaxed shadow-inner">
-          <strong class="text-indigo-300 text-[13px] block mb-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            見方のポイント
-          </strong>
-          <ul class="space-y-1.5">
-            <li><span class="font-bold text-emerald-400">⚡ 効率（戦力効率）:</span> スコア ÷ 戦力（戦力1Mあたりのスコア）。<br><span class="text-white font-bold border-b border-emerald-500 pb-0.5">この数字が高いほど、編成や立ち回りが優秀</span>な証拠です！</li>
-            <li><span class="font-bold text-slate-300">📈 📉 :</span> 前回参加時からのスコア増減を示します。</li>
-          </ul>
-        </div>
-
         <div class="mb-5">
           <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>いつの実力を見る？</p>
           <div class="flex bg-slate-800/80 p-1 rounded-lg border border-slate-700">
@@ -646,7 +638,6 @@
         return { name: name, count: count, rate: count / actualDays };
       });
 
-      // 参加回数が少ない順（未参加が多い順）
       actData.sort((a, b) => a.count - b.count || a.name.localeCompare(b.name));
       
       let currentRank = 1;
