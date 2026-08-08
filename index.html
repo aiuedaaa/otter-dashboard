@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>【OtterCompany】魔物襲来ダッシュボード</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -189,7 +190,6 @@
       <!-- ================= 履歴エリア ================= -->
       <div id="view-history" class="hidden">
         
-        <!-- ★ 追加：軌跡タブの説明パネル -->
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
           <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -298,17 +298,23 @@
         const response = await fetch(API_URL);
         const data = await response.json();
         if (data.error) throw new Error(data.error);
-        if (data.length === 0) throw new Error("データがありません");
+        if (!data.scores || data.scores.length === 0) throw new Error("データがありません");
 
-        globalRawData = data;
-        prepareData();
+        // ★ GASの新しいJSON構造（scores と latestPowers）に対応
+        globalRawData = data.scores;
+        const latestPowersDict = data.latestPowers || {};
+        
+        // 最新の戦力が登録されている人の名前だけを「現在在籍しているメンバー」として取得
+        activeMembers = Object.keys(latestPowersDict).sort((a, b) => a.localeCompare(b));
+        
+        prepareData(latestPowersDict);
         initElderWeeks(); 
         
         state.period = availableDates[0];
         setupDateSelects();
         updatePeriodButtons();
         
-        initFilterState(); 
+        initFilterState(latestPowersDict); 
         
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dashboard-content').style.display = 'block';
@@ -351,7 +357,7 @@
       return '#10b981'; 
     }
 
-    function prepareData() {
+    function prepareData(latestPowersDict) {
       let data = globalRawData.map(d => {
         const scoreNum = parseValueString(d.score);
         const powerNum = parseValueString(d.power);
@@ -360,10 +366,6 @@
       });
 
       availableDates = [...new Set(data.map(d => d.date))].sort().reverse();
-      
-      if (availableDates.length > 0) {
-        activeMembers = [...new Set(data.filter(d => d.date === availableDates[0] && d.powerNum > 0).map(d => d.name))];
-      }
 
       availableDates.forEach(date => {
         let dailyItems = data.filter(d => d.date === date);
@@ -415,7 +417,7 @@
       }
     }
 
-    // ================= 共通フィルタ制御 =================
+    // ================= ★ 変更：共通フィルタの初期化ロジック =================
     function toggleFilterPanel() {
       const panel = document.getElementById('common-filter-panel');
       const icon = document.getElementById('filter-panel-icon');
@@ -423,14 +425,23 @@
       else { panel.classList.add('hidden'); icon.textContent = '▼'; }
     }
 
-    function initFilterState() {
-      const uniqueNames = [...new Set(processedData.map(d => d.name))].sort();
+    // GASから受け取った「最新戦力辞書（latestPowersDict）」を使ってフィルターを構築
+    function initFilterState(latestPowersDict) {
       memberFilterState = {};
-      latestMemberInfo = uniqueNames.map(name => {
-        const latestData = processedData.find(d => d.name === name && d.powerNum > 0) || processedData.find(d => d.name === name);
-        return { name: name, powerNum: latestData ? latestData.powerNum : 0, tierCat: latestData ? getTierCategory(latestData.powerNum) : '0-10' };
+      
+      latestMemberInfo = activeMembers.map(name => {
+        const powerStr = latestPowersDict[name];
+        const powerNum = parseValueString(powerStr);
+        return {
+          name: name,
+          powerNum: powerNum,
+          tierCat: getTierCategory(powerNum)
+        };
       });
+
+      // 全員ONで初期化
       latestMemberInfo.forEach(info => { memberFilterState[info.name] = true; });
+      
       renderFilterControls();
     }
 
@@ -588,9 +599,7 @@
       state.sort = sort; updateButtonGroup('sort', sort, ['score', 'efficiency', 'power', 'rank']); renderView();
     }
 
-    // ★ 軌跡タブへのワープ処理（フィルター連動）
     function goToHistory(name) {
-      // 共通フィルターでその人だけをONにする
       latestMemberInfo.forEach(d => { memberFilterState[d.name] = (d.name === name); });
       renderFilterControls();
       setTab('history');
@@ -757,7 +766,6 @@
         const shortDate = d.date.substring(5).replace('-', '/') + ` <span class="text-[9px] font-normal text-slate-500">(${dayStr})</span>`;
         const effStr = d.efficiency > 0 ? d.efficiency.toFixed(1) : '-';
 
-        // 日付の下に名前を表示
         const html = `
           <li class="grid grid-cols-5 text-center items-center py-2.5 border-b border-slate-700/50 hover:bg-slate-800/40 transition-colors">
             <div class="text-[11px] text-slate-300 font-bold flex flex-col items-center justify-center">
