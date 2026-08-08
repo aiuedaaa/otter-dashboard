@@ -65,14 +65,13 @@
 
     <div id="dashboard-content" style="display:none;">
 
-      <!-- ================= 5つのメインタブ ================= -->
-      <div class="flex bg-slate-800/80 p-1 rounded-lg mb-4 overflow-x-auto scrollbar-hide border border-slate-700">
-        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-4 py-2.5 text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 比較</button>
-        <button id="nav-analysis" onclick="setTab('analysis')" class="flex-none px-4 py-2.5 text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">📈 目標分析</button>
-        <button id="nav-history" onclick="setTab('history')" class="flex-none px-4 py-2.5 text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👤 軌跡</button>
-        <button id="nav-activity" onclick="setTab('activity')" class="flex-none px-4 py-2.5 text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 非アクティブ度</button>
-        <!-- ★ 追加：長老選抜タブ -->
-        <button id="nav-elder" onclick="setTab('elder')" class="flex-none px-4 py-2.5 text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
+      <!-- ================= ★修正：折り返し（複数段）対応のメインタブ ================= -->
+      <div class="flex flex-wrap gap-1.5 bg-slate-800/80 p-1.5 rounded-lg mb-4 border border-slate-700">
+        <button id="nav-ranking" onclick="setTab('ranking')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 比較</button>
+        <button id="nav-analysis" onclick="setTab('analysis')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">📈 目標分析</button>
+        <button id="nav-history" onclick="setTab('history')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👤 軌跡</button>
+        <button id="nav-activity" onclick="setTab('activity')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 非アクティブ度</button>
+        <button id="nav-elder" onclick="setTab('elder')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
       </div>
 
       <!-- ================= 全画面共通フィルター ================= -->
@@ -92,7 +91,7 @@
             <div class="flex gap-1.5 flex-wrap">
               <button onclick="toggleAllMembers(true)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-slate-700 text-white shadow-sm hover:bg-slate-600 transition border border-slate-500">全員ON</button>
               <button onclick="toggleAllMembers(false)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-slate-900 text-slate-400 shadow-sm hover:bg-slate-800 transition border border-slate-700">全員OFF</button>
-              <!-- ★ 幹部OFFボタン -->
+              <button onclick="toggleExecutives(true)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-indigo-900/60 text-indigo-300 shadow-sm hover:bg-indigo-800/80 transition border border-indigo-700/50">幹部ON</button>
               <button onclick="toggleExecutives(false)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-rose-900/60 text-rose-300 shadow-sm hover:bg-rose-800/80 transition border border-rose-700/50">幹部OFF</button>
             </div>
           </div>
@@ -103,6 +102,19 @@
       
       <!-- ================= ランキングエリア ================= -->
       <div id="view-ranking" class="block">
+        
+        <!-- ★ 復活：効率などの解説 -->
+        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-5 text-xs text-indigo-200 leading-relaxed shadow-inner">
+          <strong class="text-indigo-300 text-[13px] block mb-2 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            見方のポイント
+          </strong>
+          <ul class="space-y-1.5">
+            <li><span class="font-bold text-emerald-400">⚡ 効率（戦力効率）:</span> スコア ÷ 戦力（戦力1Mあたりのスコア）。<br><span class="text-white font-bold border-b border-emerald-500 pb-0.5">この数字が高いほど、編成や立ち回りが優秀</span>な証拠です！</li>
+            <li><span class="font-bold text-slate-300">📈 📉 :</span> 前回参加時からのスコア増減を示します。</li>
+          </ul>
+        </div>
+
         <div class="mb-5">
           <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>いつの実力を見る？</p>
           <div class="flex bg-slate-800/80 p-1 rounded-lg border border-slate-700 gap-1">
@@ -217,6 +229,7 @@
             非アクティブ度（未参加ランキング）
           </strong>
           <span class="text-white font-bold border-b border-rose-500 pb-0.5">フィルターでONになっている現在在籍メンバー</span>を対象に、<span class="text-rose-400 font-bold">参加回数が少ない順</span>に表示しています。<br>
+          <span class="text-[10px] opacity-70 mt-1 block">※既に引退・脱退したメンバーのノイズは自動で除外されます。同数の場合は同順位になります。</span>
         </div>
 
         <div class="glass-card overflow-hidden">
@@ -224,7 +237,7 @@
         </div>
       </div>
 
-      <!-- ================= ★ 新設：長老選抜エリア ================= -->
+      <!-- ================= ★ 長老選抜エリア ================= -->
       <div id="view-elder" class="hidden">
         <div class="mb-5">
           <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>集計週を選択</p>
@@ -264,7 +277,7 @@
       elderWeek: ''
     };
     
-    // ★ 幹部のリスト
+    // 幹部のリスト
     const executives = ["てぃっしゅ", "たに", "よぴ", "かめ吉", "うえだ", "だいち", "さば"];
 
     let memberFilterState = {};
@@ -289,7 +302,7 @@
 
         globalRawData = data;
         prepareData();
-        initElderWeeks(); // 長老選抜用の週準備
+        initElderWeeks(); 
         
         state.period = availableDates[0];
         setupDateSelects();
@@ -371,7 +384,6 @@
       processedData = data;
     }
 
-    // 長老選抜用の週データ生成
     function initElderWeeks() {
       weekMap = {};
       weeks = [];
@@ -446,7 +458,6 @@
       sorted.forEach(d => {
         const isOn = memberFilterState[d.name];
         const isExec = executives.includes(d.name);
-        // 幹部の場合は少しだけバッジの見た目をリッチに（枠線）
         const execBorder = isExec ? 'border-amber-400/50' : 'border-indigo-500';
         const cls = isOn ? `bg-indigo-600 text-white ${execBorder} shadow-sm` : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
         const html = `<button onclick="toggleMember('${d.name}')" class="px-2 py-0.5 text-[10px] font-bold rounded-full border transition ${cls}">${d.name}</button>`;
@@ -469,7 +480,6 @@
       renderFilterControls(); renderView();
     }
 
-    // ★ 幹部OFFボタン
     function toggleExecutives(forceState) {
       executives.forEach(name => {
         if (memberFilterState[name] !== undefined) {
@@ -816,6 +826,7 @@
         if (rank === 2) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md font-bold text-xs num-font">2</span>`;
         if (rank === 3) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-md font-bold text-xs num-font">3</span>`;
 
+        const missedCount = actualDays - d.count;
         const missedRate = 1 - d.rate;
         const missedPercent = Math.round(missedRate * 100);
 
@@ -836,8 +847,9 @@
                 </div>
               </div>
             </div>
-            <div class="shrink-0 text-right pl-3 border-l border-slate-700 flex items-center justify-end min-w-[70px]">
-              <div class="font-bold text-slate-300 text-[18px] num-font tracking-wider">${d.count}<span class="text-[10px] text-slate-500 ml-0.5 font-normal">/${actualDays}回</span></div>
+            <div class="shrink-0 text-right pl-3 border-l border-slate-700 flex flex-col items-end min-w-[75px]">
+              <div class="font-bold text-rose-400 text-[18px] num-font tracking-wider">${missedCount}<span class="text-[10px] text-slate-400 ml-0.5 font-normal">/${actualDays}回 休</span></div>
+              <div class="text-[10px] text-slate-400 mt-0.5 font-bold">参加: <span class="num-font text-slate-300">${d.count}回</span></div>
             </div>
           </li>
         `;
@@ -845,7 +857,7 @@
       });
     }
 
-    // ================= ★ 新設：長老選抜エリア =================
+    // ================= ★ 長老選抜エリア =================
     function renderElder() {
       const listEl = document.getElementById('elderList');
       listEl.innerHTML = '';
@@ -855,7 +867,6 @@
       }
       
       const targetDates = weekMap[state.elderWeek].dates;
-      // 共通フィルタでONになっているメンバーだけ対象にする（幹部OFFを押せば幹部は除外される）
       const targetMembers = activeMembers.filter(name => memberFilterState[name]);
       
       if (targetDates.length === 0 || targetMembers.length === 0) {
@@ -867,10 +878,8 @@
         elderDataMap[name] = { name: name, totalPt: 0, totalScore: 0, powerNum: 0, joinCount: 0 };
       });
 
-      // その週の毎日ごとに順位を計算してポイント付与
       targetDates.forEach(date => {
         let dailyData = processedData.filter(d => d.date === date && memberFilterState[d.name]);
-        // ★ フィルタをかけたメンバーだけで順位を再計算
         dailyData = computeRanks(dailyData, 'scoreNum');
         
         dailyData.forEach(d => {
@@ -892,7 +901,6 @@
       
       let elderData = Object.values(elderDataMap);
       
-      // 合計Pt降順 → 合計スコア降順
       elderData.sort((a, b) => b.totalPt - a.totalPt || b.totalScore - a.totalScore);
       
       let currentRank = 1; let skip = 0; let prevPt = -1; let prevScore = -1;
@@ -910,7 +918,6 @@
         if (rank === 2) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900 shadow-md font-bold text-xs num-font">2</span>`;
         if (rank === 3) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-md font-bold text-xs num-font">3</span>`;
 
-        // 4位以内かつ1Pt以上獲得している人を長老候補とする
         const isElder = rank <= 4 && d.totalPt > 0;
         const elderBadge = isElder ? `<span class="bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-900 px-1.5 py-0.5 rounded text-[10px] font-bold shadow-sm ml-2 whitespace-nowrap">👑 長老候補</span>` : '';
 
