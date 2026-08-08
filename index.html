@@ -373,7 +373,6 @@
         initElderWeeks(); 
         
         state.period = availableDates[0];
-        // ★ ダミーオプションを追加するよう変更済み
         setupDateSelects();
         updatePeriodButtons();
         updateStickyBadge();
@@ -394,10 +393,18 @@
       }
     };
 
+    // ★ 修正：バグAの完全防弾処理（全角・小文字の対応）
     function parseValueString(str) {
       if (!str || str === "未登録") return 0;
-      const num = parseFloat(str.replace(/[^0-9.]/g, ''));
-      const upperStr = String(str).toUpperCase();
+      // 1. 全角英数字を半角に変換する
+      let halfStr = String(str).replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function(s) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+      });
+      // 2. 大文字に統一
+      const upperStr = halfStr.toUpperCase();
+      // 3. 数字部分だけを抽出して計算（Mなどの単位文字は除去される）
+      const num = parseFloat(upperStr.replace(/[^0-9.]/g, ''));
+      
       if (upperStr.includes('T')) return num * 1000000000000;
       if (upperStr.includes('B')) return num * 1000000000;
       if (upperStr.includes('M')) return num * 1000000;
@@ -586,7 +593,6 @@
       pushHistoryState(); 
     }
 
-    // ★ 変更：ダミーオプションを追加してバグを修正
     function setupDateSelects() {
       const el = document.getElementById('period-date-global');
       if(el) {
@@ -598,7 +604,6 @@
       }
     }
 
-    // ★ 変更：バグ修正のため、日付以外が選ばれている時は空文字に
     function updatePeriodButtons() {
       const isDate = !state.period.startsWith('avg-');
       const el = document.getElementById('period-date-global');
