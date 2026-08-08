@@ -65,7 +65,6 @@
 
     <div id="dashboard-content" style="display:none;">
 
-      <!-- ================= ★修正：折り返し（複数段）対応のメインタブ ================= -->
       <div class="flex flex-wrap gap-1.5 bg-slate-800/80 p-1.5 rounded-lg mb-4 border border-slate-700">
         <button id="nav-ranking" onclick="setTab('ranking')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 比較</button>
         <button id="nav-analysis" onclick="setTab('analysis')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">📈 目標分析</button>
@@ -103,7 +102,6 @@
       <!-- ================= ランキングエリア ================= -->
       <div id="view-ranking" class="block">
         
-        <!-- ★ 復活：効率などの解説 -->
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-5 text-xs text-indigo-200 leading-relaxed shadow-inner">
           <strong class="text-indigo-300 text-[13px] block mb-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -190,16 +188,19 @@
 
       <!-- ================= 履歴エリア ================= -->
       <div id="view-history" class="hidden">
-        <div class="glass-card p-3.5 mb-4">
-          <p class="text-xs font-bold text-slate-400 mb-1.5 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>確認したいメンバーを選択</p>
-          <input type="text" id="history-search" placeholder="名前で検索..." oninput="renderHistoryChips()" class="w-full bg-slate-800/80 border border-slate-700 rounded-lg text-sm p-2 mb-2 outline-none focus:ring-1 focus:ring-indigo-500 text-white placeholder-slate-500 shadow-inner">
-          <div id="history-member-chips" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1 border-t border-slate-700/50 pt-3">
-          </div>
+        
+        <!-- ★ 追加：軌跡タブの説明パネル -->
+        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
+          <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            個人の軌跡
+          </strong>
+          <span class="text-[10px] opacity-80 block">上の共通フィルターでONになっているメンバーの過去のスコアや順位の推移を時系列で表示します。（複数人ONにした場合は並べて比較できます）</span>
         </div>
 
         <div class="glass-card overflow-hidden">
           <div class="grid grid-cols-5 text-center text-[10px] sm:text-[11px] font-bold text-slate-400 bg-slate-800/80 py-2 border-b border-slate-700">
-            <div>日付</div>
+            <div>日付 / 名前</div>
             <div class="text-indigo-400 font-bold">スコア</div>
             <div>戦力</div>
             <div>効率</div>
@@ -237,7 +238,7 @@
         </div>
       </div>
 
-      <!-- ================= ★ 長老選抜エリア ================= -->
+      <!-- ================= 長老選抜エリア ================= -->
       <div id="view-elder" class="hidden">
         <div class="mb-5">
           <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>集計週を選択</p>
@@ -282,7 +283,6 @@
 
     let memberFilterState = {};
     let latestMemberInfo = []; 
-    let currentHistoryMember = ""; 
     let globalRawData = [];
     let processedData = [];
     let availableDates = [];
@@ -309,7 +309,6 @@
         updatePeriodButtons();
         
         initFilterState(); 
-        initHistoryState();
         
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dashboard-content').style.display = 'block';
@@ -589,9 +588,12 @@
       state.sort = sort; updateButtonGroup('sort', sort, ['score', 'efficiency', 'power', 'rank']); renderView();
     }
 
+    // ★ 軌跡タブへのワープ処理（フィルター連動）
     function goToHistory(name) {
+      // 共通フィルターでその人だけをONにする
+      latestMemberInfo.forEach(d => { memberFilterState[d.name] = (d.name === name); });
+      renderFilterControls();
       setTab('history');
-      setHistoryMember(name);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -735,49 +737,33 @@
       });
     }
 
-    // ================= 履歴エリア =================
-    function initHistoryState() {
-      const uniqueNames = [...new Set(processedData.map(d => d.name))].sort();
-      if (uniqueNames.length > 0) currentHistoryMember = uniqueNames[0]; 
-      renderHistoryChips();
-    }
-
-    function renderHistoryChips() {
-      const container = document.getElementById('history-member-chips');
-      const searchWord = document.getElementById('history-search').value.toLowerCase();
-      container.innerHTML = '';
-      
-      const uniqueNames = [...new Set(processedData.map(d => d.name))].sort();
-      uniqueNames.forEach(name => {
-        if (searchWord && !name.toLowerCase().includes(searchWord)) return;
-        const isActive = name === currentHistoryMember;
-        const cls = isActive ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/30' : 'bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700';
-        const html = `<button onclick="setHistoryMember('${name}')" class="px-2.5 py-1 text-[11px] font-bold rounded-full border transition-colors ${cls}">${name}</button>`;
-        container.insertAdjacentHTML('beforeend', html);
-      });
-    }
-
-    function setHistoryMember(name) {
-      currentHistoryMember = name;
-      renderHistoryChips(); renderHistory();      
-    }
-
+    // ================= ★ 軌跡エリア =================
     function renderHistory() {
       const listEl = document.getElementById('historyList');
       listEl.innerHTML = '';
-      if (!currentHistoryMember) return;
-
-      const memberData = processedData.filter(d => d.name === currentHistoryMember);
       
-      memberData.forEach(d => {
+      const targetNames = latestMemberInfo.filter(d => memberFilterState[d.name]).map(d => d.name);
+      
+      if (targetNames.length === 0) {
+        listEl.innerHTML = '<li class="p-8 text-center text-slate-500 text-sm">メンバーが選択されていません</li>'; 
+        return;
+      }
+
+      const targetData = processedData.filter(d => targetNames.includes(d.name));
+      
+      targetData.forEach(d => {
         const dObj = new Date(d.date);
         const dayStr = ['日', '月', '火', '水', '木', '金', '土'][dObj.getDay()];
         const shortDate = d.date.substring(5).replace('-', '/') + ` <span class="text-[9px] font-normal text-slate-500">(${dayStr})</span>`;
         const effStr = d.efficiency > 0 ? d.efficiency.toFixed(1) : '-';
 
+        // 日付の下に名前を表示
         const html = `
           <li class="grid grid-cols-5 text-center items-center py-2.5 border-b border-slate-700/50 hover:bg-slate-800/40 transition-colors">
-            <div class="text-[11px] text-slate-300 font-bold">${shortDate}</div>
+            <div class="text-[11px] text-slate-300 font-bold flex flex-col items-center justify-center">
+              <span>${shortDate}</span>
+              <span class="text-[9px] text-slate-400 font-normal truncate max-w-full px-1" title="${d.name}">${d.name}</span>
+            </div>
             <div class="text-[13px] sm:text-[15px] font-bold text-indigo-400 num-font tracking-wide">${formatValue(d.scoreNum)}</div>
             <div class="text-[11px] sm:text-xs text-slate-400 num-font">${formatValue(d.powerNum)}</div>
             <div class="text-[11px] sm:text-xs text-emerald-400 font-bold num-font">${effStr}</div>
@@ -848,8 +834,7 @@
               </div>
             </div>
             <div class="shrink-0 text-right pl-3 border-l border-slate-700 flex flex-col items-end min-w-[75px]">
-              <div class="font-bold text-rose-400 text-[18px] num-font tracking-wider">${missedCount}<span class="text-[10px] text-slate-400 ml-0.5 font-normal">/${actualDays}回 休</span></div>
-              <div class="text-[10px] text-slate-400 mt-0.5 font-bold">参加: <span class="num-font text-slate-300">${d.count}回</span></div>
+              <div class="font-bold text-slate-300 text-[18px] num-font tracking-wider">${d.count}<span class="text-[10px] text-slate-500 ml-0.5 font-normal">/${actualDays}回</span></div>
             </div>
           </li>
         `;
@@ -857,7 +842,7 @@
       });
     }
 
-    // ================= ★ 長老選抜エリア =================
+    // ================= 長老選抜エリア =================
     function renderElder() {
       const listEl = document.getElementById('elderList');
       listEl.innerHTML = '';
