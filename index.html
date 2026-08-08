@@ -269,7 +269,7 @@
     // ==========================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwHkhRGaeLkTBKng2M9OzdR6-t2MLO9jaDL9j6trYk6nIeYjvpQflSemLheDIHl6afgBw/exec?api=data";
 
-    const state = { 
+    let state = { 
       tab: 'ranking', 
       period: '', 
       tier: 'all', 
@@ -278,12 +278,12 @@
       elderWeek: ''
     };
     
-    // 幹部のリスト
     const executives = ["てぃっしゅ", "たに", "よぴ", "かめ吉", "うえだ", "だいち", "さば"];
 
     let memberFilterState = {};
     let latestMemberInfo = []; 
     let globalRawData = [];
+    let latestPowersDict = {};
     let processedData = [];
     let availableDates = [];
     let activeMembers = []; 
@@ -293,33 +293,68 @@
 
     Chart.register(ChartDataLabels, window['chartjs-plugin-annotation']);
 
+    // ★ブラウザの「戻る」「進む」ボタンが押された時の処理
+    window.addEventListener('popstate', (event) => {
+      if (event.state) {
+        state = event.state.stateObj;
+        memberFilterState = event.state.filterObj;
+        
+        // 画面の状態を復元
+        updatePeriodButtons();
+        updateButtonGroup('nav', state.tab, ['ranking', 'analysis', 'history', 'activity', 'elder']);
+        updateButtonGroup('act-period', state.actPeriod, ['1', '3', '7', '14', '21', '30']);
+        updateButtonGroup('tier', state.tier, ['all', '20', '15-20', '10-20', '10-15', '0-10']);
+        updateButtonGroup('sort', state.sort, ['score', 'efficiency', 'power', 'rank']);
+        
+        const selElder = document.getElementById('elder-week-select');
+        if(selElder) selElder.value = state.elderWeek;
+
+        document.getElementById('view-ranking').style.display = state.tab === 'ranking' ? 'block' : 'none';
+        document.getElementById('view-analysis').style.display = state.tab === 'analysis' ? 'block' : 'none';
+        document.getElementById('view-history').style.display = state.tab === 'history' ? 'block' : 'none';
+        document.getElementById('view-activity').style.display = state.tab === 'activity' ? 'block' : 'none';
+        document.getElementById('view-elder').style.display = state.tab === 'elder' ? 'block' : 'none';
+        
+        renderFilterControls();
+        renderView();
+      }
+    });
+
+    // ★状態をブラウザの履歴に保存する関数
+    function pushHistoryState() {
+      const stateClone = JSON.parse(JSON.stringify(state));
+      const filterClone = JSON.parse(JSON.stringify(memberFilterState));
+      history.pushState({ stateObj: stateClone, filterObj: filterClone }, "");
+    }
+
     window.onload = async () => {
       try {
         const response = await fetch(API_URL);
         const data = await response.json();
         if (data.error) throw new Error(data.error);
         if (!data.scores || data.scores.length === 0) throw new Error("データがありません");
-
-        // ★ GASの新しいJSON構造（scores と latestPowers）に対応
-        globalRawData = data.scores;
-        const latestPowersDict = data.latestPowers || {};
         
-        // 最新の戦力が登録されている人の名前だけを「現在在籍しているメンバー」として取得
+        globalRawData = data.scores;
+        latestPowersDict = data.latestPowers || {};
         activeMembers = Object.keys(latestPowersDict).sort((a, b) => a.localeCompare(b));
         
-        prepareData(latestPowersDict);
+        prepareData();
         initElderWeeks(); 
         
         state.period = availableDates[0];
         setupDateSelects();
         updatePeriodButtons();
         
-        initFilterState(latestPowersDict); 
+        initFilterState(); 
         
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dashboard-content').style.display = 'block';
         
         renderView();
+        
+        // 初回ロード時に履歴の起点を作る
+        history.replaceState({ stateObj: JSON.parse(JSON.stringify(state)), filterObj: JSON.parse(JSON.stringify(memberFilterState)) }, "");
+
       } catch (error) {
         document.getElementById('loading').innerHTML = `<div class="text-red-500 font-bold">❌ エラー</div><div class="text-sm mt-2">${error.message}</div>`;
       }
@@ -357,7 +392,7 @@
       return '#10b981'; 
     }
 
-    function prepareData(latestPowersDict) {
+    function prepareData() {
       let data = globalRawData.map(d => {
         const scoreNum = parseValueString(d.score);
         const powerNum = parseValueString(d.power);
@@ -366,7 +401,7 @@
       });
 
       availableDates = [...new Set(data.map(d => d.date))].sort().reverse();
-
+      
       availableDates.forEach(date => {
         let dailyItems = data.filter(d => d.date === date);
         dailyItems = computeRanks(dailyItems, 'scoreNum');
@@ -417,7 +452,6 @@
       }
     }
 
-    // ================= ★ 変更：共通フィルタの初期化ロジック =================
     function toggleFilterPanel() {
       const panel = document.getElementById('common-filter-panel');
       const icon = document.getElementById('filter-panel-icon');
@@ -425,23 +459,14 @@
       else { panel.classList.add('hidden'); icon.textContent = '▼'; }
     }
 
-    // GASから受け取った「最新戦力辞書（latestPowersDict）」を使ってフィルターを構築
-    function initFilterState(latestPowersDict) {
+    function initFilterState() {
       memberFilterState = {};
-      
       latestMemberInfo = activeMembers.map(name => {
         const powerStr = latestPowersDict[name];
         const powerNum = parseValueString(powerStr);
-        return {
-          name: name,
-          powerNum: powerNum,
-          tierCat: getTierCategory(powerNum)
-        };
+        return { name: name, powerNum: powerNum, tierCat: getTierCategory(powerNum) };
       });
-
-      // 全員ONで初期化
       latestMemberInfo.forEach(info => { memberFilterState[info.name] = true; });
-      
       renderFilterControls();
     }
 
@@ -475,7 +500,11 @@
       });
     }
 
-    function toggleMember(name) { memberFilterState[name] = !memberFilterState[name]; renderFilterControls(); renderView(); }
+    function toggleMember(name) { 
+      memberFilterState[name] = !memberFilterState[name]; 
+      renderFilterControls(); renderView(); 
+      pushHistoryState(); // ★操作履歴を追加
+    }
     
     function toggleTier(tierCat) {
       const membersInTier = latestMemberInfo.filter(d => d.tierCat === tierCat);
@@ -483,11 +512,13 @@
       const isAnyOn = membersInTier.some(d => memberFilterState[d.name]);
       membersInTier.forEach(d => { memberFilterState[d.name] = !isAnyOn; });
       renderFilterControls(); renderView();
+      pushHistoryState(); // ★操作履歴を追加
     }
     
     function toggleAllMembers(forceState) {
       latestMemberInfo.forEach(d => { memberFilterState[d.name] = forceState; });
       renderFilterControls(); renderView();
+      pushHistoryState(); // ★操作履歴を追加
     }
 
     function toggleExecutives(forceState) {
@@ -497,9 +528,9 @@
         }
       });
       renderFilterControls(); renderView();
+      pushHistoryState(); // ★操作履歴を追加
     }
 
-    // ================= 期間・タブ等制御 =================
     function setupDateSelects() {
       ['period-date-rk', 'period-date-an'].forEach(id => {
         const el = document.getElementById(id);
@@ -562,6 +593,7 @@
       document.getElementById('view-activity').style.display = tab === 'activity' ? 'block' : 'none';
       document.getElementById('view-elder').style.display = tab === 'elder' ? 'block' : 'none';
       renderView();
+      pushHistoryState(); // ★操作履歴を追加
     }
 
     function setPeriod(period) {
@@ -583,27 +615,39 @@
       document.getElementById('chart-period-label').textContent = `表示中のデータ: ${labelText}`;
       
       renderView();
+      pushHistoryState(); // ★操作履歴を追加
     }
     
     function setActPeriod(days) {
-      state.actPeriod = days; updateButtonGroup('act-period', days, ['1', '3', '7', '14', '21', '30']); renderView();
+      state.actPeriod = days; updateButtonGroup('act-period', days, ['1', '3', '7', '14', '21', '30']); renderView(); pushHistoryState();
     }
     function setElderWeek(val) {
-      state.elderWeek = val; renderElder();
+      state.elderWeek = val; renderElder(); pushHistoryState();
     }
 
     function setTier(tier) {
-      state.tier = tier; updateButtonGroup('tier', tier, ['all', '20', '15-20', '10-20', '10-15', '0-10']); renderView();
+      state.tier = tier; updateButtonGroup('tier', tier, ['all', '20', '15-20', '10-20', '10-15', '0-10']); renderView(); pushHistoryState();
     }
     function setSort(sort) {
-      state.sort = sort; updateButtonGroup('sort', sort, ['score', 'efficiency', 'power', 'rank']); renderView();
+      state.sort = sort; updateButtonGroup('sort', sort, ['score', 'efficiency', 'power', 'rank']); renderView(); pushHistoryState();
     }
 
     function goToHistory(name) {
       latestMemberInfo.forEach(d => { memberFilterState[d.name] = (d.name === name); });
       renderFilterControls();
-      setTab('history');
+      
+      // tabの切り替え処理を直接実行（履歴追加を1回にまとめるため）
+      state.tab = 'history';
+      updateButtonGroup('nav', 'history', ['ranking', 'analysis', 'history', 'activity', 'elder']);
+      document.getElementById('view-ranking').style.display = 'none';
+      document.getElementById('view-analysis').style.display = 'none';
+      document.getElementById('view-history').style.display = 'block';
+      document.getElementById('view-activity').style.display = 'none';
+      document.getElementById('view-elder').style.display = 'none';
+      renderView();
+      
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      pushHistoryState(); // ★ここで1回だけ履歴を追加
     }
 
     function renderView() {
@@ -662,7 +706,6 @@
       return dataArray;
     }
 
-    // ================= ランキングエリア =================
     function renderRanking() {
       let data = getBaseViewData();
       
@@ -746,7 +789,6 @@
       });
     }
 
-    // ================= ★ 軌跡エリア =================
     function renderHistory() {
       const listEl = document.getElementById('historyList');
       listEl.innerHTML = '';
@@ -782,7 +824,6 @@
       });
     }
 
-    // ================= 非アクティブ度エリア =================
     function renderActivity() {
       const listEl = document.getElementById('activityList');
       listEl.innerHTML = '';
@@ -850,7 +891,7 @@
       });
     }
 
-    // ================= 長老選抜エリア =================
+    // ================= ★ 変更：長老選抜エリア（Pt内訳表示） =================
     function renderElder() {
       const listEl = document.getElementById('elderList');
       listEl.innerHTML = '';
@@ -868,7 +909,8 @@
       
       const elderDataMap = {};
       targetMembers.forEach(name => {
-        elderDataMap[name] = { name: name, totalPt: 0, totalScore: 0, powerNum: 0, joinCount: 0 };
+        // ★ history（日別のPt獲得履歴）を保存する配列を追加
+        elderDataMap[name] = { name: name, totalPt: 0, totalScore: 0, powerNum: 0, joinCount: 0, history: [] };
       });
 
       targetDates.forEach(date => {
@@ -888,6 +930,15 @@
             else if (d.displayRank === 4) pt = 1;
             
             elderDataMap[d.name].totalPt += pt;
+
+            // ★ 日別の記録を保存（日付のMM/DDフォーマット化）
+            const shortDate = d.date.substring(5).replace('-', '/');
+            elderDataMap[d.name].history.push({
+              date: shortDate,
+              rank: d.displayRank,
+              pt: pt,
+              score: d.scoreNum
+            });
           }
         });
       });
@@ -902,6 +953,9 @@
           currentRank = currentRank + skip; skip = 1; prevPt = item.totalPt; prevScore = item.totalScore;
         } else { skip++; }
         item.displayRank = currentRank;
+        
+        // ★ 履歴を日付順（古い順）にソートしておく
+        item.history.sort((a, b) => a.date.localeCompare(b.date));
       });
 
       elderData.forEach((d) => {
@@ -914,31 +968,56 @@
         const isElder = rank <= 4 && d.totalPt > 0;
         const elderBadge = isElder ? `<span class="bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-900 px-1.5 py-0.5 rounded text-[10px] font-bold shadow-sm ml-2 whitespace-nowrap">👑 長老候補</span>` : '';
 
+        // ★ Pt内訳（日別履歴）のHTML生成
+        let historyHtml = '';
+        if (d.history.length > 0) {
+          historyHtml = `<div class="mt-2.5 flex flex-wrap gap-1.5">`;
+          d.history.forEach(h => {
+            // 順位ごとのバッジ色設定
+            let badgeClass = "bg-slate-800 text-slate-400 border-slate-700"; // 5位以下（0Pt）
+            if (h.pt === 4) badgeClass = "bg-yellow-900/60 text-yellow-300 border-yellow-700/50"; // 1位
+            else if (h.pt === 3) badgeClass = "bg-slate-700 text-slate-200 border-slate-500"; // 2位
+            else if (h.pt === 2) badgeClass = "bg-amber-900/60 text-amber-500 border-amber-700/50"; // 3位
+            else if (h.pt === 1) badgeClass = "bg-emerald-900/30 text-emerald-400 border-emerald-800/50"; // 4位
+            
+            historyHtml += `
+              <div class="text-[9px] border px-1.5 py-0.5 rounded flex items-center gap-1 ${badgeClass}" title="スコア: ${formatValue(h.score)}">
+                <span class="num-font opacity-80">${h.date}</span>
+                <span class="font-bold">${h.rank}位</span>
+              </div>
+            `;
+          });
+          historyHtml += `</div>`;
+        }
+
         const html = `
-          <li class="p-3 hover:bg-slate-800/50 flex items-center justify-between transition-colors">
-            <div class="flex items-center flex-grow min-w-0 pr-3">
-              <div class="mr-3 shrink-0">${rankBadge}</div>
-              <div class="flex-grow min-w-0">
-                <div class="font-bold text-slate-100 text-[15px] truncate tracking-wide flex items-center">
-                  <a href="javascript:void(0)" onclick="goToHistory('${d.name}')" class="hover:text-indigo-400 underline decoration-indigo-500/50 underline-offset-4 transition-colors">${d.name}</a>
-                  ${elderBadge}
-                </div>
-                <div class="text-[10px] text-slate-400 mt-1 flex flex-wrap gap-1.5 items-center">
-                  <span class="bg-slate-800/80 border border-slate-700 px-1.5 py-0.5 rounded text-slate-300 num-font">参加: ${d.joinCount}回</span>
-                  <span class="bg-indigo-900/30 border border-indigo-700/50 px-1.5 py-0.5 rounded text-indigo-300 num-font tracking-wide">総スコア: ${formatValue(d.totalScore)}</span>
+          <li class="p-3 hover:bg-slate-800/50 transition-colors flex flex-col">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center flex-grow min-w-0 pr-3">
+                <div class="mr-3 shrink-0">${rankBadge}</div>
+                <div class="flex-grow min-w-0">
+                  <div class="font-bold text-slate-100 text-[15px] truncate tracking-wide flex items-center">
+                    <a href="javascript:void(0)" onclick="goToHistory('${d.name}')" class="hover:text-indigo-400 underline decoration-indigo-500/50 underline-offset-4 transition-colors">${d.name}</a>
+                    ${elderBadge}
+                  </div>
+                  <div class="text-[10px] text-slate-400 mt-1 flex flex-wrap gap-1.5 items-center">
+                    <span class="bg-slate-800/80 border border-slate-700 px-1.5 py-0.5 rounded text-slate-300 num-font">参加: ${d.joinCount}回</span>
+                    <span class="bg-indigo-900/30 border border-indigo-700/50 px-1.5 py-0.5 rounded text-indigo-300 num-font tracking-wide">総スコア: ${formatValue(d.totalScore)}</span>
+                  </div>
                 </div>
               </div>
+              <div class="shrink-0 text-right pl-3 border-l border-slate-700 flex flex-col items-end min-w-[70px]">
+                <div class="font-bold text-yellow-400 text-[18px] num-font tracking-wider">${d.totalPt}<span class="text-[10px] text-slate-400 ml-0.5 font-normal">Pt</span></div>
+              </div>
             </div>
-            <div class="shrink-0 text-right pl-3 border-l border-slate-700 flex flex-col items-end min-w-[70px]">
-              <div class="font-bold text-yellow-400 text-[18px] num-font tracking-wider">${d.totalPt}<span class="text-[10px] text-slate-400 ml-0.5 font-normal">Pt</span></div>
-            </div>
+            <!-- ★ ここにPt内訳を表示 -->
+            ${historyHtml}
           </li>
         `;
         listEl.insertAdjacentHTML('beforeend', html);
       });
     }
 
-    // ================= グラフエリア =================
     function calculateRegressionLine(data) {
       let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
       const n = data.length;
