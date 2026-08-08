@@ -6,6 +6,14 @@
   <meta name="robots" content="noindex, nofollow">
   <title>【OtterCompany】魔物襲来ダッシュボード</title>
   
+  <script>
+    // ==========================================
+    // ⚠️ ご自身のGASのURL（?api=data付き）に書き換えてください
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbwHkhRGaeLkTBKng2M9OzdR6-t2MLO9jaDL9j6trYk6nIeYjvpQflSemLheDIHl6afgBw/exec?api=data";
+
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -50,12 +58,26 @@
 </head>
 <body class="pb-20">
 
-  <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 sticky top-0 z-50 shadow-lg border-b border-indigo-500/30 flex justify-center items-center">
-    <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
-      <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-      OtterCompany <span class="text-sm font-normal text-indigo-200">魔物スコア</span>
-    </h1>
-  </header>
+  <!-- ★ 変更：ヘッダーとタブナビゲーションをセットにして画面最上部に固定（sticky） -->
+  <div class="sticky top-0 z-50 shadow-lg w-full flex flex-col">
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 border-b border-indigo-500/30 flex justify-center items-center">
+      <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        OtterCompany <span class="text-sm font-normal text-indigo-200">魔物スコア</span>
+      </h1>
+    </header>
+    
+    <!-- メインタブ（初期状態は非表示、データロード後に表示） -->
+    <div id="main-tabs-container" class="bg-slate-900/95 backdrop-blur-md border-b border-slate-700 w-full" style="display:none;">
+      <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-wrap gap-1.5">
+        <button id="nav-ranking" onclick="setTab('ranking')" class="grow px-2 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 順位</button>
+        <button id="nav-analysis" onclick="setTab('analysis')" class="grow px-2 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">📈 目標</button>
+        <button id="nav-elder" onclick="setTab('elder')" class="grow px-2 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
+        <button id="nav-history" onclick="setTab('history')" class="grow px-2 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👤 軌跡</button>
+        <button id="nav-activity" onclick="setTab('activity')" class="grow px-2 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 非参加数</button>
+      </div>
+    </div>
+  </div>
 
   <div class="max-w-2xl mx-auto px-2 sm:px-4 pt-5">
     
@@ -66,26 +88,18 @@
 
     <div id="dashboard-content" style="display:none;">
 
-      <div class="flex flex-wrap gap-1.5 bg-slate-800/80 p-1.5 rounded-lg mb-4 border border-slate-700">
-        <button id="nav-ranking" onclick="setTab('ranking')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 比較</button>
-        <button id="nav-analysis" onclick="setTab('analysis')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">📈 目標分析</button>
-        <button id="nav-history" onclick="setTab('history')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👤 軌跡</button>
-        <button id="nav-activity" onclick="setTab('activity')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 非アクティブ度</button>
-        <button id="nav-elder" onclick="setTab('elder')" class="grow px-2 sm:px-4 py-2.5 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
-      </div>
-
-      <!-- ================= 全画面共通フィルター ================= -->
-      <div class="mb-5">
+      <!-- ================= 1. 共通フィルター（Who） ================= -->
+      <div class="mb-3">
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
             共通フィルター (表示メンバーの絞り込み)
             <span id="filter-count-badge" class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[10px] num-font border border-indigo-400"></span>
           </span>
-          <span id="filter-panel-icon" class="text-slate-400 text-lg">▼</span>
+          <span id="filter-panel-icon" class="text-slate-400 text-lg">▲</span>
         </button>
         
-        <div id="common-filter-panel" class="hidden glass-card p-3 mt-2 border border-slate-600 shadow-xl">
+        <div id="common-filter-panel" class="glass-card p-3 mt-2 border border-slate-600 shadow-xl">
           <div class="flex justify-between items-start mb-2.5 flex-wrap gap-2">
             <p class="text-[11px] font-bold text-slate-400 mt-1">表示するメンバー (タップで切替)</p>
             <div class="flex gap-1.5 flex-wrap">
@@ -99,48 +113,61 @@
           <div id="filter-member-chips" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-2 mt-1 bg-slate-900/60 border border-slate-700/80 rounded-lg shadow-inner"></div>
         </div>
       </div>
-      
-      <!-- ================= ランキングエリア ================= -->
-      <div id="view-ranking" class="block">
-        
-        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-5 text-xs text-indigo-200 leading-relaxed shadow-inner">
-          <strong class="text-indigo-300 text-[13px] block mb-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            見方のポイント
-          </strong>
-          <ul class="space-y-1.5">
-            <li><span class="font-bold text-emerald-400">⚡ 効率（戦力効率）:</span> スコア ÷ 戦力（戦力1Mあたりのスコア）。<br><span class="text-white font-bold border-b border-emerald-500 pb-0.5">この数字が高いほど、編成や立ち回りが優秀</span>な証拠です！</li>
-            <li><span class="font-bold text-slate-300">📈 📉 :</span> 前回参加時からのスコア増減を示します。</li>
-          </ul>
-        </div>
 
-        <div class="mb-5">
-          <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>いつの実力を見る？</p>
-          <div class="flex bg-slate-800/80 p-1 rounded-lg border border-slate-700 gap-1">
-            <select id="period-date-rk" onchange="setPeriod(this.value)" class="flex-none px-2 py-1.5 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
-            <button id="period-avg-3-rk" onclick="setPeriod('avg-3')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">3日平均</button>
-            <button id="period-avg-7-rk" onclick="setPeriod('avg-7')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">7日平均</button>
-            <button id="period-avg-30-rk" onclick="setPeriod('avg-30')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">30日平均</button>
+      <!-- ================= 2. 全画面共通コントロール（When） ================= -->
+      <div id="global-controls-panel" class="bg-slate-800/80 p-2.5 rounded-lg mb-5 border border-slate-700 shadow-sm transition-all">
+        <!-- 順位・目標・軌跡用 -->
+        <div id="ctrl-daily" class="block">
+          <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>いつのデータを見る？</p>
+          <div class="flex gap-1">
+            <select id="period-date-global" onchange="setPeriod(this.value)" class="flex-none px-2 py-1.5 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
+            <button id="period-avg-3-global" onclick="setPeriod('avg-3')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">3日平均</button>
+            <button id="period-avg-7-global" onclick="setPeriod('avg-7')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">7日平均</button>
+            <button id="period-avg-30-global" onclick="setPeriod('avg-30')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">30日平均</button>
           </div>
         </div>
-        <div id="avg-guide-rk" class="hidden text-[11px] text-slate-400 text-right mb-3 px-1">※一定回数以上参加したアクティブメンバーのみ表示中</div>
 
-        <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 mt-5 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>何の基準で比べる？ <span class="font-normal opacity-70 ml-1 text-[10px]">※リストのタグタップでも切替可</span></p>
-        <div class="flex bg-slate-800/80 p-1 rounded-lg mb-5 overflow-x-auto scrollbar-hide border border-slate-700">
-          <button id="sort-score" onclick="setSort('score')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">👑 スコア</button>
+        <!-- 長老選抜用 -->
+        <div id="ctrl-elder" class="hidden">
+          <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>集計週を選択</p>
+          <select id="elder-week-select" onchange="setElderWeek(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded-md text-sm p-2 outline-none focus:ring-1 focus:ring-indigo-500 text-white shadow-inner cursor-pointer font-bold"></select>
+        </div>
+
+        <!-- 非参加数（非アクティブ度）用 -->
+        <div id="ctrl-activity" class="hidden">
+          <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>集計期間 (直近の開催日数)</p>
+          <div class="flex gap-1 overflow-x-auto scrollbar-hide">
+            <button id="act-period-1" onclick="setActPeriod('1')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1日</button>
+            <button id="act-period-3" onclick="setActPeriod('3')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3日</button>
+            <button id="act-period-7" onclick="setActPeriod('7')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">1週間</button>
+            <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">2週間</button>
+            <button id="act-period-21" onclick="setActPeriod('21')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3週間</button>
+            <button id="act-period-30" onclick="setActPeriod('30')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1ヶ月</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================= 4. コンテンツエリア ================= -->
+      
+      <!-- 【順位】 -->
+      <div id="view-ranking" class="block">
+        
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs font-bold text-slate-400 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>何の基準で並べる？</p>
+          <div id="avg-guide-global" class="hidden text-[10px] text-slate-400 text-right px-1">※アクティブメンバーのみ表示中</div>
+        </div>
+        <div class="flex bg-slate-800/80 p-1 rounded-lg mb-3 overflow-x-auto scrollbar-hide border border-slate-700">
+          <button id="sort-score" onclick="setSort('score')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">👑 スコア <span class="text-[10px] ml-1 opacity-80">▼</span></button>
           <button id="sort-efficiency" onclick="setSort('efficiency')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚡ 効率</button>
           <button id="sort-power" onclick="setSort('power')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">💪 戦力</button>
           <button id="sort-rank" onclick="setSort('rank')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🏅 順位</button>
         </div>
 
-        <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>どの階級（ライバル）と比べる？</p>
-        <div class="flex space-x-1 overflow-x-auto pb-2 mb-2 scrollbar-hide p-1 rounded-lg">
-          <button id="tier-all" onclick="setTier('all')" class="flex-none px-4 py-1.5 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">全体</button>
-          <button id="tier-20" onclick="setTier('20')" class="flex-none px-3 py-1.5 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap bg-slate-800/80 border border-slate-700">20M〜</button>
-          <button id="tier-15-20" onclick="setTier('15-20')" class="flex-none px-3 py-1.5 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap bg-slate-800/80 border border-slate-700">15〜20M</button>
-          <button id="tier-10-20" onclick="setTier('10-20')" class="flex-none px-3 py-1.5 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap text-indigo-300 bg-indigo-900/30 border border-indigo-700/50">10〜20M(統合)</button>
-          <button id="tier-10-15" onclick="setTier('10-15')" class="flex-none px-3 py-1.5 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap bg-slate-800/80 border border-slate-700">10〜15M</button>
-          <button id="tier-0-10" onclick="setTier('0-10')" class="flex-none px-3 py-1.5 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap bg-slate-800/80 border border-slate-700">〜10M</button>
+        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] text-indigo-200 leading-relaxed shadow-inner">
+          <ul class="space-y-1">
+            <li><span class="font-bold text-emerald-400">⚡ 効率:</span> スコア÷戦力。編成や立ち回りが優秀な証拠！</li>
+            <li><span class="font-bold text-slate-300">📈 📉 :</span> 前回参加時からのスコア増減。</li>
+          </ul>
         </div>
 
         <div class="glass-card overflow-hidden mt-3">
@@ -148,19 +175,8 @@
         </div>
       </div>
 
-      <!-- ================= グラフエリア ================= -->
+      <!-- 【目標】 -->
       <div id="view-analysis" class="hidden">
-        <div class="mb-5">
-          <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>いつのデータで分析する？</p>
-          <div class="flex bg-slate-800/80 p-1 rounded-lg border border-slate-700 gap-1">
-            <select id="period-date-an" onchange="setPeriod(this.value)" class="flex-none px-2 py-1.5 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
-            <button id="period-avg-3-an" onclick="setPeriod('avg-3')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">3日平均</button>
-            <button id="period-avg-7-an" onclick="setPeriod('avg-7')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">7日平均</button>
-            <button id="period-avg-30-an" onclick="setPeriod('avg-30')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">30日平均</button>
-          </div>
-        </div>
-        <div id="avg-guide-an" class="hidden text-[11px] text-slate-400 text-right mb-3 px-1">※一定回数以上参加したアクティブメンバーのみ表示中</div>
-
         <div class="glass-card p-4">
           <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
             <strong class="text-indigo-300 text-[13px] block mb-1.5 flex items-center gap-1">
@@ -187,9 +203,25 @@
         </div>
       </div>
 
-      <!-- ================= 履歴エリア ================= -->
+      <!-- 【長老選抜】 -->
+      <div id="view-elder" class="hidden">
+        <div class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3 mb-4 text-xs text-amber-200 leading-relaxed shadow-inner">
+          <strong class="text-amber-400 block mb-1 flex items-center gap-1 text-[13px]">
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            長老選抜ルール
+          </strong>
+          日曜始まりで毎日のスコアランキング（<span class="text-white font-bold border-b border-amber-500 pb-0.5">フィルターでONになっているメンバー内</span>）において、<br>
+          <span class="font-bold text-amber-400">1位: 4Pt / 2位: 3Pt / 3位: 2Pt / 4位: 1Pt</span> を付与。<br>
+          週単位の合計Ptで上位4名が長老候補となります。<span class="text-[10px] opacity-70">（同Ptの場合は週の合計スコアで判定。各記録タップで日別ランキングへ）</span>
+        </div>
+
+        <div class="glass-card overflow-hidden">
+          <ul id="elderList" class="divide-y divide-slate-700/50"></ul>
+        </div>
+      </div>
+
+      <!-- 【軌跡】 -->
       <div id="view-history" class="hidden">
-        
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
           <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -210,26 +242,14 @@
         </div>
       </div>
 
-      <!-- ================= 非アクティブ度エリア ================= -->
+      <!-- 【非参加数】 -->
       <div id="view-activity" class="hidden">
-        <div class="mb-5">
-          <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>集計期間 (直近の開催日数)</p>
-          <div class="flex bg-slate-800/80 p-1 rounded-lg border border-slate-700 overflow-x-auto scrollbar-hide">
-            <button id="act-period-1" onclick="setActPeriod('1')" class="flex-none px-4 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1日</button>
-            <button id="act-period-3" onclick="setActPeriod('3')" class="flex-none px-4 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3日</button>
-            <button id="act-period-7" onclick="setActPeriod('7')" class="flex-none px-4 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">1週間</button>
-            <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">2週間</button>
-            <button id="act-period-21" onclick="setActPeriod('21')" class="flex-none px-4 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3週間</button>
-            <button id="act-period-30" onclick="setActPeriod('30')" class="flex-none px-4 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1ヶ月</button>
-          </div>
-        </div>
-
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
           <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
             <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            非アクティブ度（未参加ランキング）
+            非参加数（未参加ランキング）
           </strong>
-          <span class="text-white font-bold border-b border-rose-500 pb-0.5">フィルターでONになっている現在在籍メンバー</span>を対象に、<span class="text-rose-400 font-bold">参加回数が少ない順</span>に表示しています。<br>
+          <span class="text-white font-bold border-b border-rose-500 pb-0.5">フィルターでONになっているメンバー</span>を対象に、<span class="text-rose-400 font-bold">参加回数が少ない順</span>に表示しています。<br>
           <span class="text-[10px] opacity-70 mt-1 block">※既に引退・脱退したメンバーのノイズは自動で除外されます。同数の場合は同順位になります。</span>
         </div>
 
@@ -238,41 +258,13 @@
         </div>
       </div>
 
-      <!-- ================= 長老選抜エリア ================= -->
-      <div id="view-elder" class="hidden">
-        <div class="mb-5">
-          <p class="text-xs font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>集計週を選択</p>
-          <select id="elder-week-select" onchange="setElderWeek(this.value)" class="w-full bg-slate-800/80 border border-slate-700 rounded-lg text-sm p-2 outline-none focus:ring-1 focus:ring-indigo-500 text-white shadow-inner cursor-pointer font-bold"></select>
-        </div>
-
-        <div class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3 mb-4 text-xs text-amber-200 leading-relaxed shadow-inner">
-          <strong class="text-amber-400 block mb-1 flex items-center gap-1 text-[13px]">
-            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-            長老選抜ルール
-          </strong>
-          日曜始まりで毎日のスコアランキング（<span class="text-white font-bold border-b border-amber-500 pb-0.5">フィルターでONになっているメンバー内</span>）において、<br>
-          <span class="font-bold text-amber-400">1位: 4Pt / 2位: 3Pt / 3位: 2Pt / 4位: 1Pt</span> を付与。<br>
-          週単位の合計Ptで上位4名が長老候補となります。<span class="text-[10px] opacity-70">（同Ptの場合は週の合計スコアで判定）</span>
-        </div>
-
-        <div class="glass-card overflow-hidden">
-          <ul id="elderList" class="divide-y divide-slate-700/50"></ul>
-        </div>
-      </div>
-
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // ⚠️ ご自身のGASのURL（?api=data付き）に書き換えてください
-    // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwHkhRGaeLkTBKng2M9OzdR6-t2MLO9jaDL9j6trYk6nIeYjvpQflSemLheDIHl6afgBw/exec?api=data";
-
     let state = { 
       tab: 'ranking', 
       period: '', 
-      tier: 'all', 
       sort: 'score',
       actPeriod: '7',
       elderWeek: ''
@@ -291,36 +283,38 @@
     let weeks = [];
     let chartInstance = null;
 
+    const emptyStateHtml = `
+      <li class="p-8 text-center flex flex-col items-center justify-center">
+        <span class="text-slate-500 text-sm font-bold mb-3">該当するデータ/メンバーがいません</span>
+        <button onclick="toggleAllMembers(true)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded shadow-md transition-colors flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          フィルターをリセット (全員ON)
+        </button>
+      </li>
+    `;
+
     Chart.register(ChartDataLabels, window['chartjs-plugin-annotation']);
 
-    // ★ブラウザの「戻る」「進む」ボタンが押された時の処理
+    // ブラウザの「戻る」「進む」ボタンが押された時の処理
     window.addEventListener('popstate', (event) => {
       if (event.state) {
         state = event.state.stateObj;
         memberFilterState = event.state.filterObj;
         
-        // 画面の状態を復元
         updatePeriodButtons();
-        updateButtonGroup('nav', state.tab, ['ranking', 'analysis', 'history', 'activity', 'elder']);
+        updateSortButtons(state.sort);
+        updateButtonGroup('nav', state.tab, ['ranking', 'analysis', 'elder', 'history', 'activity']);
         updateButtonGroup('act-period', state.actPeriod, ['1', '3', '7', '14', '21', '30']);
-        updateButtonGroup('tier', state.tier, ['all', '20', '15-20', '10-20', '10-15', '0-10']);
-        updateButtonGroup('sort', state.sort, ['score', 'efficiency', 'power', 'rank']);
         
         const selElder = document.getElementById('elder-week-select');
         if(selElder) selElder.value = state.elderWeek;
 
-        document.getElementById('view-ranking').style.display = state.tab === 'ranking' ? 'block' : 'none';
-        document.getElementById('view-analysis').style.display = state.tab === 'analysis' ? 'block' : 'none';
-        document.getElementById('view-history').style.display = state.tab === 'history' ? 'block' : 'none';
-        document.getElementById('view-activity').style.display = state.tab === 'activity' ? 'block' : 'none';
-        document.getElementById('view-elder').style.display = state.tab === 'elder' ? 'block' : 'none';
-        
+        applyTabVisibility(state.tab);
         renderFilterControls();
         renderView();
       }
     });
 
-    // ★状態をブラウザの履歴に保存する関数
     function pushHistoryState() {
       const stateClone = JSON.parse(JSON.stringify(state));
       const filterClone = JSON.parse(JSON.stringify(memberFilterState));
@@ -344,15 +338,16 @@
         state.period = availableDates[0];
         setupDateSelects();
         updatePeriodButtons();
+        updateSortButtons(state.sort);
         
         initFilterState(); 
+        applyTabVisibility(state.tab);
         
         document.getElementById('loading').style.display = 'none';
+        document.getElementById('main-tabs-container').style.display = 'block'; // ★タブコンテナを表示
         document.getElementById('dashboard-content').style.display = 'block';
         
         renderView();
-        
-        // 初回ロード時に履歴の起点を作る
         history.replaceState({ stateObj: JSON.parse(JSON.stringify(state)), filterObj: JSON.parse(JSON.stringify(memberFilterState)) }, "");
 
       } catch (error) {
@@ -390,6 +385,13 @@
       if (power >= 15000000) return '#6366f1'; 
       if (power >= 10000000) return '#0ea5e9'; 
       return '#10b981'; 
+    }
+    
+    function getTierTailwindClass(power, isButton = false) {
+      if (power >= 20000000) return isButton ? 'bg-orange-900/80 text-orange-200 border-orange-700 shadow-sm' : 'bg-orange-500/20 text-orange-400 border-orange-500/50';
+      if (power >= 15000000) return isButton ? 'bg-indigo-900/80 text-indigo-200 border-indigo-700 shadow-sm' : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50';
+      if (power >= 10000000) return isButton ? 'bg-sky-900/80 text-sky-200 border-sky-700 shadow-sm' : 'bg-sky-500/20 text-sky-400 border-sky-500/50';
+      return isButton ? 'bg-emerald-900/80 text-emerald-200 border-emerald-700 shadow-sm' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
     }
 
     function prepareData() {
@@ -455,8 +457,19 @@
     function toggleFilterPanel() {
       const panel = document.getElementById('common-filter-panel');
       const icon = document.getElementById('filter-panel-icon');
-      if (panel.classList.contains('hidden')) { panel.classList.remove('hidden'); icon.textContent = '▲'; } 
-      else { panel.classList.add('hidden'); icon.textContent = '▼'; }
+      if (panel.classList.contains('hidden')) { 
+        panel.classList.remove('hidden'); icon.textContent = '▲'; 
+      } else { 
+        panel.classList.add('hidden'); icon.textContent = '▼'; 
+      }
+    }
+
+    function autoCloseFilterPanel() {
+      const panel = document.getElementById('common-filter-panel');
+      if (!panel.classList.contains('hidden')) {
+        panel.classList.add('hidden');
+        document.getElementById('filter-panel-icon').textContent = '▼';
+      }
     }
 
     function initFilterState() {
@@ -476,13 +489,15 @@
 
       const tierContainer = document.getElementById('filter-tier-chips');
       tierContainer.innerHTML = '';
+      
       const tiers = [ { id: '20', label: '20M〜' }, { id: '15-20', label: '15〜20M' }, { id: '10-15', label: '10〜15M' }, { id: '0-10', label: '〜10M' } ];
 
       tiers.forEach(t => {
         const membersInTier = latestMemberInfo.filter(d => d.tierCat === t.id);
         if (membersInTier.length === 0) return;
         const isAnyOn = membersInTier.some(d => memberFilterState[d.name]);
-        const cls = isAnyOn ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60';
+        const samplePower = t.id === '20' ? 20000000 : t.id === '15-20' ? 15000000 : t.id === '10-15' ? 10000000 : 0;
+        const cls = isAnyOn ? getTierTailwindClass(samplePower, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
         const html = `<button onclick="toggleTier('${t.id}')" class="flex-none px-3 py-1 text-[11px] font-bold rounded-md border transition ${cls}">${t.label}</button>`;
         tierContainer.insertAdjacentHTML('beforeend', html);
       });
@@ -493,8 +508,9 @@
       sorted.forEach(d => {
         const isOn = memberFilterState[d.name];
         const isExec = executives.includes(d.name);
-        const execBorder = isExec ? 'border-amber-400/50' : 'border-indigo-500';
-        const cls = isOn ? `bg-indigo-600 text-white ${execBorder} shadow-sm` : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
+        const baseColorCls = getTierTailwindClass(d.powerNum, true);
+        const execBorder = isExec ? 'ring-2 ring-amber-400/80 ring-offset-1 ring-offset-slate-900' : '';
+        const cls = isOn ? `${baseColorCls} ${execBorder}` : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
         const html = `<button onclick="toggleMember('${d.name}')" class="px-2 py-0.5 text-[10px] font-bold rounded-full border transition ${cls}">${d.name}</button>`;
         memberContainer.insertAdjacentHTML('beforeend', html);
       });
@@ -503,24 +519,21 @@
     function toggleMember(name) { 
       memberFilterState[name] = !memberFilterState[name]; 
       renderFilterControls(); renderView(); 
-      pushHistoryState(); // ★操作履歴を追加
+      pushHistoryState(); 
     }
-    
     function toggleTier(tierCat) {
       const membersInTier = latestMemberInfo.filter(d => d.tierCat === tierCat);
       if (membersInTier.length === 0) return;
       const isAnyOn = membersInTier.some(d => memberFilterState[d.name]);
       membersInTier.forEach(d => { memberFilterState[d.name] = !isAnyOn; });
       renderFilterControls(); renderView();
-      pushHistoryState(); // ★操作履歴を追加
+      pushHistoryState(); 
     }
-    
     function toggleAllMembers(forceState) {
       latestMemberInfo.forEach(d => { memberFilterState[d.name] = forceState; });
       renderFilterControls(); renderView();
-      pushHistoryState(); // ★操作履歴を追加
+      pushHistoryState(); 
     }
-
     function toggleExecutives(forceState) {
       executives.forEach(name => {
         if (memberFilterState[name] !== undefined) {
@@ -528,48 +541,56 @@
         }
       });
       renderFilterControls(); renderView();
-      pushHistoryState(); // ★操作履歴を追加
+      pushHistoryState(); 
     }
 
     function setupDateSelects() {
-      ['period-date-rk', 'period-date-an'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) {
-          el.innerHTML = '';
-          availableDates.forEach((date, i) => {
-            const label = i === 0 ? `${date} (最新)` : date;
-            el.insertAdjacentHTML('beforeend', `<option value="${date}">${label}</option>`);
-          });
-        }
-      });
+      const el = document.getElementById('period-date-global');
+      if(el) {
+        el.innerHTML = '';
+        availableDates.forEach((date, i) => {
+          const label = i === 0 ? `${date} (最新)` : date;
+          el.insertAdjacentHTML('beforeend', `<option value="${date}">${label}</option>`);
+        });
+      }
     }
 
     function updatePeriodButtons() {
       const isDate = !state.period.startsWith('avg-');
-      ['period-date-rk', 'period-date-an'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) {
-          if(isDate) {
-            el.value = state.period;
-            el.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500', 'shadow-[0_4px_6px_rgba(0,0,0,0.3)]');
-            el.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-600');
-          } else {
-            el.value = availableDates[0]; 
-            el.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500', 'shadow-[0_4px_6px_rgba(0,0,0,0.3)]');
-            el.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-600');
-          }
+      const el = document.getElementById('period-date-global');
+      if(el) {
+        if(isDate) {
+          el.value = state.period;
+          el.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500', 'shadow-[0_4px_6px_rgba(0,0,0,0.3)]');
+          el.classList.remove('bg-slate-900', 'text-slate-300', 'border-slate-600');
+        } else {
+          el.value = availableDates[0]; 
+          el.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500', 'shadow-[0_4px_6px_rgba(0,0,0,0.3)]');
+          el.classList.add('bg-slate-900', 'text-slate-300', 'border-slate-600');
         }
-      });
+      }
 
       ['avg-3', 'avg-7', 'avg-30'].forEach(val => {
-        const rkEl = document.getElementById(`period-${val}-rk`);
-        const anEl = document.getElementById(`period-${val}-an`);
-        if (val === state.period) {
-          if (rkEl) { rkEl.classList.remove('btn-inactive'); rkEl.classList.add('btn-active'); }
-          if (anEl) { anEl.classList.remove('btn-inactive'); anEl.classList.add('btn-active'); }
-        } else {
-          if (rkEl) { rkEl.classList.remove('btn-active'); rkEl.classList.add('btn-inactive'); }
-          if (anEl) { anEl.classList.remove('btn-active'); anEl.classList.add('btn-inactive'); }
+        const btn = document.getElementById(`period-${val}-global`);
+        if (btn) {
+          if (val === state.period) { btn.classList.remove('btn-inactive'); btn.classList.add('btn-active'); } 
+          else { btn.classList.remove('btn-active'); btn.classList.add('btn-inactive'); }
+        }
+      });
+    }
+
+    function updateSortButtons(sortKey) {
+      const labels = { 'score': '👑 スコア', 'efficiency': '⚡ 効率', 'power': '💪 戦力', 'rank': '🏅 順位' };
+      ['score', 'efficiency', 'power', 'rank'].forEach(s => {
+        const btn = document.getElementById(`sort-${s}`);
+        if (btn) {
+          if (s === sortKey) {
+            btn.innerHTML = labels[s] + ' <span class="text-[10px] ml-1 opacity-80">▼</span>';
+            btn.classList.remove('btn-inactive'); btn.classList.add('btn-active');
+          } else {
+            btn.innerHTML = labels[s];
+            btn.classList.remove('btn-active'); btn.classList.add('btn-inactive');
+          }
         }
       });
     }
@@ -584,38 +605,48 @@
       });
     }
 
-    function setTab(tab) {
-      state.tab = tab;
-      updateButtonGroup('nav', tab, ['ranking', 'analysis', 'history', 'activity', 'elder']);
+    function applyTabVisibility(tab) {
       document.getElementById('view-ranking').style.display = tab === 'ranking' ? 'block' : 'none';
       document.getElementById('view-analysis').style.display = tab === 'analysis' ? 'block' : 'none';
       document.getElementById('view-history').style.display = tab === 'history' ? 'block' : 'none';
       document.getElementById('view-activity').style.display = tab === 'activity' ? 'block' : 'none';
       document.getElementById('view-elder').style.display = tab === 'elder' ? 'block' : 'none';
+
+      document.getElementById('ctrl-daily').style.display = (tab === 'ranking' || tab === 'analysis' || tab === 'history') ? 'block' : 'none';
+      document.getElementById('ctrl-elder').style.display = (tab === 'elder') ? 'block' : 'none';
+      document.getElementById('ctrl-activity').style.display = (tab === 'activity') ? 'block' : 'none';
+      
+      const guideObj = document.getElementById('avg-guide-global');
+      if(guideObj) {
+        if((tab === 'ranking' || tab === 'analysis' || tab === 'history') && state.period.startsWith('avg-')) {
+          guideObj.classList.remove('hidden');
+        } else {
+          guideObj.classList.add('hidden');
+        }
+      }
+    }
+
+    function setTab(tab) {
+      state.tab = tab;
+      updateButtonGroup('nav', tab, ['ranking', 'analysis', 'elder', 'history', 'activity']);
+      applyTabVisibility(tab);
+      autoCloseFilterPanel();
       renderView();
-      pushHistoryState(); // ★操作履歴を追加
+      pushHistoryState(); 
     }
 
     function setPeriod(period) {
       state.period = period;
       updatePeriodButtons();
       
-      const guideRk = document.getElementById('avg-guide-rk');
-      const guideAn = document.getElementById('avg-guide-an');
-      if (period !== 'latest' && period.startsWith('avg-')) {
-        if(guideRk) guideRk.classList.remove('hidden'); 
-        if(guideAn) guideAn.classList.remove('hidden');
-      } else {
-        if(guideRk) guideRk.classList.add('hidden'); 
-        if(guideAn) guideAn.classList.add('hidden');
+      const guideObj = document.getElementById('avg-guide-global');
+      if(guideObj) {
+        if(period.startsWith('avg-')) { guideObj.classList.remove('hidden'); } 
+        else { guideObj.classList.add('hidden'); }
       }
       
-      const lblMap = { 'avg-3': '3日平均', 'avg-7': '7日平均', 'avg-30': '30日平均' };
-      const labelText = lblMap[period] || period;
-      document.getElementById('chart-period-label').textContent = `表示中のデータ: ${labelText}`;
-      
       renderView();
-      pushHistoryState(); // ★操作履歴を追加
+      pushHistoryState(); 
     }
     
     function setActPeriod(days) {
@@ -624,30 +655,42 @@
     function setElderWeek(val) {
       state.elderWeek = val; renderElder(); pushHistoryState();
     }
-
-    function setTier(tier) {
-      state.tier = tier; updateButtonGroup('tier', tier, ['all', '20', '15-20', '10-20', '10-15', '0-10']); renderView(); pushHistoryState();
-    }
     function setSort(sort) {
-      state.sort = sort; updateButtonGroup('sort', sort, ['score', 'efficiency', 'power', 'rank']); renderView(); pushHistoryState();
+      state.sort = sort; updateSortButtons(sort); renderView(); pushHistoryState();
     }
 
     function goToHistory(name) {
       latestMemberInfo.forEach(d => { memberFilterState[d.name] = (d.name === name); });
       renderFilterControls();
       
-      // tabの切り替え処理を直接実行（履歴追加を1回にまとめるため）
       state.tab = 'history';
-      updateButtonGroup('nav', 'history', ['ranking', 'analysis', 'history', 'activity', 'elder']);
-      document.getElementById('view-ranking').style.display = 'none';
-      document.getElementById('view-analysis').style.display = 'none';
-      document.getElementById('view-history').style.display = 'block';
-      document.getElementById('view-activity').style.display = 'none';
-      document.getElementById('view-elder').style.display = 'none';
+      updateButtonGroup('nav', 'history', ['ranking', 'analysis', 'elder', 'history', 'activity']);
+      applyTabVisibility('history');
+      autoCloseFilterPanel();
       renderView();
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      pushHistoryState(); // ★ここで1回だけ履歴を追加
+      pushHistoryState(); 
+    }
+
+    function goToRanking(dateStr) {
+      latestMemberInfo.forEach(d => { memberFilterState[d.name] = true; });
+      renderFilterControls();
+
+      const currentYear = availableDates[0].substring(0, 4);
+      const fullDate = `${currentYear}-${dateStr.replace('/', '-')}`;
+      
+      state.period = fullDate;
+      updatePeriodButtons();
+      
+      state.tab = 'ranking';
+      updateButtonGroup('nav', 'ranking', ['ranking', 'analysis', 'elder', 'history', 'activity']);
+      applyTabVisibility('ranking');
+      autoCloseFilterPanel();
+      
+      renderView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      pushHistoryState();
     }
 
     function renderView() {
@@ -708,12 +751,6 @@
 
     function renderRanking() {
       let data = getBaseViewData();
-      
-      if (state.tier === '20') data = data.filter(d => d.tierCat === '20');
-      else if (state.tier === '15-20') data = data.filter(d => d.tierCat === '15-20');
-      else if (state.tier === '10-20') data = data.filter(d => d.tierCat === '15-20' || d.tierCat === '10-15');
-      else if (state.tier === '10-15') data = data.filter(d => d.tierCat === '10-15');
-      else if (state.tier === '0-10') data = data.filter(d => d.tierCat === '0-10');
 
       if (state.sort === 'score') { data = computeRanks(data, 'scoreNum'); } 
       else if (state.sort === 'efficiency') { data = computeRanks(data, 'efficiency'); } 
@@ -726,7 +763,7 @@
       const listEl = document.getElementById('rankingList');
       listEl.innerHTML = '';
       if (data.length === 0) {
-        listEl.innerHTML = '<li class="p-10 text-center text-slate-500 text-sm">該当するメンバーがいません</li>'; return;
+        listEl.innerHTML = emptyStateHtml; return;
       }
       
       data.forEach((d) => {
@@ -755,17 +792,7 @@
         else if (state.sort === 'power') mainHtml = `<div class="font-bold text-slate-200 text-[16px] num-font tracking-wider">${strPower}</div>`;
         else if (state.sort === 'rank') mainHtml = `<div class="font-bold text-amber-400 text-[16px] num-font tracking-wider">${d.isAvg ? d.avgRank.toFixed(1) : d.dailyRank}<span class="text-[10px] ml-0.5 font-normal">位</span></div>`;
 
-        const renderTag = (sortKey, emoji, text, baseColor, activeColor) => {
-          const isActive = state.sort === sortKey; const cls = isActive ? activeColor : baseColor;
-          return `<button onclick="setSort('${sortKey}')" class="text-[10px] sm:text-[11px] font-bold border px-1.5 py-0.5 rounded transition flex items-baseline whitespace-nowrap ${cls}">${emoji} <span class="num-font ml-0.5">${text}</span></button>`;
-        };
-
-        const tagPower = renderTag('power', '💪', strPower, 'bg-slate-800/80 text-slate-400 border-slate-700 hover:bg-slate-700', 'bg-slate-600 text-white border-slate-400 shadow-md');
-        const tagScore = renderTag('score', '👑', strScore, 'bg-indigo-900/30 text-indigo-300 border-indigo-700/50 hover:bg-indigo-800/60', 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-500/30');
-        const tagEff = renderTag('efficiency', '⚡', strEff, 'bg-emerald-900/20 text-emerald-400 border-emerald-800/50 hover:bg-emerald-800/50', 'bg-emerald-600 text-white border-emerald-400 shadow-md shadow-emerald-500/30');
-        const tagRank = renderTag('rank', '🏅', strRank, 'bg-amber-900/20 text-amber-400 border-amber-800/50 hover:bg-amber-800/50', 'bg-amber-600 text-white border-amber-400 shadow-md shadow-amber-500/30');
-
-        let joinHtml = d.isAvg ? `<span class="text-[10px] text-slate-500 num-font ml-1">参加:${d.joinCount}/${d.targetDays}</span>` : '';
+        const powerColorClass = getTierTailwindClass(d.powerNum);
 
         const html = `
           <li class="p-3 hover:bg-slate-800/50 flex items-center justify-between transition-colors">
@@ -776,7 +803,10 @@
                   <a href="javascript:void(0)" onclick="goToHistory('${d.name}')" class="hover:text-indigo-400 underline decoration-indigo-500/50 underline-offset-4 transition-colors">${d.name}</a>
                 </div>
                 <div class="mt-1.5 flex flex-wrap gap-1.5 items-center">
-                  ${tagPower} ${tagScore} ${tagEff} ${tagRank} ${joinHtml}
+                  <span class="text-[10px] sm:text-[11px] font-bold border px-1.5 py-0.5 rounded flex items-baseline whitespace-nowrap ${powerColorClass}">💪 <span class="num-font ml-0.5">${strPower}</span></span>
+                  <span class="text-[10px] sm:text-[11px] font-bold border px-1.5 py-0.5 rounded flex items-baseline whitespace-nowrap bg-indigo-900/30 text-indigo-300 border-indigo-700/50">👑 <span class="num-font ml-0.5">${strScore}</span></span>
+                  <span class="text-[10px] sm:text-[11px] font-bold border px-1.5 py-0.5 rounded flex items-baseline whitespace-nowrap bg-emerald-900/20 text-emerald-400 border-emerald-800/50">⚡ <span class="num-font ml-0.5">${strEff}</span></span>
+                  ${d.isAvg ? `<span class="text-[10px] text-slate-500 num-font ml-1">参加:${d.joinCount}/${d.targetDays}</span>` : ''}
                 </div>
               </div>
             </div>
@@ -796,11 +826,13 @@
       const targetNames = latestMemberInfo.filter(d => memberFilterState[d.name]).map(d => d.name);
       
       if (targetNames.length === 0) {
-        listEl.innerHTML = '<li class="p-8 text-center text-slate-500 text-sm">メンバーが選択されていません</li>'; 
-        return;
+        listEl.innerHTML = emptyStateHtml; return;
       }
 
       const targetData = processedData.filter(d => targetNames.includes(d.name));
+      if (targetData.length === 0) {
+        listEl.innerHTML = emptyStateHtml; return;
+      }
       
       targetData.forEach(d => {
         const dObj = new Date(d.date);
@@ -835,7 +867,7 @@
       const targetMembers = activeMembers.filter(name => memberFilterState[name]);
 
       if (actualDays === 0 || targetMembers.length === 0) {
-        listEl.innerHTML = '<li class="p-8 text-center text-slate-500 text-sm">データがありません</li>'; return;
+        listEl.innerHTML = emptyStateHtml; return;
       }
 
       const targetData = processedData.filter(d => targetDates.includes(d.date));
@@ -891,25 +923,23 @@
       });
     }
 
-    // ================= ★ 変更：長老選抜エリア（Pt内訳表示） =================
     function renderElder() {
       const listEl = document.getElementById('elderList');
       listEl.innerHTML = '';
       
       if (!state.elderWeek || !weekMap[state.elderWeek] || activeMembers.length === 0) {
-        listEl.innerHTML = '<li class="p-8 text-center text-slate-500 text-sm">データがありません</li>'; return;
+        listEl.innerHTML = emptyStateHtml; return;
       }
       
       const targetDates = weekMap[state.elderWeek].dates;
       const targetMembers = activeMembers.filter(name => memberFilterState[name]);
       
       if (targetDates.length === 0 || targetMembers.length === 0) {
-        listEl.innerHTML = '<li class="p-8 text-center text-slate-500 text-sm">対象メンバー/データがありません</li>'; return;
+        listEl.innerHTML = emptyStateHtml; return;
       }
       
       const elderDataMap = {};
       targetMembers.forEach(name => {
-        // ★ history（日別のPt獲得履歴）を保存する配列を追加
         elderDataMap[name] = { name: name, totalPt: 0, totalScore: 0, powerNum: 0, joinCount: 0, history: [] };
       });
 
@@ -931,7 +961,6 @@
             
             elderDataMap[d.name].totalPt += pt;
 
-            // ★ 日別の記録を保存（日付のMM/DDフォーマット化）
             const shortDate = d.date.substring(5).replace('-', '/');
             elderDataMap[d.name].history.push({
               date: shortDate,
@@ -954,7 +983,6 @@
         } else { skip++; }
         item.displayRank = currentRank;
         
-        // ★ 履歴を日付順（古い順）にソートしておく
         item.history.sort((a, b) => a.date.localeCompare(b.date));
       });
 
@@ -968,23 +996,21 @@
         const isElder = rank <= 4 && d.totalPt > 0;
         const elderBadge = isElder ? `<span class="bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-900 px-1.5 py-0.5 rounded text-[10px] font-bold shadow-sm ml-2 whitespace-nowrap">👑 長老候補</span>` : '';
 
-        // ★ Pt内訳（日別履歴）のHTML生成
         let historyHtml = '';
         if (d.history.length > 0) {
           historyHtml = `<div class="mt-2.5 flex flex-wrap gap-1.5">`;
           d.history.forEach(h => {
-            // 順位ごとのバッジ色設定
-            let badgeClass = "bg-slate-800 text-slate-400 border-slate-700"; // 5位以下（0Pt）
-            if (h.pt === 4) badgeClass = "bg-yellow-900/60 text-yellow-300 border-yellow-700/50"; // 1位
-            else if (h.pt === 3) badgeClass = "bg-slate-700 text-slate-200 border-slate-500"; // 2位
-            else if (h.pt === 2) badgeClass = "bg-amber-900/60 text-amber-500 border-amber-700/50"; // 3位
-            else if (h.pt === 1) badgeClass = "bg-emerald-900/30 text-emerald-400 border-emerald-800/50"; // 4位
+            let badgeClass = "bg-slate-800 text-slate-400 border-slate-700"; 
+            if (h.pt === 4) badgeClass = "bg-yellow-900/60 text-yellow-300 border-yellow-700/50"; 
+            else if (h.pt === 3) badgeClass = "bg-slate-700 text-slate-200 border-slate-500"; 
+            else if (h.pt === 2) badgeClass = "bg-amber-900/60 text-amber-500 border-amber-700/50"; 
+            else if (h.pt === 1) badgeClass = "bg-emerald-900/30 text-emerald-400 border-emerald-800/50"; 
             
             historyHtml += `
-              <div class="text-[9px] border px-1.5 py-0.5 rounded flex items-center gap-1 ${badgeClass}" title="スコア: ${formatValue(h.score)}">
+              <button onclick="goToRanking('${h.date}')" class="text-[9px] sm:text-[10px] border px-1.5 py-1 rounded flex items-center gap-1 transition hover:brightness-125 cursor-pointer ${badgeClass}" title="スコア: ${formatValue(h.score)}">
                 <span class="num-font opacity-80">${h.date}</span>
-                <span class="font-bold">${h.rank}位</span>
-              </div>
+                <span class="font-bold">${h.rank}位 <span class="font-normal opacity-90 num-font ml-0.5">(${formatValue(h.score)})</span></span>
+              </button>
             `;
           });
           historyHtml += `</div>`;
@@ -1010,7 +1036,6 @@
                 <div class="font-bold text-yellow-400 text-[18px] num-font tracking-wider">${d.totalPt}<span class="text-[10px] text-slate-400 ml-0.5 font-normal">Pt</span></div>
               </div>
             </div>
-            <!-- ★ ここにPt内訳を表示 -->
             ${historyHtml}
           </li>
         `;
@@ -1030,6 +1055,12 @@
 
     function renderChart() {
       const activeData = getBaseViewData();
+      if (activeData.length === 0) {
+        const ctx = document.getElementById('scatterChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+        return;
+      }
+      
       const chartPoints = activeData.map(d => ({ 
         x: d.powerNum / 1000000, y: d.scoreNum / 1000000000000, name: d.name, color: getTierColor(d.powerNum)
       }));
