@@ -161,7 +161,8 @@
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] text-indigo-200 leading-relaxed shadow-inner">
           <ul class="space-y-1">
             <li><span class="font-bold text-emerald-400">⚡ 効率:</span> スコア÷戦力（戦力1Mあたりのスコア）。編成や立ち回りが優秀な証拠！</li>
-            <li><span class="font-bold text-slate-300">📈 📉 :</span> 前回参加時からのスコア増減。</li>
+            <!-- ★ 先週比の説明に変更 -->
+            <li><span class="font-bold text-slate-300">先週比 :</span> ちょうど1週間前（7日前）のスコアからの増減。</li>
           </ul>
         </div>
 
@@ -393,16 +394,12 @@
       }
     };
 
-    // ★ 修正：バグAの完全防弾処理（全角・小文字の対応）
     function parseValueString(str) {
       if (!str || str === "未登録") return 0;
-      // 1. 全角英数字を半角に変換する
       let halfStr = String(str).replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function(s) {
         return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
       });
-      // 2. 大文字に統一
       const upperStr = halfStr.toUpperCase();
-      // 3. 数字部分だけを抽出して計算（Mなどの単位文字は除去される）
       const num = parseFloat(upperStr.replace(/[^0-9.]/g, ''));
       
       if (upperStr.includes('T')) return num * 1000000000000;
@@ -458,12 +455,27 @@
         });
       });
 
-      data.sort((a, b) => new Date(a.date) - new Date(b.date));
-      const memberLastScore = {};
+      // ★ 変更：先週比（7日前）のスコアを計算するための処理
+      const memberData = {};
       data.forEach(d => {
-        d.diffScore = memberLastScore[d.name] !== undefined ? d.scoreNum - memberLastScore[d.name] : null;
-        memberLastScore[d.name] = d.scoreNum;
+        if (!memberData[d.name]) memberData[d.name] = {};
+        memberData[d.name][d.date] = d.scoreNum;
       });
+
+      data.forEach(d => {
+        const [y, m, day] = d.date.split('-');
+        const dObj = new Date(y, m - 1, day);
+        // ちょうど7日前の日付を算出
+        dObj.setDate(dObj.getDate() - 7);
+        const weekAgoStr = dObj.getFullYear() + '-' + String(dObj.getMonth() + 1).padStart(2, '0') + '-' + String(dObj.getDate()).padStart(2, '0');
+
+        if (memberData[d.name] && memberData[d.name][weekAgoStr] !== undefined) {
+          d.diffScore = d.scoreNum - memberData[d.name][weekAgoStr];
+        } else {
+          d.diffScore = null;
+        }
+      });
+
       data.sort((a, b) => new Date(b.date) - new Date(a.date));
       processedData = data;
     }
@@ -827,26 +839,50 @@
         if (rank === 2) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900 shadow-md font-bold text-xs num-font">2</span>`;
         if (rank === 3) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-md font-bold text-xs num-font">3</span>`;
 
-        let diffHtml = '';
+        // ★ 変更：先週比表示用のHTML（タグ用と右側強調用）
+        let diffHtmlRight = '';
+        let diffHtmlTag = '';
+
         if (!d.isAvg && d.diffScore !== null) {
-          if (d.diffScore > 0) diffHtml = `<span class="text-[10px] text-red-400 ml-0.5 num-font tracking-tight">📈+${formatValue(d.diffScore)}</span>`;
-          else if (d.diffScore < 0) diffHtml = `<span class="text-[10px] text-blue-400 ml-0.5 num-font tracking-tight">📉-${formatValue(Math.abs(d.diffScore))}</span>`;
-          else diffHtml = `<span class="text-[10px] text-slate-500 ml-0.5 num-font">±0</span>`;
+          const diffVal = d.diffScore;
+          if (diffVal > 0) {
+            diffHtmlRight = `<span class="text-[11px] text-red-400 font-bold whitespace-nowrap">先週比 📈+${formatValue(diffVal)}</span>`;
+            diffHtmlTag = `<span class="text-[10px] text-red-400 ml-1">📈+${formatValue(diffVal)}</span>`;
+          } else if (diffVal < 0) {
+            diffHtmlRight = `<span class="text-[11px] text-blue-400 font-bold whitespace-nowrap">先週比 📉-${formatValue(Math.abs(diffVal))}</span>`;
+            diffHtmlTag = `<span class="text-[10px] text-blue-400 ml-1">📉-${formatValue(Math.abs(diffVal))}</span>`;
+          } else {
+            diffHtmlRight = `<span class="text-[11px] text-slate-500 font-bold whitespace-nowrap">先週比 ±0</span>`;
+            diffHtmlTag = `<span class="text-[10px] text-slate-500 ml-1">±0</span>`;
+          }
         }
         
         const strPower = formatValue(d.powerNum);
-        const strScore = formatValue(d.scoreNum) + diffHtml;
+        // ★ 変更：スコアでソートしていない時はタグの中に増減を表示する
+        const strScore = formatValue(d.scoreNum) + (state.sort !== 'score' ? diffHtmlTag : '');
         const strEff = d.efficiency > 0 ? d.efficiency.toFixed(1) : '-';
         const strRank = d.isAvg ? d.avgRank.toFixed(1) + '位' : d.dailyRank + '位';
 
         let mainHtml = "";
-        if (state.sort === 'score') mainHtml = `<div class="font-bold text-indigo-400 text-[16px] num-font tracking-wider">${formatValue(d.scoreNum)}</div>`;
-        else if (state.sort === 'efficiency') mainHtml = `<div class="font-bold text-emerald-400 text-[16px] num-font tracking-wider">${strEff}<span class="text-[10px] ml-0.5 font-normal">⚡</span></div>`;
-        else if (state.sort === 'power') mainHtml = `<div class="font-bold text-slate-200 text-[16px] num-font tracking-wider">${strPower}</div>`;
-        else if (state.sort === 'rank') mainHtml = `<div class="font-bold text-amber-400 text-[16px] num-font tracking-wider">${d.isAvg ? d.avgRank.toFixed(1) : d.dailyRank}<span class="text-[10px] ml-0.5 font-normal">位</span></div>`;
+        if (state.sort === 'score') {
+          // ★ 変更：スコアソート時は、スコアの真下に先週比を併記
+          mainHtml = `
+            <div class="flex flex-col items-end">
+              <div class="font-bold text-indigo-400 text-[16px] num-font tracking-wider leading-tight">${formatValue(d.scoreNum)}</div>
+              ${diffHtmlRight ? `<div class="mt-0.5">${diffHtmlRight}</div>` : ''}
+            </div>
+          `;
+        } else if (state.sort === 'efficiency') {
+          mainHtml = `<div class="font-bold text-emerald-400 text-[16px] num-font tracking-wider">${strEff}<span class="text-[10px] ml-0.5 font-normal">⚡</span></div>`;
+        } else if (state.sort === 'power') {
+          mainHtml = `<div class="font-bold text-slate-200 text-[16px] num-font tracking-wider">${strPower}</div>`;
+        } else if (state.sort === 'rank') {
+          mainHtml = `<div class="font-bold text-amber-400 text-[16px] num-font tracking-wider">${d.isAvg ? d.avgRank.toFixed(1) : d.dailyRank}<span class="text-[10px] ml-0.5 font-normal">位</span></div>`;
+        }
 
         const powerColorClass = getTierTailwindClass(d.powerNum);
 
+        // ★ 変更：右側ブロックの最小幅を min-w-max に変更し、文字のはみ出しを防止
         const html = `
           <li class="p-3 hover:bg-slate-800/50 flex items-center justify-between transition-colors">
             <div class="flex items-center flex-grow min-w-0">
@@ -863,7 +899,7 @@
                 </div>
               </div>
             </div>
-            <div class="shrink-0 text-right pl-3 border-l border-slate-700 flex items-center justify-end min-w-[70px]">
+            <div class="shrink-0 text-right pl-3 border-l border-slate-700 flex items-center justify-end min-w-max">
               ${mainHtml}
             </div>
           </li>
