@@ -153,6 +153,7 @@
         </div>
         <div class="flex bg-slate-800/80 p-1 rounded-lg mb-3 overflow-x-auto scrollbar-hide border border-slate-700">
           <button id="sort-score" onclick="setSort('score')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">👑 スコア <span class="text-[10px] ml-1 opacity-80">▼</span></button>
+          <button id="sort-maxScore" onclick="setSort('maxScore')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🔥 最高</button>
           <button id="sort-efficiency" onclick="setSort('efficiency')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚡ 効率</button>
           <button id="sort-power" onclick="setSort('power')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">💪 戦力</button>
           <button id="sort-rank" onclick="setSort('rank')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🏅 順位</button>
@@ -161,7 +162,6 @@
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] text-indigo-200 leading-relaxed shadow-inner">
           <ul class="space-y-1">
             <li><span class="font-bold text-emerald-400">⚡ 効率:</span> スコア÷戦力（戦力1Mあたりのスコア）。編成や立ち回りが優秀な証拠！</li>
-            <!-- ★ 先週比の説明に変更 -->
             <li><span class="font-bold text-slate-300">先週比 :</span> ちょうど1週間前（7日前）のスコアからの増減。</li>
           </ul>
         </div>
@@ -455,7 +455,6 @@
         });
       });
 
-      // ★ 変更：先週比（7日前）のスコアを計算するための処理
       const memberData = {};
       data.forEach(d => {
         if (!memberData[d.name]) memberData[d.name] = {};
@@ -465,7 +464,6 @@
       data.forEach(d => {
         const [y, m, day] = d.date.split('-');
         const dObj = new Date(y, m - 1, day);
-        // ちょうど7日前の日付を算出
         dObj.setDate(dObj.getDate() - 7);
         const weekAgoStr = dObj.getFullYear() + '-' + String(dObj.getMonth() + 1).padStart(2, '0') + '-' + String(dObj.getDate()).padStart(2, '0');
 
@@ -641,8 +639,9 @@
     }
 
     function updateSortButtons(sortKey) {
-      const labels = { 'score': '👑 スコア', 'efficiency': '⚡ 効率', 'power': '💪 戦力', 'rank': '🏅 順位' };
-      ['score', 'efficiency', 'power', 'rank'].forEach(s => {
+      // ★ 変更：「最高スコア」のラベルを追加
+      const labels = { 'score': '👑 スコア', 'maxScore': '🔥 最高', 'efficiency': '⚡ 効率', 'power': '💪 戦力', 'rank': '🏅 順位' };
+      ['score', 'maxScore', 'efficiency', 'power', 'rank'].forEach(s => {
         const btn = document.getElementById(`sort-${s}`);
         if (btn) {
           if (s === sortKey) {
@@ -772,7 +771,9 @@
         viewData = processedData.filter(d => d.date === state.period).map(d => ({
           name: d.name, powerNum: d.powerNum, scoreNum: d.scoreNum, 
           efficiency: d.efficiency, diffScore: d.diffScore, tierCat: d.tierCat, isAvg: false,
-          dailyRank: d.dailyRank
+          dailyRank: d.dailyRank,
+          maxScoreNum: d.scoreNum, // ★ 追加：特定の日の場合はそのスコアがそのまま最高スコア
+          maxScoreDate: d.date       // ★ 追加：記録日
         }));
       } else {
         let days = 3; let minJoinCount = 2;
@@ -783,9 +784,14 @@
         let targetData = processedData.filter(d => targetDates.includes(d.date));
         const agg = {};
         targetData.forEach(d => {
-          if (!agg[d.name]) agg[d.name] = { scoreSum: 0, powerSum: 0, powerCount: 0, rankSum: 0, count: 0 };
+          if (!agg[d.name]) agg[d.name] = { scoreSum: 0, powerSum: 0, powerCount: 0, rankSum: 0, count: 0, maxScore: 0, maxScoreDate: '' };
           agg[d.name].scoreSum += d.scoreNum; agg[d.name].rankSum += d.dailyRank; agg[d.name].count += 1;
           if (d.powerNum > 0) { agg[d.name].powerSum += d.powerNum; agg[d.name].powerCount += 1; }
+          // ★ 追加：期間内の最高スコアを計算
+          if (d.scoreNum > agg[d.name].maxScore) {
+            agg[d.name].maxScore = d.scoreNum;
+            agg[d.name].maxScoreDate = d.date;
+          }
         });
         Object.keys(agg).forEach(name => {
           const item = agg[name];
@@ -795,7 +801,9 @@
             viewData.push({
               name: name, powerNum: avgPower, scoreNum: avgScore, efficiency: avgPower > 0 ? (avgScore / 1000000000) / (avgPower / 1000000) : 0,
               avgRank: item.rankSum / item.count, joinCount: item.count, targetDays: targetDates.length,
-              tierCat: getTierCategory(avgPower), isAvg: true
+              tierCat: getTierCategory(avgPower), isAvg: true,
+              maxScoreNum: item.maxScore,       // ★ 追加
+              maxScoreDate: item.maxScoreDate   // ★ 追加
             });
           }
         });
@@ -817,7 +825,9 @@
     function renderRanking() {
       let data = getBaseViewData();
 
+      // ★ 変更：最高スコアのソート処理を追加
       if (state.sort === 'score') { data = computeRanks(data, 'scoreNum'); } 
+      else if (state.sort === 'maxScore') { data = computeRanks(data, 'maxScoreNum'); } 
       else if (state.sort === 'efficiency') { data = computeRanks(data, 'efficiency'); } 
       else if (state.sort === 'power') { data = computeRanks(data, 'powerNum'); } 
       else if (state.sort === 'rank') {
@@ -839,7 +849,6 @@
         if (rank === 2) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900 shadow-md font-bold text-xs num-font">2</span>`;
         if (rank === 3) rankBadge = `<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-md font-bold text-xs num-font">3</span>`;
 
-        // ★ 変更：先週比表示用のHTML（タグ用と右側強調用）
         let diffHtmlRight = '';
         let diffHtmlTag = '';
 
@@ -858,18 +867,24 @@
         }
         
         const strPower = formatValue(d.powerNum);
-        // ★ 変更：スコアでソートしていない時はタグの中に増減を表示する
         const strScore = formatValue(d.scoreNum) + (state.sort !== 'score' ? diffHtmlTag : '');
         const strEff = d.efficiency > 0 ? d.efficiency.toFixed(1) : '-';
         const strRank = d.isAvg ? d.avgRank.toFixed(1) + '位' : d.dailyRank + '位';
 
         let mainHtml = "";
+        // ★ 変更：最高スコア（maxScore）が選ばれたときの右側表示ロジックを追加
         if (state.sort === 'score') {
-          // ★ 変更：スコアソート時は、スコアの真下に先週比を併記
           mainHtml = `
             <div class="flex flex-col items-end">
               <div class="font-bold text-indigo-400 text-[16px] num-font tracking-wider leading-tight">${formatValue(d.scoreNum)}</div>
               ${diffHtmlRight ? `<div class="mt-0.5">${diffHtmlRight}</div>` : ''}
+            </div>
+          `;
+        } else if (state.sort === 'maxScore') {
+          mainHtml = `
+            <div class="flex flex-col items-end">
+              <div class="font-bold text-rose-400 text-[16px] num-font tracking-wider leading-tight">${formatValue(d.maxScoreNum)}</div>
+              ${d.isAvg ? `<div class="text-[10px] text-rose-300/80 mt-0.5">${d.maxScoreDate.substring(5).replace('-', '/')} 記録</div>` : `<div class="text-[10px] text-slate-500 mt-0.5">当日のスコア</div>`}
             </div>
           `;
         } else if (state.sort === 'efficiency') {
@@ -882,7 +897,6 @@
 
         const powerColorClass = getTierTailwindClass(d.powerNum);
 
-        // ★ 変更：右側ブロックの最小幅を min-w-max に変更し、文字のはみ出しを防止
         const html = `
           <li class="p-3 hover:bg-slate-800/50 flex items-center justify-between transition-colors">
             <div class="flex items-center flex-grow min-w-0">
