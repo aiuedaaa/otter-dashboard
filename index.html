@@ -119,9 +119,10 @@
           <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>いつのデータを見る？</p>
           <div class="flex gap-1">
             <select id="period-date-global" onchange="setPeriod(this.value)" class="flex-none px-2 py-1.5 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
-            <button id="period-avg-3-global" onclick="setPeriod('avg-3')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">3日平均</button>
-            <button id="period-avg-7-global" onclick="setPeriod('avg-7')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">7日平均</button>
-            <button id="period-avg-30-global" onclick="setPeriod('avg-30')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">30日平均</button>
+            <!-- ★ 変更：期間ボタンの名前を「直近〇日」とシンプルに変更 -->
+            <button id="period-avg-3-global" onclick="setPeriod('avg-3')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">直近3日</button>
+            <button id="period-avg-7-global" onclick="setPeriod('avg-7')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">直近7日</button>
+            <button id="period-avg-30-global" onclick="setPeriod('avg-30')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">直近30日</button>
           </div>
         </div>
 
@@ -153,13 +154,18 @@
         </div>
         <div class="flex bg-slate-800/80 p-1 rounded-lg mb-3 overflow-x-auto scrollbar-hide border border-slate-700">
           <button id="sort-score" onclick="setSort('score')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">👑 スコア <span class="text-[10px] ml-1 opacity-80">▼</span></button>
-          <button id="sort-maxScore" onclick="setSort('maxScore')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🔥 最高</button>
+          <!-- ★ 変更：ボタン名を「ハイスコア」に変更 -->
+          <button id="sort-maxScore" onclick="setSort('maxScore')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🔥 ハイスコア</button>
           <button id="sort-efficiency" onclick="setSort('efficiency')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚡ 効率</button>
           <button id="sort-power" onclick="setSort('power')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">💪 戦力</button>
           <button id="sort-rank" onclick="setSort('rank')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🏅 順位</button>
         </div>
 
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] text-indigo-200 leading-relaxed shadow-inner">
+          <!-- ★ 追加：選択状況を教えてくれる動的メッセージエリア -->
+          <div id="dynamic-guide-message" class="mb-2.5 p-2 bg-indigo-950/60 rounded border border-indigo-500/30 font-bold text-indigo-100 shadow-sm flex items-start gap-1.5">
+            <!-- JavaScriptで書き換えられます -->
+          </div>
           <ul class="space-y-1">
             <li><span class="font-bold text-emerald-400">⚡ 効率:</span> スコア÷戦力（戦力1Mあたりのスコア）。編成や立ち回りが優秀な証拠！</li>
             <li><span class="font-bold text-slate-300">先週比 :</span> ちょうど1週間前（7日前）のスコアからの増減。</li>
@@ -639,8 +645,8 @@
     }
 
     function updateSortButtons(sortKey) {
-      // ★ 変更：「最高スコア」のラベルを追加
-      const labels = { 'score': '👑 スコア', 'maxScore': '🔥 最高', 'efficiency': '⚡ 効率', 'power': '💪 戦力', 'rank': '🏅 順位' };
+      // ★ 変更：ボタン名を「ハイスコア」に変更
+      const labels = { 'score': '👑 スコア', 'maxScore': '🔥 ハイスコア', 'efficiency': '⚡ 効率', 'power': '💪 戦力', 'rank': '🏅 順位' };
       ['score', 'maxScore', 'efficiency', 'power', 'rank'].forEach(s => {
         const btn = document.getElementById(`sort-${s}`);
         if (btn) {
@@ -757,8 +763,38 @@
       pushHistoryState();
     }
 
+    // ★ 追加：現在選択中の条件を言語化してガイドメッセージを更新する機能
+    function updateDynamicGuide() {
+      const guideEl = document.getElementById('dynamic-guide-message');
+      if (!guideEl) return;
+      if (state.tab !== 'ranking') return;
+
+      let periodText = "";
+      if (state.period === 'avg-3') periodText = "直近3日間";
+      else if (state.period === 'avg-7') periodText = "直近7日間";
+      else if (state.period === 'avg-30') periodText = "直近30日間";
+      else periodText = "指定した日付（" + state.period.substring(5).replace('-', '/') + "）";
+
+      let sortText = "";
+      let isAvgMode = state.period.startsWith('avg-');
+
+      if (state.sort === 'maxScore') {
+        sortText = isAvgMode ? "の 最高記録（ハイスコア）" : "の データ";
+      } else {
+        sortText = isAvgMode ? "の 平均値" : "の データ";
+      }
+
+      guideEl.innerHTML = `
+        <svg class="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>現在は <span class="text-white border-b border-indigo-400 pb-0.5">【 ${periodText}${sortText} 】</span> を表示しています。</span>
+      `;
+    }
+
     function renderView() {
-      if (state.tab === 'ranking') renderRanking();
+      if (state.tab === 'ranking') {
+        updateDynamicGuide(); // ★ 表示更新時にガイドも最新化
+        renderRanking();
+      }
       else if (state.tab === 'history') renderHistory();
       else if (state.tab === 'activity') renderActivity();
       else if (state.tab === 'elder') renderElder();
@@ -772,8 +808,8 @@
           name: d.name, powerNum: d.powerNum, scoreNum: d.scoreNum, 
           efficiency: d.efficiency, diffScore: d.diffScore, tierCat: d.tierCat, isAvg: false,
           dailyRank: d.dailyRank,
-          maxScoreNum: d.scoreNum, // ★ 追加：特定の日の場合はそのスコアがそのまま最高スコア
-          maxScoreDate: d.date       // ★ 追加：記録日
+          maxScoreNum: d.scoreNum, 
+          maxScoreDate: d.date       
         }));
       } else {
         let days = 3; let minJoinCount = 2;
@@ -787,7 +823,6 @@
           if (!agg[d.name]) agg[d.name] = { scoreSum: 0, powerSum: 0, powerCount: 0, rankSum: 0, count: 0, maxScore: 0, maxScoreDate: '' };
           agg[d.name].scoreSum += d.scoreNum; agg[d.name].rankSum += d.dailyRank; agg[d.name].count += 1;
           if (d.powerNum > 0) { agg[d.name].powerSum += d.powerNum; agg[d.name].powerCount += 1; }
-          // ★ 追加：期間内の最高スコアを計算
           if (d.scoreNum > agg[d.name].maxScore) {
             agg[d.name].maxScore = d.scoreNum;
             agg[d.name].maxScoreDate = d.date;
@@ -802,8 +837,8 @@
               name: name, powerNum: avgPower, scoreNum: avgScore, efficiency: avgPower > 0 ? (avgScore / 1000000000) / (avgPower / 1000000) : 0,
               avgRank: item.rankSum / item.count, joinCount: item.count, targetDays: targetDates.length,
               tierCat: getTierCategory(avgPower), isAvg: true,
-              maxScoreNum: item.maxScore,       // ★ 追加
-              maxScoreDate: item.maxScoreDate   // ★ 追加
+              maxScoreNum: item.maxScore,       
+              maxScoreDate: item.maxScoreDate   
             });
           }
         });
@@ -825,7 +860,6 @@
     function renderRanking() {
       let data = getBaseViewData();
 
-      // ★ 変更：最高スコアのソート処理を追加
       if (state.sort === 'score') { data = computeRanks(data, 'scoreNum'); } 
       else if (state.sort === 'maxScore') { data = computeRanks(data, 'maxScoreNum'); } 
       else if (state.sort === 'efficiency') { data = computeRanks(data, 'efficiency'); } 
@@ -872,7 +906,6 @@
         const strRank = d.isAvg ? d.avgRank.toFixed(1) + '位' : d.dailyRank + '位';
 
         let mainHtml = "";
-        // ★ 変更：最高スコア（maxScore）が選ばれたときの右側表示ロジックを追加
         if (state.sort === 'score') {
           mainHtml = `
             <div class="flex flex-col items-end">
