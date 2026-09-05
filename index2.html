@@ -43,7 +43,6 @@
 </head>
 <body class="pb-20">
 
-  <!-- ================= ヘッダー & 常時表示コントロール ================= -->
   <div class="sticky top-0 z-50 w-full flex flex-col shadow-lg bg-slate-900/95 backdrop-blur-md border-b border-slate-700">
     <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 border-b border-indigo-500/30 flex justify-center items-center relative">
       <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
@@ -53,7 +52,7 @@
       <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap hidden sm:block"></div>
     </header>
     
-    <div class="w-full border-b border-slate-700/50">
+    <div id="main-tabs-container" class="w-full border-b border-slate-700/50" style="display:none;">
       <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
         <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
         <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個別考察</button>
@@ -62,10 +61,8 @@
       </div>
     </div>
 
-    <!-- グローバルコントロール -->
     <div id="global-controls-panel" class="max-w-2xl mx-auto w-full px-2 sm:px-4 py-2 transition-all">
       
-      <!-- 🏆 総合順位 コントロール -->
       <div id="ctrl-ranking" class="block">
         <div class="flex gap-1">
           <select id="sel-rank-date" onchange="setRankPeriod(this.value)" class="flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
@@ -75,7 +72,6 @@
         </div>
       </div>
 
-      <!-- 👤 個別考察 コントロール -->
       <div id="ctrl-personal" class="hidden">
         <div class="flex gap-1 mb-1.5">
           <button id="btn-pers-14" onclick="setPersPeriod('last-14')" class="flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors">2週間</button>
@@ -94,15 +90,13 @@
         </div>
       </div>
 
-      <!-- 👑 長老用 -->
       <div id="ctrl-elder" class="hidden">
         <select id="elder-week-select" onchange="setElderWeek(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded-md text-sm p-1.5 outline-none text-white shadow-inner cursor-pointer font-bold"></select>
       </div>
 
-      <!-- ⚠️ 未参加用 -->
       <div id="ctrl-activity" class="hidden">
         <div class="flex gap-1 overflow-x-auto scrollbar-hide">
-          <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">2週間</button>
+          <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">2週間</button>
           <button id="act-period-30" onclick="setActPeriod('30')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1ヶ月</button>
           <button id="act-period-90" onclick="setActPeriod('90')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3ヶ月</button>
         </div>
@@ -110,7 +104,6 @@
     </div>
   </div>
 
-  <!-- ================= メインコンテンツ ================= -->
   <div class="max-w-2xl mx-auto px-2 sm:px-4 pt-4">
     
     <div id="loading" class="flex flex-col items-center justify-center py-20 text-indigo-400">
@@ -120,7 +113,6 @@
 
     <div id="dashboard-content" style="display:none;">
       
-      <!-- メンバーフィルター -->
       <div id="filter-section" class="mb-4">
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
@@ -131,7 +123,7 @@
           <span id="filter-panel-icon" class="text-slate-400 text-lg">▼</span>
         </button>
         
-        <div id="common-filter-panel" class="glass-card p-3 mt-1.5 border border-slate-600 shadow-xl block">
+        <div id="common-filter-panel" class="glass-card p-3 mt-1.5 border border-slate-600 shadow-xl hidden">
           <div class="flex justify-between items-start mb-2.5 flex-wrap gap-2">
             <p class="text-[11px] font-bold text-slate-400 mt-1">タップで個別にON/OFF</p>
             <div id="global-filter-presets" class="flex gap-1.5 flex-wrap">
@@ -146,10 +138,9 @@
         </div>
       </div>
 
-      <!-- 🏆【総合順位】 -->
       <div id="view-ranking" class="block">
         <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
-          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 一部のメンバーのみ表示中</span>
+          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 現在一部のメンバーのみ表示中</span>
           <button onclick="toggleAllMembers(true)" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow-sm transition">全員表示に戻す</button>
         </div>
         
@@ -175,10 +166,8 @@
         <div class="glass-card overflow-hidden"><ul id="rankingList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
-      <!-- 👤【個別考察】 -->
       <div id="view-personal" class="hidden">
         
-        <!-- ライバルサジェスト -->
         <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
           <p id="rival-suggest-title" class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -187,7 +176,6 @@
           <div id="rival-suggest-buttons" class="flex flex-wrap gap-2"></div>
         </div>
 
-        <!-- 考察レポート表 -->
         <div id="diagnostic-area" class="mb-5 hidden">
           <div class="glass-card overflow-hidden border-indigo-500/50 border shadow-lg relative">
             <div id="diagnostic-title" class="bg-indigo-900/80 p-2 text-sm font-bold text-indigo-100 border-b border-indigo-500/50"></div>
@@ -202,7 +190,6 @@
         </div>
         
         <div id="rich-analysis-area" class="hidden">
-          <!-- 立ち位置（散布図） -->
           <div class="glass-card p-3 mb-4 relative">
             <div class="flex flex-wrap justify-between items-center mb-1.5 pl-1 gap-2">
               <p class="text-[11px] font-bold text-slate-300 flex items-center gap-1"><svg class="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6c0 4 6 10 6 10s6-6 6-10a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z"/></svg> 全体の中での立ち位置</p>
@@ -218,13 +205,11 @@
             <div class="relative w-full h-[280px]"><canvas id="scatterChartPersonal"></canvas></div>
           </div>
 
-          <!-- 得意不得意（レーダー） -->
           <div id="radar-container" class="glass-card p-3 mb-4 hidden">
             <p class="text-[11px] font-bold text-slate-300 mb-1 pl-1">🎯 ボス別 平均スコア適性</p>
             <div class="relative w-full h-[250px]"><canvas id="radarChart"></canvas></div>
           </div>
 
-          <!-- トレンド＆予測（折れ線） -->
           <div class="glass-card p-3 mb-4 relative overflow-hidden">
             <div class="absolute top-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10 shadow-md">未来予測</div>
             <p class="text-[11px] font-bold text-slate-300 mb-2 pl-1">📈 スコア推移 と <span class="text-rose-400">来週の予測（点線）</span></p>
@@ -248,7 +233,6 @@
         </div>
       </div>
 
-      <!-- 👑【長老選抜】 -->
       <div id="view-elder" class="hidden">
         <div class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3 mb-4 text-[11px] sm:text-xs text-amber-200 leading-relaxed shadow-inner">
           <strong class="text-amber-400 block mb-1 flex items-center gap-1 text-xs sm:text-[13px]">
@@ -262,7 +246,6 @@
         <div class="glass-card overflow-hidden"><ul id="elderList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
-      <!-- ⚠️【未参加数】 -->
       <div id="view-activity" class="hidden">
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] sm:text-xs text-indigo-200 leading-relaxed shadow-inner">
           <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
@@ -278,7 +261,6 @@
     </div>
   </div>
 
-  <!-- JavaScript領域 -->
   <script>
     // --- State Management ---
     let state = { 
@@ -328,6 +310,7 @@
         
         prepareData(); initElderWeeks(); 
         
+        // 総合順位のデフォルトは最新日
         state.rankPeriod = availableDates.length > 0 ? availableDates[0] : ''; 
         setupDateSelects();
         
@@ -339,12 +322,14 @@
         if(activeMembers.length > 0) state.selectedPersonal = [activeMembers[0]];
 
         updateUIState();
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('main-tabs-container').style.display = 'block'; 
-        document.getElementById('dashboard-content').style.display = 'block';
+        if(document.getElementById('loading')) document.getElementById('loading').style.display = 'none';
+        if(document.getElementById('main-tabs-container')) document.getElementById('main-tabs-container').style.display = 'block'; 
+        if(document.getElementById('dashboard-content')) document.getElementById('dashboard-content').style.display = 'block';
         
         renderView(); pushHistoryState();
-      } catch (error) { document.getElementById('loading').innerHTML = `<div class="text-red-500 font-bold">❌ エラー</div><div class="text-sm mt-2">${error.message}</div>`; }
+      } catch (error) { 
+        if(document.getElementById('loading')) document.getElementById('loading').innerHTML = `<div class="text-red-500 font-bold">❌ エラー</div><div class="text-sm mt-2">${error.message}</div>`; 
+      }
     };
 
     // --- Data Utils ---
@@ -425,42 +410,57 @@
       const ctrlE = document.getElementById('ctrl-elder'); if(ctrlE) ctrlE.style.display = state.tab === 'elder'?'block':'none';
       const ctrlA = document.getElementById('ctrl-activity'); if(ctrlA) ctrlA.style.display = state.tab === 'activity'?'block':'none';
 
-      document.getElementById('filter-title-text').innerText = state.tab === 'personal' ? '個別考察のメンバー追加 (最大10人)' : '表示メンバーの絞り込み (全体用)';
-      document.getElementById('global-filter-presets').style.display = state.tab === 'personal' ? 'none' : 'flex';
+      const fTitle = document.getElementById('filter-title-text'); if(fTitle) fTitle.innerText = state.tab === 'personal' ? '個別考察のメンバー追加 (最大10人)' : '表示メンバーの絞り込み (全体用)';
+      const fPresets = document.getElementById('global-filter-presets'); if(fPresets) fPresets.style.display = state.tab === 'personal' ? 'none' : 'flex';
+
+      // タブごとのフィルターパネルの初期開閉
+      const fPanel = document.getElementById('common-filter-panel');
+      const fIcon = document.getElementById('filter-panel-icon');
+      if(fPanel && fIcon) {
+        if (state.tab === 'ranking') { fPanel.classList.add('hidden'); fIcon.textContent = '▼'; }
+        else { fPanel.classList.remove('hidden'); fIcon.textContent = '▲'; }
+      }
 
       renderFilterControls(); updateStickyBadge();
     }
 
     function toggleFilterPanel() { 
-      const p = document.getElementById('common-filter-panel'); p.classList.toggle('hidden'); 
-      document.getElementById('filter-panel-icon').textContent = p.classList.contains('hidden') ? '▼' : '▲'; 
+      const p = document.getElementById('common-filter-panel'); if(!p) return;
+      p.classList.toggle('hidden'); 
+      const i = document.getElementById('filter-panel-icon'); if(i) i.textContent = p.classList.contains('hidden') ? '▼' : '▲'; 
     }
     
     function renderFilterControls() {
       const onCount = state.tab === 'personal' ? state.selectedPersonal.length : Object.values(globalFilterState).filter(v => v).length;
-      document.getElementById('filter-count-badge').textContent = `${onCount}名`;
+      const fBadge = document.getElementById('filter-count-badge'); if(fBadge) fBadge.textContent = `${onCount}名`;
       
       const warnRanking = document.getElementById('ranking-filter-warning');
       if(warnRanking) {
         if(state.tab === 'ranking' && onCount < latestMemberInfo.length) warnRanking.classList.remove('hidden'); else warnRanking.classList.add('hidden');
       }
 
-      const tCont = document.getElementById('filter-tier-chips'); tCont.innerHTML = '';
-      if (state.tab !== 'personal') {
-        [{ id: '20', l: '20M〜' }, { id: '15-20', l: '15〜20M' }, { id: '10-15', l: '10〜15M' }, { id: '0-10', l: '〜10M' }].forEach(t => {
-          const ms = latestMemberInfo.filter(d => d.tierCat === t.id); if (ms.length === 0) return;
-          const isOn = ms.some(d => globalFilterState[d.name]);
-          const cls = isOn ? getTierTailwindClass(t.id==='20'?2e7:t.id==='15-20'?1.5e7:1e7, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
-          tCont.insertAdjacentHTML('beforeend', `<button onclick="toggleTier('${t.id}')" class="flex-none px-3 py-1 text-[11px] font-bold rounded-md border transition ${cls}">${t.l}</button>`);
-        });
+      const tCont = document.getElementById('filter-tier-chips');
+      if (tCont) {
+        tCont.innerHTML = '';
+        if (state.tab !== 'personal') {
+          [{ id: '20', l: '20M〜' }, { id: '15-20', l: '15〜20M' }, { id: '10-15', l: '10〜15M' }, { id: '0-10', l: '〜10M' }].forEach(t => {
+            const ms = latestMemberInfo.filter(d => d.tierCat === t.id); if (ms.length === 0) return;
+            const isOn = ms.some(d => globalFilterState[d.name]);
+            const cls = isOn ? getTierTailwindClass(t.id==='20'?2e7:t.id==='15-20'?1.5e7:1e7, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
+            tCont.insertAdjacentHTML('beforeend', `<button onclick="toggleTier('${t.id}')" class="flex-none px-3 py-1 text-[11px] font-bold rounded-md border transition ${cls}">${t.l}</button>`);
+          });
+        }
       }
 
-      const mCont = document.getElementById('filter-member-chips'); mCont.innerHTML = '';
-      [...latestMemberInfo].sort((a,b) => b.powerNum - a.powerNum).forEach(d => {
-        const isOn = state.tab === 'personal' ? state.selectedPersonal.includes(d.name) : globalFilterState[d.name];
-        const cls = isOn ? getTierTailwindClass(d.powerNum, true) : 'bg-slate-800 text-slate-500 border-slate-700 opacity-60 hover:bg-slate-700';
-        mCont.insertAdjacentHTML('beforeend', `<button onclick="toggleMember('${d.name}')" class="px-2 py-0.5 text-[10px] font-bold rounded-full border transition ${cls}">${d.name}</button>`);
-      });
+      const mCont = document.getElementById('filter-member-chips');
+      if (mCont) {
+        mCont.innerHTML = '';
+        [...latestMemberInfo].sort((a,b) => b.powerNum - a.powerNum).forEach(d => {
+          const isOn = state.tab === 'personal' ? state.selectedPersonal.includes(d.name) : globalFilterState[d.name];
+          const cls = isOn ? getTierTailwindClass(d.powerNum, true) : 'bg-slate-800 text-slate-500 border-slate-700 opacity-60 hover:bg-slate-700';
+          mCont.insertAdjacentHTML('beforeend', `<button onclick="toggleMember('${d.name}')" class="px-2 py-0.5 text-[10px] font-bold rounded-full border transition ${cls}">${d.name}</button>`);
+        });
+      }
     }
     
     function toggleTier(t) { 
@@ -499,11 +499,9 @@
       if(el) { el.innerHTML = '<option value="" disabled hidden>単日指定</option>'; availableDates.forEach((date, i) => { el.insertAdjacentHTML('beforeend', `<option value="${date}">${i===0?date+'(最新)':date}</option>`); }); }
     }
     function updatePeriodButtons() {
-      // Ranking
       const rDate = !state.rankPeriod.startsWith('last-'); const rEl = document.getElementById('sel-rank-date');
       if(rEl) { rEl.value = rDate ? state.rankPeriod : ""; rEl.className = rDate ? "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-indigo-600 text-white border-indigo-500 shadow-md" : "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-slate-900 text-slate-300 border-slate-600"; }
       ['14', '30', '90'].forEach(v => { const b = document.getElementById(`btn-rank-${v}`); if(b) b.className = (`last-${v}` === state.rankPeriod) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
-      // Personal
       ['14', '30', '90'].forEach(v => { const b = document.getElementById(`btn-pers-${v}`); if(b) b.className = (`last-${v}` === state.persPeriod) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
     }
     function updateBossButtons() { ['all','1','2','3','4','5','6','0'].forEach(v => { const b = document.getElementById(`boss-${v}`); if(b) { if(v===state.persBoss){b.classList.remove('btn-inactive');b.classList.add('btn-active');}else{b.classList.remove('btn-active');b.classList.add('btn-inactive');} }}); }
@@ -533,9 +531,6 @@
     // --- Actions ---
     function setTab(t) { 
       state.tab = t; 
-      if (['personal','elder','activity'].includes(t)) document.getElementById('common-filter-panel').classList.remove('hidden');
-      else document.getElementById('common-filter-panel').classList.add('hidden');
-      document.getElementById('filter-panel-icon').textContent = document.getElementById('common-filter-panel').classList.contains('hidden') ? '▼' : '▲';
       updateUIState(); renderView(); pushHistoryState(); 
     }
     function setRankPeriod(p) { state.rankPeriod = p; updateUIState(); renderView(); pushHistoryState(); }
@@ -554,8 +549,7 @@
         state.selectedPersonal.unshift(name);
       }
       state.tab = 'personal'; 
-      updateUIState(); document.getElementById('common-filter-panel').classList.remove('hidden'); document.getElementById('filter-panel-icon').textContent = '▲';
-      renderView(); window.scrollTo({top:0, behavior:'smooth'}); pushHistoryState(); 
+      updateUIState(); renderView(); window.scrollTo({top:0, behavior:'smooth'}); pushHistoryState(); 
     }
 
     function calculateRegressionLine(data) {
@@ -764,14 +758,14 @@
                 if (regB.slope >= regT.slope) trendStr = `<span class="text-emerald-400 font-bold">盤石 (+${diffStrTxt})</span>`;
                 else {
                   let weeks = diff / (regT.slope - regB.slope);
-                  if(weeks < 4) trendStr = `<span class="text-amber-400 font-bold">猛追されてる (+${diffStrTxt})</span><br><span class="text-[9px]">約${Math.ceil(weeks)}週で逆転圏内</span>`;
+                  if(weeks < 4) trendStr = `<span class="text-amber-400 font-bold">猛追されてる (+${diffStrTxt})</span> / <span class="text-[9px]">約${Math.ceil(weeks)}週で逆転圏内</span>`;
                   else trendStr = `<span class="text-emerald-300 font-bold">リード (+${diffStrTxt})</span>`;
                 }
               } else {
                 if (regB.slope <= regT.slope) trendStr = `<span class="text-rose-400 font-bold">差が拡大中 (-${diffStrTxt})</span>`;
                 else {
                   let weeks = Math.abs(diff) / (regB.slope - regT.slope);
-                  if(weeks < 4) trendStr = `<span class="text-amber-300 font-bold">猛追中！ (-${diffStrTxt})</span><br><span class="text-[9px]">約${Math.ceil(weeks)}週で逆転見込</span>`;
+                  if(weeks < 4) trendStr = `<span class="text-amber-300 font-bold">猛追中！ (-${diffStrTxt})</span> / <span class="text-[9px]">約${Math.ceil(weeks)}週で逆転見込</span>`;
                   else trendStr = `<span class="text-rose-300 font-bold">ビハインド (-${diffStrTxt})</span>`;
                 }
               }
@@ -820,7 +814,7 @@
         if (rivals.length > 0) {
           suggBtns.innerHTML = rivals.map(r => {
             const isSelected = tNames.includes(r);
-            if(isSelected) return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-indigo-900/80 border border-indigo-500 text-indigo-200 font-bold text-[11px] rounded shadow-md transition whitespace-nowrap">✓ ${r} (比較中)</button>`;
+            if(isSelected) return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-indigo-900/80 border border-indigo-500 text-indigo-200 font-bold text-[11px] rounded shadow-md transition whitespace-nowrap">✓ ${r} (表示中)</button>`;
             return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-slate-800 border border-slate-600 text-amber-300 font-bold text-[11px] rounded shadow-md hover:bg-slate-700 transition whitespace-nowrap">+ ${r} 追加</button>`;
           }).join('');
           suggArea.classList.remove('hidden');
@@ -835,7 +829,7 @@
         radarCont.classList.toggle('hidden', tNames.length > 5);
         
         // --- 1. 散布図 ---
-        const allData = getBaseViewData(true, true); 
+        const allData = getBaseViewData(true, true); // 全員取得
         let filteredBgData = allData;
         if (!state.scatterTiers.includes('all')) {
           filteredBgData = allData.filter(d => state.scatterTiers.includes(d.tierCat) || tNames.includes(d.name));
@@ -846,6 +840,7 @@
           return { x: d.powerNum/1e6, y: d.scoreNum/1e12, name: d.name, isSelected: isSelected, color: isSelected ? CHART_PALETTE[cIndex % CHART_PALETTE.length] : 'rgba(100,116,139,0.3)' };
         });
         
+        // オートズーム処理 (Y軸) ※フィルタで表示中の全員が収まるように
         let yMin = 0, yMax = 100;
         if(pts.length > 0) {
           const sMin = Math.min(...pts.map(p=>p.y)), sMax = Math.max(...pts.map(p=>p.y));
@@ -882,7 +877,7 @@
         chartDates.reverse();
 
         const xLabels = chartDates.map(d=>d.substring(5).replace('-','/'));
-        xLabels.push("来週予測", " ", " ", " "); 
+        xLabels.push("来週予測", " ", " ", " "); // 右側に予測用の余白を広く確保
 
         const tDatasets = tNames.map((name, i) => {
           const c = CHART_PALETTE[i % CHART_PALETTE.length];
