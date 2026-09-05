@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>【OtterCompany】魔物襲来ダッシュボード v3</title>
+  <title>【OtterCompany】魔物襲来ダッシュボード</title>
   
   <script>
     // ==========================================
-    // ⚠️ ご自身のGASのURL（?api=data付き）
+    // ⚠️ ご自身のGASのURL（?api=data付き）に書き換えてください
     // ==========================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwHkhRGaeLkTBKng2M9OzdR6-t2MLO9jaDL9j6trYk6nIeYjvpQflSemLheDIHl6afgBw/exec?api=data";
   </script>
@@ -18,7 +18,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0"></script>
   
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     body { 
@@ -43,6 +43,7 @@
       color: #94a3b8; 
       border: 1px solid transparent;
     }
+    
     .glass-card { 
       background: rgba(30, 41, 59, 0.6);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -53,22 +54,22 @@
 </head>
 <body class="pb-20">
 
-  <!-- ================= ヘッダー & 4大タブ ================= -->
   <div class="sticky top-0 z-50 shadow-lg w-full flex flex-col">
     <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 border-b border-indigo-500/30 flex justify-center items-center relative">
       <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
         <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-        OtterCompany <span class="text-xs font-normal text-indigo-200 ml-1">Dash v3</span>
+        OtterCompany <span class="text-sm font-normal text-indigo-200">魔物スコア</span>
       </h1>
       <div id="sticky-period-badge" class="absolute right-3 transition-opacity duration-300 opacity-0 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap"></div>
     </header>
     
     <div id="main-tabs-container" class="bg-slate-900/95 backdrop-blur-md border-b border-slate-700 w-full" style="display:none;">
-      <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-2">
-        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 全体ランキング</button>
-        <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👤 個人・比較分析</button>
-        <button id="nav-elder" onclick="setTab('elder')" class="flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老</button>
-        <button id="nav-activity" onclick="setTab('activity')" class="flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 非参加</button>
+      <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
+        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 順位</button>
+        <button id="nav-analysis" onclick="setTab('analysis')" class="flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">📈 目標</button>
+        <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個人・比較</button>
+        <button id="nav-elder" onclick="setTab('elder')" class="flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
+        <button id="nav-activity" onclick="setTab('activity')" class="flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 非参加数</button>
       </div>
     </div>
   </div>
@@ -77,28 +78,31 @@
     
     <div id="loading" class="flex flex-col items-center justify-center py-20 text-indigo-400">
       <svg class="animate-spin h-10 w-10 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-      <p class="font-bold tracking-widest text-sm">データ解析中...</p>
+      <p class="font-bold tracking-widest text-sm">最新データを同期中...</p>
     </div>
 
     <div id="dashboard-content" style="display:none;">
 
-      <!-- ================= フィルター & コントロール ================= -->
-      <div id="filter-section" class="mb-3">
+      <!-- ================= 1. 共通フィルター ================= -->
+      <div class="mb-3">
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-            表示メンバーの絞り込み
+            共通フィルター (表示メンバーの絞り込み)
             <span id="filter-count-badge" class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[10px] num-font border border-indigo-400"></span>
           </span>
           <span id="filter-panel-icon" class="text-slate-400 text-lg">▲</span>
         </button>
         
-        <div id="common-filter-panel" class="glass-card p-3 mt-2 border border-slate-600 shadow-xl hidden">
+        <!-- デフォルトで開いておく -->
+        <div id="common-filter-panel" class="glass-card p-3 mt-2 border border-slate-600 shadow-xl block">
           <div class="flex justify-between items-start mb-2.5 flex-wrap gap-2">
-            <p class="text-[11px] font-bold text-slate-400 mt-1">タップで個別にON/OFF</p>
+            <p class="text-[11px] font-bold text-slate-400 mt-1">表示するメンバー (タップで切替)</p>
             <div class="flex gap-1.5 flex-wrap">
               <button onclick="toggleAllMembers(true)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-slate-700 text-white shadow-sm hover:bg-slate-600 transition border border-slate-500">全員ON</button>
               <button onclick="toggleAllMembers(false)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-slate-900 text-slate-400 shadow-sm hover:bg-slate-800 transition border border-slate-700">全員OFF</button>
+              <button onclick="toggleExecutives(true)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-indigo-900/60 text-indigo-300 shadow-sm hover:bg-indigo-800/80 transition border border-indigo-700/50">幹部ON</button>
+              <button onclick="toggleExecutives(false)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-rose-900/60 text-rose-300 shadow-sm hover:bg-rose-800/80 transition border border-rose-700/50">幹部OFF</button>
             </div>
           </div>
           <div id="filter-tier-chips" class="flex space-x-1.5 overflow-x-auto pb-2 scrollbar-hide mb-1"></div>
@@ -106,16 +110,16 @@
         </div>
       </div>
 
+      <!-- ================= 2. コントロールパネル ================= -->
       <div id="global-controls-panel" class="bg-slate-800/80 p-2.5 rounded-lg mb-5 border border-slate-700 shadow-sm transition-all">
         
-        <!-- 期間とボス (ランキング・個人タブ共通) -->
         <div id="ctrl-daily" class="block">
           <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>いつのデータを見る？</p>
           <div class="flex gap-1 mb-3">
             <select id="period-date-global" onchange="setPeriod(this.value)" class="flex-none px-2 py-1.5 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
-            <button id="period-last-14-global" onclick="setPeriod('last-14')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">2週間</button>
-            <button id="period-last-30-global" onclick="setPeriod('last-30')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">1ヶ月</button>
-            <button id="period-last-90-global" onclick="setPeriod('last-90')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">3ヶ月</button>
+            <button id="period-last-14-global" onclick="setPeriod('last-14')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">直近2週間</button>
+            <button id="period-last-30-global" onclick="setPeriod('last-30')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">直近1ヶ月</button>
+            <button id="period-last-90-global" onclick="setPeriod('last-90')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors">直近3ヶ月</button>
           </div>
 
           <div id="boss-filter-container" class="transition-opacity duration-300 relative">
@@ -144,9 +148,12 @@
         <div id="ctrl-activity" class="hidden">
           <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1.5 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>集計期間 (直近の開催日数)</p>
           <div class="flex gap-1 overflow-x-auto scrollbar-hide">
-            <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">2週間</button>
+            <button id="act-period-1" onclick="setActPeriod('1')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1日</button>
+            <button id="act-period-3" onclick="setActPeriod('3')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3日</button>
+            <button id="act-period-7" onclick="setActPeriod('7')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">1週間</button>
+            <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">2週間</button>
+            <button id="act-period-21" onclick="setActPeriod('21')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3週間</button>
             <button id="act-period-30" onclick="setActPeriod('30')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1ヶ月</button>
-            <button id="act-period-90" onclick="setActPeriod('90')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3ヶ月</button>
           </div>
         </div>
       </div>
@@ -155,23 +162,23 @@
       
       <!-- 🏆【全体ランキング】 -->
       <div id="view-ranking" class="block">
-        
-        <!-- フィルター解除案内（絞り込まれている時だけ出現） -->
-        <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
-          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 現在一部のメンバーのみ表示中</span>
-          <button onclick="toggleAllMembers(true)" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow-sm transition">全員表示に戻す</button>
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs font-bold text-slate-400 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>何の基準で並べる？</p>
         </div>
-
         <div class="flex bg-slate-800/80 p-1 rounded-lg mb-3 overflow-x-auto scrollbar-hide border border-slate-700">
           <button id="sort-score" onclick="setSort('score')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">👑 スコア <span class="text-[10px] ml-1 opacity-80">▼</span></button>
           <button id="sort-maxScore" onclick="setSort('maxScore')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🔥 ハイスコア</button>
           <button id="sort-efficiency" onclick="setSort('efficiency')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚡ 効率</button>
+          <button id="sort-power" onclick="setSort('power')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">💪 戦力</button>
           <button id="sort-rank" onclick="setSort('rank')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🏅 順位</button>
         </div>
 
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] text-indigo-200 leading-relaxed shadow-inner">
           <div id="dynamic-guide-message" class="mb-2 p-2 bg-indigo-950/60 rounded border border-indigo-500/30 font-bold text-indigo-100 shadow-sm flex items-start gap-1.5"></div>
-          <p class="text-[10px] opacity-80 pl-1">※名前をタップすると、その人の「個人・比較分析」タブへ移動します。</p>
+          <ul class="space-y-1">
+            <li><span class="font-bold text-emerald-400">⚡ 効率:</span> スコア÷戦力。編成や立ち回りが優秀な証拠！</li>
+            <li>※名前をタップすると、その人の「個人・比較分析」タブへ移動します。</li>
+          </ul>
         </div>
 
         <div class="glass-card overflow-hidden">
@@ -179,33 +186,54 @@
         </div>
       </div>
 
-      <!-- 👤【個人・比較分析】 -->
+      <!-- 📈【目標・分布】 -->
+      <div id="view-analysis" class="hidden">
+        <div class="glass-card p-4">
+          <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
+            <strong class="text-indigo-300 text-[13px] block mb-1.5 flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              目標ライン（回帰直線）について
+            </strong>
+            <p class="mb-1.5">
+              <span class="font-bold text-red-400">🔴赤い点線</span>は、「現在の戦力なら平均してこれくらいのスコアが出るはず」という全体の傾向を示す目標ライン（最小二乗法で算出）です。<br>
+              <span class="text-[10px] opacity-70">※上のフィルターでONになっているメンバーのデータから自動計算しています。</span>
+            </p>
+            <div class="mt-2 p-2.5 bg-slate-900/60 rounded border border-slate-700/80">
+              <span class="text-indigo-300 font-bold text-[10px] sm:text-[11px] bg-indigo-900/80 px-1.5 py-0.5 rounded border border-indigo-700/50 inline-block mb-1">応用テクニック</span><br>
+              装備によって目標スコアは大きく変わります。上のフィルターで<span class="text-indigo-300 font-bold border-b border-indigo-500 pb-0.5">「自分と同じ装備のメンバーだけ」</span>をONに絞り込むと、より正確な『その装備専用の目標ライン』が引けます！
+            </div>
+          </div>
+          <div class="relative w-full h-[60vh] min-h-[400px]">
+            <canvas id="scatterChartAnalysis"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 👤【個人・比較分析】★新機能 -->
       <div id="view-personal" class="hidden">
         
-        <!-- サジェストエリア (1人選択時のみ表示) -->
-        <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-amber-900/40 to-rose-900/40 border border-amber-700/50 rounded-lg p-3 shadow-inner">
-          <p class="text-[11px] font-bold text-amber-300 mb-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            競り合っているライバルを追加して比較
+        <div id="diagnostic-area" class="hidden mb-4"></div>
+
+        <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
+          <p class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            競り合っているライバルを追加して比較する
           </p>
           <div id="rival-suggest-buttons" class="flex flex-wrap gap-2"></div>
         </div>
         
-        <!-- リッチ分析エリア -->
         <div id="rich-analysis-area" class="hidden">
           
-          <!-- 立ち位置（散布図） -->
           <div class="glass-card p-3 mb-4">
             <div class="flex justify-between items-center mb-1 pl-1">
               <p class="text-[11px] font-bold text-slate-300">📍 全体の中での立ち位置</p>
-              <span class="text-[9px] text-slate-500">赤点線＝クラン全体の目標基準</span>
+              <span class="text-[9px] text-slate-500">赤点線＝全体の目標基準</span>
             </div>
             <div class="relative w-full h-[250px]">
-              <canvas id="scatterChart"></canvas>
+              <canvas id="scatterChartPersonal"></canvas>
             </div>
           </div>
 
-          <!-- 得意不得意（レーダー） -->
           <div id="radar-container" class="glass-card p-3 mb-4 hidden">
             <p class="text-[11px] font-bold text-slate-300 mb-1 pl-1">🎯 ボス別 平均スコア適性</p>
             <div class="relative w-full h-[250px]">
@@ -213,7 +241,6 @@
             </div>
           </div>
 
-          <!-- トレンド＆予測（折れ線） -->
           <div class="glass-card p-3 mb-4 relative overflow-hidden">
             <div class="absolute top-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10 shadow-md">未来予測</div>
             <p class="text-[11px] font-bold text-slate-300 mb-2 pl-1">
@@ -222,18 +249,13 @@
             <div class="relative w-full h-[300px]">
               <canvas id="trendChart"></canvas>
             </div>
-            <div class="mt-2 text-[9px] text-slate-400 text-right pr-2">
-              ※点線は過去の傾き（モメンタム）から算出した来週の予想スコア。
-            </div>
           </div>
         </div>
 
-        <!-- 人数超過時の警告 -->
         <div id="too-many-warning" class="hidden bg-slate-800/80 border border-slate-700 rounded-lg p-4 mb-4 text-xs text-slate-300 text-center shadow-inner">
-          詳細な比較分析グラフを表示するには、<br>フィルターでメンバーを<span class="text-indigo-400 font-bold px-1">5人以下</span>に絞ってください。
+          詳細な比較グラフを表示するには、<br>フィルターでメンバーを<span class="text-indigo-400 font-bold px-1">5人以下</span>に絞ってください。
         </div>
 
-        <!-- データリスト -->
         <div class="glass-card overflow-hidden">
           <div class="grid grid-cols-5 text-center text-[10px] sm:text-[11px] font-bold text-slate-400 bg-slate-800/80 py-2 border-b border-slate-700">
             <div>日付 / 名前</div>
@@ -248,11 +270,28 @@
 
       <!-- 👑【長老選抜】 -->
       <div id="view-elder" class="hidden">
+        <div class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3 mb-4 text-xs text-amber-200 leading-relaxed shadow-inner">
+          <strong class="text-amber-400 block mb-1 flex items-center gap-1 text-[13px]">
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            長老選抜ルール
+          </strong>
+          日曜始まりで毎日のスコアランキング（<span class="text-white font-bold border-b border-amber-500 pb-0.5">フィルターでONになっているメンバー内</span>）において、<br>
+          <span class="font-bold text-amber-400">1位: 4Pt / 2位: 3Pt / 3位: 2Pt / 4位: 1Pt</span> を付与。<br>
+          週単位の合計Ptで上位4名が長老候補となります。<span class="text-[10px] opacity-70">（同Ptの場合は週の合計スコアで判定。各記録タップで日別ランキングへ）</span>
+        </div>
         <div class="glass-card overflow-hidden"><ul id="elderList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
       <!-- ⚠️【非参加数】 -->
       <div id="view-activity" class="hidden">
+        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
+          <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
+            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            非参加数（未参加ランキング）
+          </strong>
+          <span class="text-white font-bold border-b border-rose-500 pb-0.5">フィルターでONになっているメンバー</span>を対象に、<span class="text-rose-400 font-bold">参加回数が少ない順</span>に表示しています。<br>
+          <span class="text-[10px] opacity-70 mt-1 block">※既に引退・脱退したメンバーのノイズは自動で除外されます。同数の場合は同順位になります。</span>
+        </div>
         <div class="glass-card overflow-hidden"><ul id="activityList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
@@ -263,34 +302,47 @@
   <script>
     let state = { 
       tab: 'ranking', 
-      period: '', boss: 'all', sort: 'score', actPeriod: '14', elderWeek: ''
+      period: '', boss: 'all', sort: 'score', actPeriod: '7', elderWeek: ''
     };
     
     const executives = ["てぃっしゅ", "たに", "よぴ", "かめ吉", "うえだ", "だいち", "さば"];
-    const CHART_PALETTE = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#a855f7']; // 個人タブ用厳選5色
+    const CHART_PALETTE = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#a855f7']; 
     const BOSS_NAMES = { '1':'墓守り', '2':'ドラゴン', '3':'バルログ', '4':'メドゥーサ', '5':'ストーンマン', '6':'一つ目', '0':'鎌' };
 
-    let memberFilterState = {};
+    // ★ 状態管理を全体と個人で完全に分離
+    let globalFilterState = {}; 
+    let personalFilterState = {}; 
+    let primaryPersonalUser = null; // サジェストの基準となる人
+
     let latestMemberInfo = []; 
     let globalRawData = []; let latestPowersDict = {};
     let processedData = []; let availableDates = [];
     let activeMembers = []; let weekMap = {}; let weeks = [];
     
-    let chartInstance = null; let radarChartInstance = null; let trendChartInstance = null;
+    let chartInstanceAnalysis = null; 
+    let chartInstancePersonal = null; 
+    let radarChartInstance = null; let trendChartInstance = null;
 
     Chart.register(ChartDataLabels, window['chartjs-plugin-annotation']);
 
-    // 履歴(戻るボタン)対応
     window.addEventListener('popstate', (event) => {
       if (event.state) {
         state = event.state.stateObj;
-        memberFilterState = event.state.filterObj;
+        globalFilterState = event.state.gFilter;
+        personalFilterState = event.state.pFilter;
+        primaryPersonalUser = event.state.primaryUser;
         updateUIState();
         renderView();
       }
     });
+
     function pushHistoryState() {
-      history.pushState({ stateObj: JSON.parse(JSON.stringify(state)), filterObj: JSON.parse(JSON.stringify(memberFilterState)) }, "");
+      history.pushState({ 
+        stateObj: JSON.parse(JSON.stringify(state)), 
+        gFilter: JSON.parse(JSON.stringify(globalFilterState)),
+        pFilter: JSON.parse(JSON.stringify(personalFilterState)),
+        primaryUser: primaryPersonalUser
+      }, "");
     }
 
     window.onload = async () => {
@@ -302,19 +354,25 @@
         activeMembers = Object.keys(latestPowersDict).sort((a, b) => a.localeCompare(b));
         
         prepareData(); initElderWeeks(); 
-        
         state.period = availableDates[0]; 
         setupDateSelects();
         
-        initFilterState(); // 初期は全員ON
+        // 初期化: globalは全員ON, personalは全員OFF
+        latestMemberInfo = activeMembers.map(name => {
+          const pNum = parseValueString(latestPowersDict[name]); return { name: name, powerNum: pNum, tierCat: getTierCategory(pNum) };
+        });
+        latestMemberInfo.forEach(info => { 
+          globalFilterState[info.name] = true; 
+          personalFilterState[info.name] = false; 
+        });
+
         updateUIState();
-        
         document.getElementById('loading').style.display = 'none';
         document.getElementById('main-tabs-container').style.display = 'block'; 
         document.getElementById('dashboard-content').style.display = 'block';
         
         renderView();
-        history.replaceState({ stateObj: JSON.parse(JSON.stringify(state)), filterObj: JSON.parse(JSON.stringify(memberFilterState)) }, "");
+        history.replaceState({ stateObj: JSON.parse(JSON.stringify(state)), gFilter: JSON.parse(JSON.stringify(globalFilterState)), pFilter: JSON.parse(JSON.stringify(personalFilterState)), primaryUser: primaryPersonalUser }, "");
       } catch (error) { document.getElementById('loading').innerHTML = `<div class="text-red-500 font-bold">❌ エラー</div><div class="text-sm mt-2">${error.message}</div>`; }
     };
 
@@ -380,22 +438,22 @@
     }
 
     // --- UI/状態の更新 ---
+    function getActiveFilter() { return state.tab === 'personal' ? personalFilterState : globalFilterState; }
+
     function updateUIState() {
       updatePeriodButtons(); updateBossButtons(); updateSortButtons(state.sort);
       
-      // タブボタンの色更新
-      ['ranking','personal','elder','activity'].forEach(v => {
+      ['ranking','analysis','personal','elder','activity'].forEach(v => {
         const b = document.getElementById(`nav-${v}`);
-        if(b) b.className = v===state.tab ? "flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-slate-700";
+        if(b) b.className = v===state.tab ? "flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-slate-700";
       });
-      ['14','30','90'].forEach(v => {
+      ['1','3','7','14','21','30'].forEach(v => {
         const b = document.getElementById(`act-period-${v}`);
         if(b) b.className = v===state.actPeriod ? "flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap";
       });
 
-      // 表示セクションの切り替え
-      ['ranking','personal','elder','activity'].forEach(id => document.getElementById(`view-${id}`).style.display = id===state.tab?'block':'none');
-      document.getElementById('ctrl-daily').style.display = ['ranking','personal'].includes(state.tab) ? 'block':'none';
+      ['ranking','analysis','personal','elder','activity'].forEach(id => document.getElementById(`view-${id}`).style.display = id===state.tab?'block':'none');
+      document.getElementById('ctrl-daily').style.display = ['ranking','analysis','personal'].includes(state.tab) ? 'block':'none';
       document.getElementById('ctrl-elder').style.display = state.tab==='elder'?'block':'none';
       document.getElementById('ctrl-activity').style.display = state.tab==='activity'?'block':'none';
 
@@ -406,42 +464,67 @@
     function toggleFilterPanel() { const p = document.getElementById('common-filter-panel'); p.classList.toggle('hidden'); document.getElementById('filter-panel-icon').textContent = p.classList.contains('hidden') ? '▼' : '▲'; }
     function autoCloseFilterPanel() { document.getElementById('common-filter-panel').classList.add('hidden'); document.getElementById('filter-panel-icon').textContent = '▼'; }
     
-    function initFilterState() {
-      memberFilterState = {};
-      latestMemberInfo = activeMembers.map(name => {
-        const pNum = parseValueString(latestPowersDict[name]); return { name: name, powerNum: pNum, tierCat: getTierCategory(pNum) };
-      });
-      latestMemberInfo.forEach(info => { memberFilterState[info.name] = true; }); // 基本は全員ON
-    }
-    
     function renderFilterControls() {
-      const onCount = Object.values(memberFilterState).filter(v => v).length;
+      const activeFilter = getActiveFilter();
+      const onCount = Object.values(activeFilter).filter(v => v).length;
       document.getElementById('filter-count-badge').textContent = `${onCount}名`;
-      
-      const warnRanking = document.getElementById('ranking-filter-warning');
-      if(warnRanking) {
-        if(state.tab === 'ranking' && onCount < latestMemberInfo.length) warnRanking.classList.remove('hidden');
-        else warnRanking.classList.add('hidden');
-      }
 
       const tCont = document.getElementById('filter-tier-chips'); tCont.innerHTML = '';
       [{ id: '20', l: '20M〜' }, { id: '15-20', l: '15〜20M' }, { id: '10-15', l: '10〜15M' }, { id: '0-10', l: '〜10M' }].forEach(t => {
         const ms = latestMemberInfo.filter(d => d.tierCat === t.id); if (ms.length === 0) return;
-        const isOn = ms.some(d => memberFilterState[d.name]);
+        const isOn = ms.some(d => activeFilter[d.name]);
         const cls = isOn ? getTierTailwindClass(t.id==='20'?2e7:t.id==='15-20'?1.5e7:1e7, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
         tCont.insertAdjacentHTML('beforeend', `<button onclick="toggleTier('${t.id}')" class="flex-none px-3 py-1 text-[11px] font-bold rounded-md border transition ${cls}">${t.l}</button>`);
       });
+
       const mCont = document.getElementById('filter-member-chips'); mCont.innerHTML = '';
       [...latestMemberInfo].sort((a,b) => b.powerNum - a.powerNum).forEach(d => {
-        const isOn = memberFilterState[d.name];
+        const isOn = activeFilter[d.name];
         const cls = isOn ? getTierTailwindClass(d.powerNum, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
         mCont.insertAdjacentHTML('beforeend', `<button onclick="toggleMember('${d.name}')" class="px-2 py-0.5 text-[10px] font-bold rounded-full border transition ${cls}">${d.name}</button>`);
       });
     }
     
-    function toggleTier(t) { const ms = latestMemberInfo.filter(d => d.tierCat === t); const isOn = ms.some(d => memberFilterState[d.name]); ms.forEach(d => memberFilterState[d.name] = !isOn); renderFilterControls(); renderView(); pushHistoryState(); }
-    function toggleMember(n) { memberFilterState[n] = !memberFilterState[n]; renderFilterControls(); renderView(); pushHistoryState(); }
-    function toggleAllMembers(f) { latestMemberInfo.forEach(d => memberFilterState[d.name] = f); renderFilterControls(); renderView(); pushHistoryState(); }
+    function toggleTier(t) { 
+      const activeFilter = getActiveFilter();
+      const ms = latestMemberInfo.filter(d => d.tierCat === t); 
+      const isOn = ms.some(d => activeFilter[d.name]); 
+      ms.forEach(d => {
+        activeFilter[d.name] = !isOn;
+        checkPrimaryUser(d.name, !isOn);
+      }); 
+      renderFilterControls(); renderView(); pushHistoryState(); 
+    }
+    
+    function toggleMember(n) { 
+      const activeFilter = getActiveFilter();
+      activeFilter[n] = !activeFilter[n]; 
+      checkPrimaryUser(n, activeFilter[n]);
+      renderFilterControls(); renderView(); pushHistoryState(); 
+    }
+    
+    function toggleAllMembers(f) { 
+      const activeFilter = getActiveFilter();
+      latestMemberInfo.forEach(d => activeFilter[d.name] = f); 
+      if (!f) primaryPersonalUser = null;
+      renderFilterControls(); renderView(); pushHistoryState(); 
+    }
+    
+    function toggleExecutives(f) {
+      const activeFilter = getActiveFilter();
+      executives.forEach(n => { if (activeFilter[n] !== undefined) activeFilter[n] = f; checkPrimaryUser(n, f); });
+      renderFilterControls(); renderView(); pushHistoryState(); 
+    }
+
+    function checkPrimaryUser(name, isAdding) {
+      if (state.tab !== 'personal') return;
+      const onCount = Object.values(personalFilterState).filter(v=>v).length;
+      if (isAdding && onCount === 1) primaryPersonalUser = name;
+      else if (!isAdding && name === primaryPersonalUser) {
+        const remaining = Object.keys(personalFilterState).filter(k=>personalFilterState[k]);
+        primaryPersonalUser = remaining.length > 0 ? remaining[0] : null;
+      }
+    }
 
     function setupDateSelects() {
       const el = document.getElementById('period-date-global');
@@ -454,7 +537,7 @@
       ['last-14', 'last-30', 'last-90'].forEach(v => { const b = document.getElementById(`period-${v}-global`); if(b) b.className = (v === state.period) ? "flex-1 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
     }
     function updateBossButtons() { ['all','1','2','3','4','5','6','0'].forEach(v => { const b = document.getElementById(`boss-${v}`); if(b) { if(v===state.boss){b.classList.remove('btn-inactive');b.classList.add('btn-active');}else{b.classList.remove('btn-active');b.classList.add('btn-inactive');} }}); }
-    function updateSortButtons(k) { const l = {'score':'👑 スコア','maxScore':'🔥 ハイスコア','efficiency':'⚡ 効率','rank':'🏅 順位'}; ['score','maxScore','efficiency','rank'].forEach(s => { const b = document.getElementById(`sort-${s}`); if(b){ b.innerHTML=l[s]+(s===k?' <span class="text-[10px] ml-1 opacity-80">▼</span>':''); b.className = s===k ? "flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap"; }}); }
+    function updateSortButtons(k) { const l = {'score':'👑 スコア','maxScore':'🔥 ハイスコア','efficiency':'⚡ 効率','power':'💪 戦力','rank':'🏅 順位'}; ['score','maxScore','efficiency','power','rank'].forEach(s => { const b = document.getElementById(`sort-${s}`); if(b){ b.innerHTML=l[s]+(s===k?' <span class="text-[10px] ml-1 opacity-80">▼</span>':''); b.className = s===k ? "flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap"; }}); }
     
     function updateStickyBadge() {
       const b = document.getElementById('sticky-period-badge'); if(!b) return;
@@ -481,10 +564,9 @@
     function setActPeriod(d) { state.actPeriod = d; updateUIState(); renderActivity(); pushHistoryState(); }
     function setElderWeek(w) { state.elderWeek = w; updateStickyBadge(); renderElder(); pushHistoryState(); }
     
-    // 個人タブへのショートカットジャンプ（フィルターを1人に絞る）
-    function goToPersonal(name) { 
-      latestMemberInfo.forEach(d => memberFilterState[d.name] = false); 
-      memberFilterState[name] = true; 
+    function goToHistory(name) { 
+      latestMemberInfo.forEach(d => personalFilterState[d.name] = (d.name === name)); 
+      primaryPersonalUser = name;
       state.tab = 'personal'; 
       updateUIState(); autoCloseFilterPanel(); renderView(); window.scrollTo({top:0, behavior:'smooth'}); 
       pushHistoryState(); 
@@ -517,23 +599,32 @@
           }
         });
       }
-      return forceAllMembers ? vData : vData.filter(d => memberFilterState[d.name]);
+      const activeFilter = getActiveFilter();
+      return forceAllMembers ? vData : vData.filter(d => activeFilter[d.name]);
+    }
+
+    function calculateRegressionLine(data) {
+      let sX=0, sY=0, sXY=0, sX2=0; const n=data.length; if(n<=1)return null;
+      data.forEach(d => { sX+=d.x; sY+=d.y; sXY+=d.x*d.y; sX2+=d.x*d.x; });
+      return { slope: (n*sXY - sX*sY)/(n*sX2 - sX*sX), intercept: (sY - (n*sXY - sX*sY)/(n*sX2 - sX*sX)*sX)/n };
     }
 
     // --- メイン描画分岐 ---
     function renderView() {
       if (state.tab === 'ranking') renderRanking();
+      else if (state.tab === 'analysis') renderAnalysis();
       else if (state.tab === 'personal') renderPersonal();
       else if (state.tab === 'activity') renderActivity();
       else if (state.tab === 'elder') renderElder();
     }
 
-    // 🏆 ランキング
+    // 🏆 全体ランキング
     function renderRanking() {
       let data = getBaseViewData();
       if (state.sort === 'score') data = computeRanks(data, 'scoreNum'); 
       else if (state.sort === 'maxScore') data = computeRanks(data, 'maxScoreNum'); 
       else if (state.sort === 'efficiency') data = computeRanks(data, 'efficiency'); 
+      else if (state.sort === 'power') data = computeRanks(data, 'powerNum'); 
       else if (state.sort === 'rank') { data.sort((a,b)=>(a.isAvg?a.avgRank:a.dailyRank)-(b.isAvg?b.avgRank:b.dailyRank)); data.forEach(i=>i.displayRank=i.isAvg?i.avgRank:i.dailyRank); }
       
       const guideEl = document.getElementById('dynamic-guide-message');
@@ -541,8 +632,7 @@
         let pT = !state.period.startsWith('last-') ? "指定日（"+state.period.substring(5).replace('-','/')+"）" : {'last-14':'直近2週間','last-30':'直近1ヶ月','last-90':'直近3ヶ月'}[state.period];
         let bT = state.period.startsWith('last-') && state.boss !== 'all' ? BOSS_NAMES[state.boss]+" の " : "";
         let sT = state.sort === 'maxScore' ? (state.period.startsWith('last-')?"歴代ハイスコア":"データ") : (state.period.startsWith('last-')?"平均値":"データ");
-        guideEl.innerHTML = `<svg class="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          <span>現在は <span class="text-white border-b border-indigo-400 pb-0.5 tracking-wide">【 ${pT}の${bT}${sT} 】</span> を表示しています。</span>`;
+        guideEl.innerHTML = `<span>現在は <span class="text-white border-b border-indigo-400 pb-0.5 tracking-wide">【 ${pT}の${bT}${sT} 】</span> を表示しています。</span>`;
       }
 
       const listEl = document.getElementById('rankingList'); listEl.innerHTML = '';
@@ -555,10 +645,19 @@
         if(r===2)rB=`<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900 shadow-md font-bold text-xs num-font">2</span>`;
         if(r===3)rB=`<span class="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-md font-bold text-xs num-font">3</span>`;
 
+        let diffHtmlRight = ''; let diffHtmlTag = '';
+        if (!d.isAvg && d.diffScore !== null) {
+          const diffVal = d.diffScore;
+          if (diffVal > 0) { diffHtmlRight = `<span class="text-[11px] text-red-400 font-bold whitespace-nowrap">先週比 📈+${formatValue(diffVal)}</span>`; diffHtmlTag = `<span class="text-[10px] text-red-400 ml-1">📈+${formatValue(diffVal)}</span>`; } 
+          else if (diffVal < 0) { diffHtmlRight = `<span class="text-[11px] text-blue-400 font-bold whitespace-nowrap">先週比 📉-${formatValue(Math.abs(diffVal))}</span>`; diffHtmlTag = `<span class="text-[10px] text-blue-400 ml-1">📉-${formatValue(Math.abs(diffVal))}</span>`; } 
+          else { diffHtmlRight = `<span class="text-[11px] text-slate-500 font-bold whitespace-nowrap">先週比 ±0</span>`; diffHtmlTag = `<span class="text-[10px] text-slate-500 ml-1">±0</span>`; }
+        }
+
         let mH = "";
-        if (state.sort === 'score') mH = `<div class="font-bold text-indigo-400 text-[16px] num-font tracking-wider leading-tight">${formatValue(d.scoreNum)}</div>${(!d.isAvg && d.diffScore!==null)?`<div class="mt-0.5 text-[11px] font-bold ${d.diffScore>0?'text-red-400':'text-blue-400'}">${d.diffScore>0?'📈+'+formatValue(d.diffScore):'📉-'+formatValue(Math.abs(d.diffScore))}</div>`:''}`;
+        if (state.sort === 'score') mH = `<div class="font-bold text-indigo-400 text-[16px] num-font tracking-wider leading-tight">${formatValue(d.scoreNum)}</div>${diffHtmlRight ? `<div class="mt-0.5">${diffHtmlRight}</div>` : ''}`;
         else if (state.sort === 'maxScore') mH = `<div class="font-bold text-rose-400 text-[16px] num-font tracking-wider leading-tight">${formatValue(d.maxScoreNum)}</div><div class="text-[9px] text-rose-300/80 mt-0.5">${d.maxScoreDate.substring(5).replace('-','/')} ${BOSS_NAMES[d.maxScoreBoss]}</div>`;
         else if (state.sort === 'efficiency') mH = `<div class="font-bold text-emerald-400 text-[16px] num-font tracking-wider">${d.efficiency>0?d.efficiency.toFixed(1):'-'}<span class="text-[10px] ml-0.5 font-normal">⚡</span></div>`;
+        else if (state.sort === 'power') mH = `<div class="font-bold text-slate-200 text-[16px] num-font tracking-wider">${formatValue(d.powerNum)}</div>`;
         else if (state.sort === 'rank') mH = `<div class="font-bold text-amber-400 text-[16px] num-font tracking-wider">${d.isAvg?d.avgRank.toFixed(1):d.dailyRank}<span class="text-[10px] ml-0.5 font-normal">位</span></div>`;
 
         listEl.insertAdjacentHTML('beforeend', `
@@ -566,9 +665,10 @@
             <div class="flex items-center flex-grow min-w-0 pr-2">
               <div class="mr-3 shrink-0">${rB}</div>
               <div class="flex-grow min-w-0">
-                <div class="font-bold text-slate-100 text-[15px] truncate"><a href="javascript:void(0)" onclick="goToPersonal('${d.name}')" class="hover:text-indigo-400 underline decoration-indigo-500/50 cursor-pointer">${d.name}</a></div>
-                <div class="mt-1 flex gap-1 items-center">
+                <div class="font-bold text-slate-100 text-[15px] truncate"><a href="javascript:void(0)" onclick="goToHistory('${d.name}')" class="hover:text-indigo-400 underline decoration-indigo-500/50 cursor-pointer">${d.name}</a></div>
+                <div class="mt-1 flex gap-1 items-center flex-wrap">
                   <span class="text-[10px] font-bold border px-1.5 py-0.5 rounded ${getTierTailwindClass(d.powerNum)}">💪 ${formatValue(d.powerNum)}</span>
+                  <span class="text-[10px] font-bold border px-1.5 py-0.5 rounded bg-emerald-900/20 text-emerald-400 border-emerald-800/50">⚡ ${d.efficiency>0?d.efficiency.toFixed(1):'-'}</span>
                 </div>
               </div>
             </div>
@@ -578,77 +678,148 @@
       });
     }
 
-    // 👤 個人・比較
-    function calculateRegressionLine(data) {
-      let sX=0, sY=0, sXY=0, sX2=0; const n=data.length; if(n<=1)return null;
-      data.forEach(d => { sX+=d.x; sY+=d.y; sXY+=d.x*d.y; sX2+=d.x*d.x; });
-      return { slope: (n*sXY - sX*sY)/(n*sX2 - sX*sX), intercept: (sY - (n*sXY - sX*sY)/(n*sX2 - sX*sX)*sX)/n };
+    // 📈 目標・分布 (全体)
+    function renderAnalysis() {
+      const aData = getBaseViewData();
+      if (aData.length === 0) {
+        if (chartInstanceAnalysis) chartInstanceAnalysis.destroy(); return;
+      }
+      const pts = aData.map(d => ({ x: d.powerNum / 1000000, y: d.scoreNum / 1000000000000, name: d.name, color: getTierColor(d.powerNum) }));
+      const reg = calculateRegressionLine(pts); let anno = {};
+      if (reg && pts.length > 1) {
+        const minX = Math.min(...pts.map(d=>d.x))*0.8, maxX = Math.max(...pts.map(d=>d.x))*1.1;
+        anno = { line1: { type: 'line', xMin: minX, xMax: maxX, yMin: reg.slope*minX+reg.intercept, yMax: reg.slope*maxX+reg.intercept, borderColor: 'rgba(248, 113, 113, 0.8)', borderWidth: 2, borderDash: [4, 4] } };
+      }
+      if (chartInstanceAnalysis) chartInstanceAnalysis.destroy();
+      chartInstanceAnalysis = new Chart(document.getElementById('scatterChartAnalysis').getContext('2d'), {
+        type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: (ctx)=>ctx.raw?ctx.raw.color:'#4f46e5', borderColor: '#ffffff', borderWidth: 0.5, pointRadius: 5, pointHoverRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, annotation: { annotations: anno }, tooltip: { callbacks: { label: (ctx)=>` スコア: ${ctx.raw.y.toFixed(2)}T, 戦力: ${ctx.raw.x.toFixed(2)}M`, title: (ctx)=>ctx[0].raw.name } }, datalabels: { align: 'top', color: '#94a3b8', font: { size: 9, family: 'Noto Sans JP' }, formatter: v=>v.name } }, scales: { x: { title:{display:true, text:'戦力 (M)', color:'#94a3b8'}, grid:{color:'rgba(51,65,85,0.4)'}, ticks:{color:'#94a3b8'} }, y: { title:{display:true, text:'スコア (T)', color:'#94a3b8'}, grid:{color:'rgba(51,65,85,0.4)'}, ticks:{color:'#94a3b8'}, beginAtZero:true } } }
+      });
     }
 
+    // 👤 個人・比較分析（★メイン改修）
     function renderPersonal() {
-      const tNames = latestMemberInfo.filter(d => memberFilterState[d.name]).map(d => d.name);
+      const tNames = latestMemberInfo.filter(d => personalFilterState[d.name]).map(d => d.name);
+      
+      const diagArea = document.getElementById('diagnostic-area');
       const suggArea = document.getElementById('rival-suggest-area'); const suggBtns = document.getElementById('rival-suggest-buttons');
       const richArea = document.getElementById('rich-analysis-area'); const radarCont = document.getElementById('radar-container');
       const warnArea = document.getElementById('too-many-warning'); const listEl = document.getElementById('historyList');
       listEl.innerHTML = '';
       
       if (tNames.length === 0) {
-        suggArea.classList.add('hidden'); richArea.classList.add('hidden'); warnArea.classList.add('hidden');
+        diagArea.classList.add('hidden'); suggArea.classList.add('hidden'); richArea.classList.add('hidden'); warnArea.classList.add('hidden');
         listEl.innerHTML = `<li class="p-8 text-center text-slate-500 text-sm">上のフィルターからメンバーを1〜5人選んでください</li>`;
-        if (chartInstance) chartInstance.destroy(); if (radarChartInstance) radarChartInstance.destroy(); if (trendChartInstance) trendChartInstance.destroy();
+        if (chartInstancePersonal) chartInstancePersonal.destroy(); if (radarChartInstance) radarChartInstance.destroy(); if (trendChartInstance) trendChartInstance.destroy();
         return;
       }
 
-      // サジェスト (1人時のみ)
+      // ベースになる人 (1人目)
+      const baseName = primaryPersonalUser || tNames[0];
+
+      // 全体の目標ライン計算用 (直近1ヶ月)
+      let pDays = state.period.startsWith('last-') ? parseInt(state.period.split('-')[1]) : 30; 
+      const validDates = availableDates.filter(d => new Date(d).getTime() > new Date(availableDates[0]).getTime() - (pDays * 864e5));
+      const allAvgsObj = {}; const allPowersObj = {};
+      activeMembers.forEach(n => {
+        const sData = processedData.filter(d => d.name === n && validDates.includes(d.date));
+        if (sData.length > 0) { 
+          allAvgsObj[n] = sData.map(d=>d.scoreNum).reduce((a,b)=>a+b,0) / sData.length; 
+          allPowersObj[n] = sData.map(d=>d.powerNum).reduce((a,b)=>a+b,0) / sData.length; 
+        }
+      });
+      const allReg = calculateRegressionLine(Object.keys(allAvgsObj).map(n => ({x: allPowersObj[n], y: allAvgsObj[n]})));
+      
+      const baseAvg = allAvgsObj[baseName] || 0;
+      const basePower = allPowersObj[baseName] || 0;
+      const baseTarget = allReg ? (allReg.slope * basePower + allReg.intercept) : 0;
+
+      // === 診断レポート (1人選択時のみ) ===
       if (tNames.length === 1) {
-        const myName = tNames[0];
-        let pDays = state.period.startsWith('last-') ? parseInt(state.period.split('-')[1]) : 30; 
-        const validDates = availableDates.filter(d => new Date(d).getTime() > new Date(availableDates[0]).getTime() - (pDays * 864e5));
-        
-        let myAvg = 0; const allAvgs = {};
-        activeMembers.forEach(n => {
-          const s = processedData.filter(d => d.name === n && validDates.includes(d.date)).map(d => d.scoreNum);
-          if (s.length > 0) { allAvgs[n] = s.reduce((a,b)=>a+b,0) / s.length; if(n === myName) myAvg = allAvgs[n]; }
-        });
-        if (myAvg > 0) {
-          const rivals = Object.keys(allAvgs).filter(n => n !== myName && allAvgs[n] > 0 && Math.abs(allAvgs[n] - myAvg)/myAvg <= 0.15).sort((a,b) => Math.abs(allAvgs[a]-myAvg) - Math.abs(allAvgs[b]-myAvg)).slice(0, 3);
-          if (rivals.length > 0) {
-            suggBtns.innerHTML = rivals.map(r => `<button onclick="toggleMember('${r}')" class="px-3 py-1 bg-slate-800 border border-slate-600 text-indigo-300 font-bold text-[11px] rounded shadow-md hover:bg-slate-700 transition">+ ${r}</button>`).join('');
-            suggArea.classList.remove('hidden');
-          } else suggArea.classList.add('hidden');
+        if (baseAvg > 0) {
+          // ボス別計算
+          const bAvgs = [1,2,3,4,5,6,0].map(bid => {
+            const s = processedData.filter(d => d.name === baseName && validDates.includes(d.date) && new Date(d.date).getDay()===bid).map(d=>d.scoreNum);
+            return { id: bid, avg: s.length>0 ? s.reduce((a,b)=>a+b,0)/s.length : 0 };
+          }).filter(x=>x.avg>0).sort((a,b)=>b.avg-a.avg);
+          
+          let bestBoss = bAvgs.length>0 ? `${BOSS_NAMES[bAvgs[0].id]}(${formatValue(bAvgs[0].avg)})` : '-';
+          let worstBoss = bAvgs.length>1 ? `${BOSS_NAMES[bAvgs[bAvgs.length-1].id]}(${formatValue(bAvgs[bAvgs.length-1].avg)})` : '-';
+          
+          const todayDow = new Date().getDay();
+          const todayBossAvg = bAvgs.find(x=>x.id===todayDow)?.avg || 0;
+
+          // 順位
+          let myRank = 1; Object.values(allAvgsObj).forEach(v => { if(v > baseAvg) myRank++; });
+          
+          // 目標との差
+          let diffStr = baseTarget > 0 ? (baseAvg >= baseTarget ? `<span class="text-emerald-400">平均基準を+${formatValue(baseAvg-baseTarget)}上回っています</span>` : `<span class="text-rose-400">平均基準まであと+${formatValue(baseTarget-baseAvg)}</span>`) : '-';
+
+          diagArea.innerHTML = `
+            <div class="glass-card p-4 border-l-4 border-l-indigo-500 shadow-lg">
+              <h3 class="text-indigo-300 font-bold text-sm mb-3">🩺 ${baseName} 選手の分析レポート <span class="text-[10px] text-slate-500 font-normal ml-2">(直近${pDays}日)</span></h3>
+              <div class="text-xs text-slate-200 leading-relaxed space-y-2">
+                <p>📊 <b>平均スコア:</b> <span class="text-indigo-400 font-bold num-font text-sm">${formatValue(baseAvg)}</span> (クラン内 ${myRank}位)</p>
+                <p>🎯 <b>得意ボス:</b> ${bestBoss} ／ <b>苦手:</b> ${worstBoss}</p>
+                <p class="bg-slate-900/50 p-2 rounded border border-slate-700 mt-1">📌 <b>目標スコア:</b> ${formatValue(baseTarget)} (現在の戦力${formatValue(basePower)}での全体基準値)<br>👉 ${diffStr}</p>
+                ${todayBossAvg > 0 ? `<p class="mt-2 text-amber-300 font-bold">⚔️ 今日のボス（${BOSS_NAMES[todayDow]}）の平均は ${formatValue(todayBossAvg)} です！</p>` : ''}
+              </div>
+            </div>`;
+          diagArea.classList.remove('hidden');
+        } else diagArea.classList.add('hidden');
+      } else diagArea.classList.add('hidden');
+
+      // === ライバルサジェスト (1〜5人時) ===
+      if (baseAvg > 0) {
+        // +- 15% の人を抽出 (自分以外)
+        const rivals = Object.keys(allAvgsObj).filter(n => n !== baseName && Math.abs(allAvgsObj[n] - baseAvg)/baseAvg <= 0.15).sort((a,b) => Math.abs(allAvgsObj[a]-baseAvg) - Math.abs(allAvgsObj[b]-baseAvg)).slice(0, 5);
+        if (rivals.length > 0) {
+          suggBtns.innerHTML = rivals.map(r => {
+            const isSelected = tNames.includes(r);
+            if(isSelected) return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-indigo-900/80 border border-indigo-500 text-indigo-200 font-bold text-[11px] rounded shadow-md transition">✓ ${r} 比較中</button>`;
+            return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-slate-800 border border-slate-600 text-amber-300 font-bold text-[11px] rounded shadow-md hover:bg-slate-700 transition">+ ${r} を追加</button>`;
+          }).join('');
+          suggArea.classList.remove('hidden');
         } else suggArea.classList.add('hidden');
       } else suggArea.classList.add('hidden');
 
-      // グラフ描画制御
+      // === グラフ描画制御 ===
       if (tNames.length > 5) {
         richArea.classList.add('hidden'); warnArea.classList.remove('hidden');
       } else {
         richArea.classList.remove('hidden'); warnArea.classList.add('hidden');
         radarCont.classList.toggle('hidden', tNames.length > 3);
         
-        // --- 1. 散布図 (全体 vs 自分) ---
-        const allData = getBaseViewData(true); // 強制的に全員分のデータを取得
+        // --- 1. 散布図 (全体グレー vs 選択者カラー・ズーム) ---
+        const allData = getBaseViewData(true); 
         const pts = allData.map(d => {
-          const isSelected = tNames.includes(d.name);
-          const cIndex = isSelected ? tNames.indexOf(d.name) : -1;
+          const isSelected = tNames.includes(d.name); const cIndex = isSelected ? tNames.indexOf(d.name) : -1;
           return { x: d.powerNum/1e6, y: d.scoreNum/1e12, name: d.name, isSelected: isSelected, color: isSelected ? CHART_PALETTE[cIndex] : 'rgba(100,116,139,0.3)' };
         });
+        // ズーム処理
+        const selPts = pts.filter(p=>p.isSelected);
+        let yMin = 0, yMax = 100;
+        if(selPts.length > 0) {
+          const sMin = Math.min(...selPts.map(p=>p.y)), sMax = Math.max(...selPts.map(p=>p.y));
+          yMin = Math.max(0, sMin - (sMax-sMin)*0.5); yMax = sMax + (sMax-sMin)*0.5;
+          if (yMin === yMax) { yMin *= 0.8; yMax *= 1.2; }
+        }
         const reg = calculateRegressionLine(pts); let anno = {};
         if (reg && pts.length > 1) {
           const minX = Math.min(...pts.map(d=>d.x))*0.8, maxX = Math.max(...pts.map(d=>d.x))*1.1;
-          anno = { line1: { type: 'line', xMin: minX, xMax: maxX, yMin: reg.slope*minX+reg.intercept, yMax: reg.slope*maxX+reg.intercept, borderColor: 'rgba(248,113,113,0.8)', borderWidth: 2, borderDash: [4,4] } };
+          anno = { line1: { type: 'line', xMin: minX, xMax: maxX, yMin: reg.slope*minX+reg.intercept, yMax: reg.slope*maxX+reg.intercept, borderColor: 'rgba(248,113,113,0.6)', borderWidth: 2, borderDash: [4,4] } };
         }
-        if (chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(document.getElementById('scatterChart').getContext('2d'), { 
-          type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: (c)=>c.raw?c.raw.color:'#000', pointRadius: (c)=>c.raw&&c.raw.isSelected?8:3, pointBorderColor: (c)=>c.raw&&c.raw.isSelected?'#fff':'transparent', pointBorderWidth: (c)=>c.raw&&c.raw.isSelected?2:0, pointHoverRadius: (c)=>c.raw&&c.raw.isSelected?10:5 }] }, 
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false}, annotation: {annotations:anno}, datalabels: { display: (c)=>c.dataset.data[c.dataIndex].isSelected, align: 'top', color: '#fff', font:{size:10, family:'Noto Sans JP', weight:'bold'}, formatter: v=>v.name }, tooltip: { callbacks: { label: (ctx)=>`スコア: ${ctx.raw.y.toFixed(2)}T, 戦力: ${ctx.raw.x.toFixed(2)}M`, title: (ctx)=>ctx[0].raw.name } } }, scales: { x: { title:{display:true, text:'戦力 (M)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.4)'}, ticks:{color:'#94a3b8'} }, y: { title:{display:true, text:'スコア (T)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.4)'}, ticks:{color:'#94a3b8'}, beginAtZero:true } } } 
+        if (chartInstancePersonal) chartInstancePersonal.destroy();
+        chartInstancePersonal = new Chart(document.getElementById('scatterChartPersonal').getContext('2d'), { 
+          type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: (c)=>c.raw?c.raw.color:'#000', pointRadius: (c)=>c.raw&&c.raw.isSelected?8:3, pointBorderColor: (c)=>c.raw&&c.raw.isSelected?'#fff':'transparent', pointBorderWidth: (c)=>c.raw&&c.raw.isSelected?2:0 }] }, 
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false}, annotation: {annotations:anno}, datalabels: { display: (c)=>c.dataset.data[c.dataIndex].isSelected, align: 'top', color: '#fff', font:{size:11, family:'Noto Sans JP', weight:'bold'}, formatter: v=>v.name }, tooltip: { callbacks: { label: (ctx)=>`${ctx.raw.y.toFixed(2)}T`, title: (ctx)=>ctx[0].raw.name } } }, scales: { x: { title:{display:true, text:'戦力 (M)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8'} }, y: { min: yMin, max: yMax, title:{display:true, text:'スコア (T)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8'} } } } 
         });
 
         // --- 2. レーダーチャート ---
         if (tNames.length <= 3) {
           const radarData = tNames.map((name, i) => {
             const bossAvgs = [1,2,3,4,5,6,0].map(bossId => {
-              const scores = processedData.filter(d => d.name === name && new Date(d.date).getDay() == bossId).map(d => d.scoreNum);
+              const scores = processedData.filter(d => d.name === name && validDates.includes(d.date) && new Date(d.date).getDay() == bossId).map(d => d.scoreNum);
               return scores.length > 0 ? (scores.reduce((a,b)=>a+b,0)/scores.length)/1e12 : 0;
             });
             const c = CHART_PALETTE[i]; return { label: name, data: bossAvgs, backgroundColor: c+'33', borderColor: c, pointBackgroundColor: c, borderWidth: 2 };
@@ -657,11 +828,14 @@
           radarChartInstance = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'radar', data: { labels: ['月(墓)','火(ド)','水(バ)','木(メ)','金(ス)','土(一)','日(鎌)'], datasets: radarData }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#cbd5e1', font: { family: 'Noto Sans JP', size: 10, weight: 'bold' } }, ticks: { display: false } } }, plugins: { legend: { display: false }, datalabels: { display: false } } } });
         }
 
-        // --- 3. トレンドグラフ ---
+        // --- 3. トレンド＆予測グラフ (余白調整版) ---
         let bFilter = (state.period.startsWith('last-') && state.boss !== 'all') ? state.boss : null;
-        let chartDates = availableDates.slice(0, 30);
-        if(bFilter !== null) chartDates = chartDates.filter(d => new Date(d).getDay() == bFilter).slice(0, 10);
+        let chartDates = availableDates.slice(0, 15); // 直近を短くして横幅を確保
+        if(bFilter !== null) chartDates = chartDates.filter(d => new Date(d).getDay() == bFilter).slice(0, 8);
         chartDates.reverse();
+
+        const xLabels = chartDates.map(d=>d.substring(5).replace('-','/'));
+        xLabels.push("来週予測", " ", " "); // 右側に予測用の余白を強制確保
 
         const tDatasets = tNames.map((name, i) => {
           const c = CHART_PALETTE[i];
@@ -669,20 +843,19 @@
           let validPts = []; pts.forEach((y, idx) => { if(y!==null) validPts.push({x:idx, y:y}); });
           if(validPts.length >= 2) {
             const reg = calculateRegressionLine(validPts);
-            if (i === 0) chartDates.push("Next"); // 代表して1回だけX軸を増やす
-            pts.push(reg.slope * (chartDates.length - 1) + reg.intercept);
-          }
-          return { label: name, data: pts, borderColor: c, backgroundColor: c, borderWidth: 2, pointRadius: 4, spanGaps: true, segment: { borderDash: ctx => ctx.p1DataIndex === pts.length-1 ? [4,4] : undefined } };
+            pts.push(reg.slope * (chartDates.length) + reg.intercept, null, null); // 次の週にプロット
+          } else { pts.push(null, null, null); }
+          return { label: name, data: pts, borderColor: c, backgroundColor: c, borderWidth: 2, pointRadius: 4, spanGaps: true, segment: { borderDash: ctx => ctx.p1DataIndex >= chartDates.length-1 ? [4,4] : undefined } };
         });
 
         if (trendChartInstance) trendChartInstance.destroy();
         trendChartInstance = new Chart(document.getElementById('trendChart').getContext('2d'), {
-          type: 'line', data: { labels: chartDates.map(d=>d==="Next"?"来週予測":d.substring(5).replace('-','/')), datasets: tDatasets },
-          options: { responsive: true, maintainAspectRatio: false, layout: { padding: { right: 30 } }, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, datalabels: { display: function(ctx){ const d=ctx.dataset.data; let i=d.length-1; while(i>=0&&d[i]===null)i--; return ctx.dataIndex===i; }, align: 'right', color: ctx=>ctx.dataset.borderColor, font: {size: 10, weight:'bold', family:'Noto Sans JP'}, formatter: (v,ctx)=>ctx.dataset.label } }, scales: { x: { grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8', font:{size:9}} }, y: { title:{display:true, text:'スコア (T)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8', font:{size:9}} } } }
+          type: 'line', data: { labels: xLabels, datasets: tDatasets },
+          options: { responsive: true, maintainAspectRatio: false, layout: { padding: { right: 10 } }, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, datalabels: { display: function(ctx){ const d=ctx.dataset.data; let i=d.length-1; while(i>=0&&d[i]===null)i--; return ctx.dataIndex===i; }, align: 'right', color: ctx=>ctx.dataset.borderColor, font: {size: 10, weight:'bold', family:'Noto Sans JP'}, formatter: (v,ctx)=>ctx.dataset.label } }, scales: { x: { grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8', font:{size:9}} }, y: { title:{display:true, text:'スコア (T)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8', font:{size:9}} } } }
         });
       }
 
-      // リスト描画
+      // --- リスト描画 ---
       let tData = processedData.filter(d => tNames.includes(d.name));
       if (state.period.startsWith('last-') && state.boss !== 'all') tData = tData.filter(d => new Date(d.date).getDay() == state.boss);
       if(tData.length > 0) {
@@ -705,7 +878,7 @@
       }
     }
 
-    // ⚠️ 管理タブ類 (既存そのまま)
+    // ⚠️ 管理系タブ
     function renderActivity() {
       const listEl = document.getElementById('activityList'); listEl.innerHTML = '';
       const days = parseInt(state.actPeriod); const pastMs = new Date(availableDates[0]).getTime() - (days * 864e5);
