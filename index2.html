@@ -49,6 +49,10 @@
       border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; 
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2); 
     }
+    /* 表のセル内改行禁止用スタイル */
+    .table-compact th, .table-compact td {
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body class="pb-20">
@@ -56,29 +60,28 @@
   <!-- ================= ヘッダー & 常時表示コントロール ================= -->
   <div class="sticky top-0 z-50 w-full flex flex-col shadow-lg bg-slate-900/95 backdrop-blur-md border-b border-slate-700">
     
-    <!-- タイトル -->
     <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 border-b border-indigo-500/30 flex justify-center items-center relative">
       <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
         <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-        OtterCompany <span class="text-sm font-normal text-indigo-200">魔物スコア</span>
+        OtterCompany <span class="text-xs font-normal text-indigo-200 ml-1">Dash</span>
       </h1>
-      <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap"></div>
+      <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap hidden sm:block"></div>
     </header>
     
     <!-- 4大タブ -->
     <div id="main-tabs-container" class="w-full border-b border-slate-700/50" style="display:none;">
       <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
-        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 全体ランキング</button>
+        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
         <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個別考察</button>
         <button id="nav-elder" onclick="setTab('elder')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
         <button id="nav-activity" onclick="setTab('activity')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 未参加数</button>
       </div>
     </div>
 
-    <!-- グローバルコントロール（スクロールしても追従） -->
+    <!-- グローバルコントロール -->
     <div id="global-controls-panel" class="max-w-2xl mx-auto w-full px-2 sm:px-4 py-2 transition-all">
       
-      <!-- ランキング・個別考察用 コントロール -->
+      <!-- ランキング・個別考察用 -->
       <div id="ctrl-daily" class="block">
         <div class="flex gap-1 mb-1.5">
           <select id="period-date-global" onchange="setPeriod(this.value)" class="flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
@@ -103,12 +106,12 @@
         </div>
       </div>
 
-      <!-- 長老用 コントロール -->
+      <!-- 長老用 -->
       <div id="ctrl-elder" class="hidden">
         <select id="elder-week-select" onchange="setElderWeek(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded-md text-sm p-1.5 outline-none text-white shadow-inner cursor-pointer font-bold"></select>
       </div>
 
-      <!-- 未参加用 コントロール -->
+      <!-- 未参加用 -->
       <div id="ctrl-activity" class="hidden">
         <div class="flex gap-1 overflow-x-auto scrollbar-hide">
           <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">2週間</button>
@@ -123,16 +126,14 @@
   <!-- ================= メインコンテンツ ================= -->
   <div class="max-w-2xl mx-auto px-2 sm:px-4 pt-4">
     
-    <!-- ★ 復活させたローディングインジケーター（これがないとJSがフリーズします） -->
     <div id="loading" class="flex flex-col items-center justify-center py-20 text-indigo-400">
       <svg class="animate-spin h-10 w-10 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-      <p class="font-bold tracking-widest text-sm">最新データを同期中...</p>
+      <p class="font-bold tracking-widest text-sm">データ解析中...</p>
     </div>
 
-    <!-- コンテンツエリア -->
     <div id="dashboard-content" style="display:none;">
       
-      <!-- メンバーフィルター (スクロールで消える) -->
+      <!-- メンバーフィルター -->
       <div id="filter-section" class="mb-4">
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
@@ -143,7 +144,6 @@
           <span id="filter-panel-icon" class="text-slate-400 text-lg">▲</span>
         </button>
         
-        <!-- デフォルトで開いておく -->
         <div id="common-filter-panel" class="glass-card p-3 mt-1.5 border border-slate-600 shadow-xl block">
           <div class="flex justify-between items-start mb-2.5 flex-wrap gap-2">
             <p class="text-[11px] font-bold text-slate-400 mt-1">タップで個別にON/OFF</p>
@@ -159,7 +159,7 @@
         </div>
       </div>
 
-      <!-- 🏆【全体ランキング】 -->
+      <!-- 🏆【総合順位】 -->
       <div id="view-ranking" class="block">
         
         <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
@@ -192,14 +192,33 @@
       <!-- 👤【個別考察】 -->
       <div id="view-personal" class="hidden">
         
-        <!-- 診断レポート（横並び） -->
-        <div id="diagnostic-area" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4 hidden"></div>
+        <!-- 考察レポート表 -->
+        <div id="diagnostic-area" class="mb-4 hidden">
+          <div class="glass-card overflow-hidden border-indigo-500/50 border shadow-lg">
+            <div id="diagnostic-today-boss" class="bg-indigo-900/60 p-2 text-center text-xs font-bold text-indigo-100 border-b border-indigo-500/30">
+              <!-- 今日のボス情報が入る -->
+            </div>
+            <div class="overflow-x-auto scrollbar-hide">
+              <table class="w-full text-left border-collapse text-[11px] sm:text-xs table-compact text-slate-200">
+                <thead>
+                  <tr id="diag-header-row" class="border-b border-slate-600 bg-slate-800/80 text-slate-300">
+                    <th class="p-2 font-normal whitespace-nowrap">項目</th>
+                    <!-- 動的追加 -->
+                  </tr>
+                </thead>
+                <tbody id="diag-body">
+                  <!-- 動的追加 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
         <!-- ライバルサジェスト -->
         <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
-          <p class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
+          <p id="rival-suggest-title" class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            競り合っているライバルを追加して比較する
+            ライバル候補を抽出中...
           </p>
           <div id="rival-suggest-buttons" class="flex flex-wrap gap-2"></div>
         </div>
@@ -211,14 +230,14 @@
             <div class="flex flex-wrap justify-between items-center mb-1.5 pl-1 gap-2">
               <p class="text-[11px] font-bold text-slate-300 flex items-center gap-1"><svg class="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6c0 4 6 10 6 10s6-6 6-10a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z"/></svg> 全体の中での立ち位置</p>
               <div class="flex gap-1 overflow-x-auto scrollbar-hide pb-0.5">
-                <button onclick="setScatterTier('all')" id="sc-tier-all" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-indigo-600 text-white border-indigo-400">全員</button>
-                <button onclick="setScatterTier('20')" id="sc-tier-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">20M〜</button>
-                <button onclick="setScatterTier('15-20')" id="sc-tier-15-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">15-20M</button>
-                <button onclick="setScatterTier('10-15')" id="sc-tier-10-15" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">10-15M</button>
-                <button onclick="setScatterTier('0-10')" id="sc-tier-0-10" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">〜10M</button>
+                <button onclick="toggleScatterTier('all')" id="sc-tier-all" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-indigo-600 text-white border-indigo-400 whitespace-nowrap">全員</button>
+                <button onclick="toggleScatterTier('20')" id="sc-tier-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap">20M〜</button>
+                <button onclick="toggleScatterTier('15-20')" id="sc-tier-15-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap">15-20M</button>
+                <button onclick="toggleScatterTier('10-15')" id="sc-tier-10-15" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap">10-15M</button>
+                <button onclick="toggleScatterTier('0-10')" id="sc-tier-0-10" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap">〜10M</button>
               </div>
             </div>
-            <p class="text-[9px] text-slate-400 pl-1 mb-2">※赤点線は<span class="text-slate-200 font-bold border-b border-slate-500">表示中の背景メンバー</span>から算出した目標基準です。Y軸は自動ズームされます。</p>
+            <p class="text-[9px] text-slate-400 pl-1 mb-2">※赤点線は<span class="text-slate-200 font-bold border-b border-slate-500">表示中の背景メンバー</span>全体から算出した目標基準です。Y軸は自動ズームされます。</p>
             <div class="relative w-full h-[280px]">
               <canvas id="scatterChartPersonal"></canvas>
             </div>
@@ -245,7 +264,7 @@
         </div>
 
         <div id="too-many-warning" class="hidden bg-slate-800/80 border border-slate-700 rounded-lg p-4 mb-4 text-xs text-slate-300 text-center shadow-inner">
-          詳細な比較グラフを表示するには、<br>フィルターでメンバーを<span class="text-indigo-400 font-bold px-1">5人以下</span>に絞ってください。
+          グラフを表示するには、表示メンバーを<span class="text-indigo-400 font-bold px-1">10人以下</span>に絞ってください。
         </div>
 
         <div class="glass-card overflow-hidden">
@@ -292,14 +311,14 @@
 
   <!-- JavaScript領域 -->
   <script>
+    // --- 状態管理オブジェクト ---
     let state = { 
-      tab: 'ranking', 
-      period: '', boss: 'all', sort: 'score', actPeriod: '14', elderWeek: '',
-      scatterTier: 'all' // 個人タブ内の散布図専用フィルター
+      tab: 'ranking', period: '', boss: 'all', sort: 'score', actPeriod: '14', elderWeek: '',
+      scatterTiers: ['all'] 
     };
     
     const executives = ["てぃっしゅ", "たに", "よぴ", "かめ吉", "うえだ", "だいち", "さば"];
-    const CHART_PALETTE = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#a855f7']; 
+    const CHART_PALETTE = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#06b6d4', '#d946ef', '#84cc16', '#f97316', '#6366f1']; 
     const BOSS_NAMES = { '1':'墓守り', '2':'ドラゴン', '3':'バルログ', '4':'メドゥーサ', '5':'ストーンマン', '6':'一つ目', '0':'鎌' };
 
     let globalFilterState = {}; 
@@ -311,31 +330,26 @@
     let processedData = []; let availableDates = [];
     let activeMembers = []; let weekMap = {}; let weeks = [];
     
-    let chartInstancePersonal = null; 
-    let radarChartInstance = null; let trendChartInstance = null;
+    let charts = { scatterPers: null, radar: null, trend: null };
 
     Chart.register(ChartDataLabels, window['chartjs-plugin-annotation']);
 
+    // --- ブラウザ履歴対応 ---
     window.addEventListener('popstate', (event) => {
       if (event.state) {
         state = event.state.stateObj;
         globalFilterState = event.state.gFilter;
         personalFilterState = event.state.pFilter;
         primaryPersonalUser = event.state.primaryUser;
-        updateUIState();
-        renderView();
+        updateUIState(); renderView();
       }
     });
 
     function pushHistoryState() {
-      history.pushState({ 
-        stateObj: JSON.parse(JSON.stringify(state)), 
-        gFilter: JSON.parse(JSON.stringify(globalFilterState)),
-        pFilter: JSON.parse(JSON.stringify(personalFilterState)),
-        primaryUser: primaryPersonalUser
-      }, "");
+      history.pushState({ stateObj: JSON.parse(JSON.stringify(state)), gFilter: JSON.parse(JSON.stringify(globalFilterState)), pFilter: JSON.parse(JSON.stringify(personalFilterState)), primaryUser: primaryPersonalUser }, "");
     }
 
+    // --- 初期ロード ---
     window.onload = async () => {
       try {
         const response = await fetch(API_URL); const data = await response.json();
@@ -380,15 +394,15 @@
       return num.toLocaleString();
     }
     function getTierCategory(power) {
-      if (power >= 20000000) return '20'; if (power >= 15000000) return '15-20'; if (power >= 10000000) return '10-15'; return '0-10';
+      if (power >= 2e7) return '20'; if (power >= 1.5e7) return '15-20'; if (power >= 1e7) return '10-15'; return '0-10';
     }
     function getTierColor(power) {
-      if (power >= 20000000) return '#f97316'; if (power >= 15000000) return '#6366f1'; if (power >= 10000000) return '#0ea5e9'; return '#10b981'; 
+      if (power >= 2e7) return '#f97316'; if (power >= 1.5e7) return '#6366f1'; if (power >= 1e7) return '#0ea5e9'; return '#10b981'; 
     }
     function getTierTailwindClass(power, isButton = false) {
-      if (power >= 20000000) return isButton ? 'bg-orange-900/80 text-orange-200 border-orange-700' : 'bg-orange-500/20 text-orange-400 border-orange-500/50';
-      if (power >= 15000000) return isButton ? 'bg-indigo-900/80 text-indigo-200 border-indigo-700' : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50';
-      if (power >= 10000000) return isButton ? 'bg-sky-900/80 text-sky-200 border-sky-700' : 'bg-sky-500/20 text-sky-400 border-sky-500/50';
+      if (power >= 2e7) return isButton ? 'bg-orange-900/80 text-orange-200 border-orange-700' : 'bg-orange-500/20 text-orange-400 border-orange-500/50';
+      if (power >= 1.5e7) return isButton ? 'bg-indigo-900/80 text-indigo-200 border-indigo-700' : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50';
+      if (power >= 1e7) return isButton ? 'bg-sky-900/80 text-sky-200 border-sky-700' : 'bg-sky-500/20 text-sky-400 border-sky-500/50';
       return isButton ? 'bg-emerald-900/80 text-emerald-200 border-emerald-700' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
     }
     function computeRanks(arr, key) {
@@ -431,8 +445,7 @@
     function getActiveFilter() { return state.tab === 'personal' ? personalFilterState : globalFilterState; }
 
     function updateUIState() {
-      updatePeriodButtons(); updateBossButtons(); updateSortButtons(state.sort);
-      updateScatterTierButtons();
+      updatePeriodButtons(); updateBossButtons(); updateSortButtons(state.sort); updateScatterTierButtons();
       
       ['ranking','personal','elder','activity'].forEach(v => {
         const b = document.getElementById(`nav-${v}`);
@@ -448,8 +461,7 @@
       document.getElementById('ctrl-elder').style.display = state.tab==='elder'?'block':'none';
       document.getElementById('ctrl-activity').style.display = state.tab==='activity'?'block':'none';
 
-      renderFilterControls();
-      updateStickyBadge();
+      renderFilterControls(); updateStickyBadge();
     }
 
     function toggleFilterPanel() { const p = document.getElementById('common-filter-panel'); p.classList.toggle('hidden'); document.getElementById('filter-panel-icon').textContent = p.classList.contains('hidden') ? '▼' : '▲'; }
@@ -499,7 +511,7 @@
     function toggleAllMembers(f) { 
       const activeFilter = getActiveFilter();
       latestMemberInfo.forEach(d => activeFilter[d.name] = f); 
-      if (!f) primaryPersonalUser = null;
+      if (!f) primaryPersonalUser = null; else if(f && activeMembers.length>0 && !primaryPersonalUser) primaryPersonalUser = activeMembers[0];
       renderFilterControls(); renderView(); pushHistoryState(); 
     }
     
@@ -530,12 +542,23 @@
       ['last-14', 'last-30', 'last-90'].forEach(v => { const b = document.getElementById(`period-${v}-global`); if(b) b.className = (v === state.period) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
     }
     function updateBossButtons() { ['all','1','2','3','4','5','6','0'].forEach(v => { const b = document.getElementById(`boss-${v}`); if(b) { if(v===state.boss){b.classList.remove('btn-inactive');b.classList.add('btn-active');}else{b.classList.remove('btn-active');b.classList.add('btn-inactive');} }}); }
-    function updateSortButtons(k) { const l = {'score':'👑 スコア','maxScore':'🔥 ハイスコア','efficiency':'⚡ 効率','power':'💪 戦力','rank':'🏅 順位'}; ['score','maxScore','efficiency','power','rank'].forEach(s => { const b = document.getElementById(`sort-${s}`); if(b){ b.innerHTML=l[s]+(s===k?' <span class="text-[10px] ml-1 opacity-80">▼</span>':''); b.className = s===k ? "flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap"; }}); }
+    function updateSortButtons(k) { const l = {'score':'👑 スコア','maxScore':'🔥 ハイスコア','efficiency':'⚡ 効率','power':'💪 戦力','rank':'🏅 順位'}; ['score','maxScore','efficiency','power','rank'].forEach(s => { const b = document.getElementById(`sort-${s}`); if(b){ b.innerHTML=l[s]+(s===k?' <span class="text-[10px] ml-1 opacity-80">▼</span>':''); b.className = s===k ? "flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap"; }}); }
+    
+    function toggleScatterTier(t) {
+      if (t === 'all') { state.scatterTiers = ['all']; } 
+      else {
+        state.scatterTiers = state.scatterTiers.filter(x => x !== 'all');
+        if (state.scatterTiers.includes(t)) state.scatterTiers = state.scatterTiers.filter(x => x !== t);
+        else state.scatterTiers.push(t);
+        if (state.scatterTiers.length === 0) state.scatterTiers = ['all'];
+      }
+      updateScatterTierButtons(); renderPersonal(); pushHistoryState(); 
+    }
     
     function updateScatterTierButtons() {
       ['all','20','15-20','10-15','0-10'].forEach(t => {
         const b = document.getElementById(`sc-tier-${t}`);
-        if(b) b.className = t === state.scatterTier ? "text-[9px] px-2 py-1 font-bold rounded transition border bg-indigo-600 text-white border-indigo-400" : "text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700";
+        if(b) b.className = state.scatterTiers.includes(t) ? "text-[9px] px-2 py-1 font-bold rounded transition border bg-indigo-600 text-white border-indigo-400 whitespace-nowrap" : "text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap";
       });
     }
 
@@ -550,10 +573,7 @@
     }
 
     // --- インタラクション ---
-    function setTab(t) { 
-      state.tab = t; 
-      updateUIState(); autoCloseFilterPanel(); renderView(); pushHistoryState(); 
-    }
+    function setTab(t) { state.tab = t; updateUIState(); autoCloseFilterPanel(); renderView(); pushHistoryState(); }
     function setPeriod(p) { 
       state.period = p; const o = document.getElementById('boss-disabled-overlay'); 
       if(!p.startsWith('last-')){ state.boss='all'; if(o)o.classList.remove('hidden'); } else { if(o)o.classList.add('hidden'); } 
@@ -563,7 +583,6 @@
     function setSort(s) { state.sort = s; updateSortButtons(s); renderView(); pushHistoryState(); }
     function setActPeriod(d) { state.actPeriod = d; updateUIState(); renderActivity(); pushHistoryState(); }
     function setElderWeek(w) { state.elderWeek = w; updateStickyBadge(); renderElder(); pushHistoryState(); }
-    function setScatterTier(t) { state.scatterTier = t; updateScatterTierButtons(); renderPersonal(); pushHistoryState(); }
     
     function goToHistory(name) { 
       latestMemberInfo.forEach(d => personalFilterState[d.name] = (d.name === name)); 
@@ -691,11 +710,11 @@
       if (tNames.length === 0) {
         diagArea.classList.add('hidden'); suggArea.classList.add('hidden'); richArea.classList.add('hidden'); warnArea.classList.add('hidden');
         listEl.innerHTML = `<li class="p-8 text-center text-slate-500 text-sm">上のフィルターからメンバーを選んでください</li>`;
-        if (chartInstancePersonal) chartInstancePersonal.destroy(); if (radarChartInstance) radarChartInstance.destroy(); if (trendChartInstance) trendChartInstance.destroy();
+        if (charts.scatterPers) charts.scatterPers.destroy(); if (charts.radar) charts.radar.destroy(); if (charts.trend) charts.trend.destroy();
         return;
       }
 
-      // === 診断レポート (横並び) ===
+      // === 診断レポート表（横並び） ===
       let pDays = state.period.startsWith('last-') ? parseInt(state.period.split('-')[1]) : 30; 
       const validDates = availableDates.filter(d => new Date(d).getTime() > new Date(availableDates[0]).getTime() - (pDays * 864e5));
       const allAvgsObj = {}; 
@@ -705,10 +724,15 @@
       });
 
       const todayDow = new Date().getDay(); 
-      const todayBossStr = `今日のボス（${['日','月','火','水','木','金','土'][todayDow]}曜・${BOSS_NAMES[todayDow]}）`;
+      const todayBossStr = `👑 今日のボス（${['日','月','火','水','木','金','土'][todayDow]}曜 / ${BOSS_NAMES[todayDow]}）`;
       
-      diagArea.innerHTML = '';
+      let htmlToday = '', htmlAvg = '', htmlBest = '', htmlWorst = '';
+      let headerHtml = '';
+
       tNames.forEach((name, i) => {
+        const c = CHART_PALETTE[i % CHART_PALETTE.length];
+        headerHtml += `<th class="p-2 text-center border-l border-slate-700/50"><div class="flex justify-between items-center"><span style="color:${c}">● ${name}</span><button onclick="toggleMember('${name}')" class="text-slate-500 hover:text-rose-400 px-1 font-normal">✖</button></div></th>`;
+        
         const avg = allAvgsObj[name] || 0;
         if(avg > 0) {
           const bAvgs = [1,2,3,4,5,6,0].map(bid => {
@@ -716,53 +740,61 @@
             return { id: bid, avg: s.length>0 ? s.reduce((a,b)=>a+b,0)/s.length : 0 };
           }).filter(x=>x.avg>0).sort((a,b)=>b.avg-a.avg);
           
-          let bestBoss = bAvgs.length>0 ? `${BOSS_NAMES[bAvgs[0].id]} (${formatValue(bAvgs[0].avg)})` : '-';
-          let worstBoss = bAvgs.length>1 ? `${BOSS_NAMES[bAvgs[bAvgs.length-1].id]} (${formatValue(bAvgs[bAvgs.length-1].avg)})` : '-';
           const todayAvg = bAvgs.find(x=>x.id===todayDow)?.avg || 0;
           let myRank = 1; Object.values(allAvgsObj).forEach(v => { if(v > avg) myRank++; });
+          let bestStr = bAvgs.length>0 ? `${['日','月','火','水','木','金','土'][bAvgs[0].id]}(${BOSS_NAMES[bAvgs[0].id]}) ${formatValue(bAvgs[0].avg)}` : '-';
+          let worstStr = bAvgs.length>1 ? `${['日','月','火','水','木','金','土'][bAvgs[bAvgs.length-1].id]}(${BOSS_NAMES[bAvgs[bAvgs.length-1].id]}) ${formatValue(bAvgs[bAvgs.length-1].avg)}` : '-';
 
-          const c = CHART_PALETTE[i % CHART_PALETTE.length];
-          diagArea.insertAdjacentHTML('beforeend', `
-            <div class="glass-card p-3 border-t-4 shadow-lg flex flex-col" style="border-color:${c}">
-              <h3 class="font-bold text-sm mb-2" style="color:${c}">🩺 ${name} の考察 <span class="text-[9px] text-slate-500 font-normal ml-1">(直近${pDays}日)</span></h3>
-              ${todayAvg > 0 ? `<div class="bg-amber-900/40 text-amber-200 p-1.5 rounded mb-2 border border-amber-700/50 text-[10px] font-bold">👑 ${todayBossStr}<br><span class="text-xs">平均 ${formatValue(todayAvg)}</span></div>` : ''}
-              <div class="text-[11px] text-slate-200 space-y-1.5 flex-grow">
-                <p>📊 <b>平均:</b> <span class="num-font text-xs font-bold text-indigo-300">${formatValue(avg)}</span> (全体${myRank}位)</p>
-                <p>🎯 <b>得意:</b> ${bestBoss}</p>
-                <p>📉 <b>苦手:</b> ${worstBoss}</p>
-              </div>
-            </div>`);
+          htmlToday += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200 bg-amber-900/10">${todayAvg>0 ? formatValue(todayAvg) : '-'}</td>`;
+          htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50 text-indigo-300 font-bold">${formatValue(avg)} <span class="text-[9px] text-slate-400 font-normal">(${myRank}位)</span></td>`;
+          htmlBest += `<td class="p-2 text-center border-l border-slate-700/50 text-emerald-300">${bestStr}</td>`;
+          htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50 text-rose-300">${worstStr}</td>`;
+        } else {
+          htmlToday += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
+          htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
+          htmlBest += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
+          htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
         }
       });
+      
+      document.getElementById('diag-header-row').innerHTML = `<th class="p-2 font-normal whitespace-nowrap text-slate-400">項目 <span class="text-[9px]">(直近${pDays}日)</span></th>` + headerHtml;
+      document.getElementById('diagnostic-today-boss').innerHTML = todayBossStr;
+      document.getElementById('diag-body').innerHTML = `
+        <tr class="border-b border-slate-700/50 bg-slate-800/30"><td class="p-2 text-slate-400 font-bold">平均スコア (全体順位)</td>${htmlAvg}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 font-bold">得意ボス</td>${htmlBest}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 font-bold">苦手ボス</td>${htmlWorst}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-400/80 font-bold">今日の平均</td>${htmlToday}</tr>
+      `;
       diagArea.classList.remove('hidden');
 
       // === ライバルサジェスト (常時表示＆トグル化) ===
       const baseName = primaryPersonalUser || tNames[0];
+      document.getElementById('rival-suggest-title').innerHTML = `🎯 <span class="text-white px-1 border-b border-indigo-400">${baseName}</span> と競り合うライバル`;
       const baseAvg = allAvgsObj[baseName] || 0;
       if (baseAvg > 0) {
         const rivals = Object.keys(allAvgsObj).filter(n => n !== baseName && Math.abs(allAvgsObj[n] - baseAvg)/baseAvg <= 0.15).sort((a,b) => Math.abs(allAvgsObj[a]-baseAvg) - Math.abs(allAvgsObj[b]-baseAvg)).slice(0, 5);
         if (rivals.length > 0) {
           suggBtns.innerHTML = rivals.map(r => {
             const isSelected = tNames.includes(r);
-            if(isSelected) return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-indigo-900/80 border border-indigo-500 text-indigo-200 font-bold text-[11px] rounded shadow-md transition">- ${r} を外す</button>`;
-            return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-slate-800 border border-slate-600 text-amber-300 font-bold text-[11px] rounded shadow-md hover:bg-slate-700 transition">+ ${r} を追加</button>`;
+            if(isSelected) return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-indigo-900/80 border border-indigo-500 text-indigo-200 font-bold text-[11px] rounded shadow-md transition whitespace-nowrap">✓ ${r} (比較中)</button>`;
+            return `<button onclick="toggleMember('${r}')" class="px-3 py-1.5 bg-slate-800 border border-slate-600 text-amber-300 font-bold text-[11px] rounded shadow-md hover:bg-slate-700 transition whitespace-nowrap">+ ${r} 追加</button>`;
           }).join('');
           suggArea.classList.remove('hidden');
         } else suggArea.classList.add('hidden');
       } else suggArea.classList.add('hidden');
 
       // === グラフ描画制御 ===
-      if (tNames.length > 5) {
+      if (tNames.length > 10) {
         richArea.classList.add('hidden'); warnArea.classList.remove('hidden');
       } else {
         richArea.classList.remove('hidden'); warnArea.classList.add('hidden');
-        radarCont.classList.toggle('hidden', tNames.length > 4);
+        radarCont.classList.toggle('hidden', tNames.length > 5);
         
         // --- 1. 散布図 (個別フィルター対応 & ズーム) ---
         const allData = getBaseViewData(true); 
         let filteredBgData = allData;
-        if (state.scatterTier !== 'all') {
-          filteredBgData = allData.filter(d => d.tierCat === state.scatterTier || tNames.includes(d.name));
+        if (!state.scatterTiers.includes('all')) {
+          filteredBgData = allData.filter(d => state.scatterTiers.includes(d.tierCat) || tNames.includes(d.name));
         }
 
         const pts = filteredBgData.map(d => {
@@ -770,7 +802,7 @@
           return { x: d.powerNum/1e6, y: d.scoreNum/1e12, name: d.name, isSelected: isSelected, color: isSelected ? CHART_PALETTE[cIndex] : 'rgba(100,116,139,0.3)' };
         });
         
-        // ズーム処理
+        // オートズーム処理 (Y軸)
         const selPts = pts.filter(p=>p.isSelected);
         let yMin = 0, yMax = 100;
         if(selPts.length > 0) {
@@ -782,16 +814,16 @@
         const reg = calculateRegressionLine(pts); let anno = {};
         if (reg && pts.length > 1) {
           const minX = Math.min(...pts.map(d=>d.x))*0.8, maxX = Math.max(...pts.map(d=>d.x))*1.1;
-          anno = { line1: { type: 'line', xMin: minX, xMax: maxX, yMin: reg.slope*minX+reg.intercept, yMax: reg.slope*maxX+reg.intercept, borderColor: 'rgba(248,113,113,0.6)', borderWidth: 2, borderDash: [4,4] } };
+          anno = { line1: { type: 'line', xMin: minX, xMax: maxX, yMin: reg.slope*minX+reg.intercept, yMax: reg.slope*maxX+reg.intercept, borderColor: 'rgba(248,113,113,0.5)', borderWidth: 2, borderDash: [4,4] } };
         }
-        if (chartInstancePersonal) chartInstancePersonal.destroy();
-        chartInstancePersonal = new Chart(document.getElementById('scatterChartPersonal').getContext('2d'), { 
+        if (charts.scatterPers) charts.scatterPers.destroy();
+        charts.scatterPers = new Chart(document.getElementById('scatterChartPersonal').getContext('2d'), { 
           type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: (c)=>c.raw?c.raw.color:'#000', pointRadius: (c)=>c.raw&&c.raw.isSelected?8:3, pointBorderColor: (c)=>c.raw&&c.raw.isSelected?'#fff':'transparent', pointBorderWidth: (c)=>c.raw&&c.raw.isSelected?2:0 }] }, 
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false}, annotation: {annotations:anno}, datalabels: { display: (c)=>c.dataset.data[c.dataIndex].isSelected, align: 'top', color: '#fff', font:{size:11, family:'Noto Sans JP', weight:'bold'}, formatter: v=>v.name }, tooltip: { callbacks: { label: (ctx)=>`${ctx.raw.y.toFixed(2)}T`, title: (ctx)=>ctx[0].raw.name } } }, scales: { x: { title:{display:true, text:'戦力 (M)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8'} }, y: { min: yMin, max: yMax, title:{display:true, text:'スコア (T)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8'} } } } 
         });
 
         // --- 2. レーダーチャート ---
-        if (tNames.length <= 4) {
+        if (tNames.length <= 5) {
           const radarData = tNames.map((name, i) => {
             const bossAvgs = [1,2,3,4,5,6,0].map(bossId => {
               const scores = processedData.filter(d => d.name === name && validDates.includes(d.date) && new Date(d.date).getDay() == bossId).map(d => d.scoreNum);
@@ -799,8 +831,8 @@
             });
             const c = CHART_PALETTE[i]; return { label: name, data: bossAvgs, backgroundColor: c+'33', borderColor: c, pointBackgroundColor: c, borderWidth: 2 };
           });
-          if (radarChartInstance) radarChartInstance.destroy();
-          radarChartInstance = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'radar', data: { labels: ['月(墓)','火(ド)','水(バ)','木(メ)','金(ス)','土(一)','日(鎌)'], datasets: radarData }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#cbd5e1', font: { family: 'Noto Sans JP', size: 10, weight: 'bold' } }, ticks: { display: false } } }, plugins: { legend: { display: false }, datalabels: { display: false } } } });
+          if (charts.radar) charts.radar.destroy();
+          charts.radar = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'radar', data: { labels: ['月(墓)','火(ド)','水(バ)','木(メ)','金(ス)','土(一)','日(鎌)'], datasets: radarData }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#cbd5e1', font: { family: 'Noto Sans JP', size: 10, weight: 'bold' } }, ticks: { display: false } } }, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#94a3b8', font: {size:10, family:'Noto Sans JP'} } }, datalabels: { display: false } } } });
         }
 
         // --- 3. トレンド＆予測グラフ (バグ修正＆余白調整) ---
@@ -813,7 +845,7 @@
         xLabels.push("来週予測", " ", " "); 
 
         const tDatasets = tNames.map((name, i) => {
-          const c = CHART_PALETTE[i];
+          const c = CHART_PALETTE[i % CHART_PALETTE.length];
           let pts = chartDates.map(date => { const d = processedData.find(x => x.name === name && x.date === date); return d ? d.scoreNum/1e12 : null; });
           let validPts = []; pts.forEach((y, idx) => { if(y!==null) validPts.push({x:idx, y:y}); });
           if(validPts.length >= 2) {
@@ -823,8 +855,8 @@
           return { label: name, data: pts, borderColor: c, backgroundColor: c, borderWidth: 2, pointRadius: 4, spanGaps: true, segment: { borderDash: ctx => ctx.p1DataIndex >= chartDates.length-1 ? [4,4] : undefined } };
         });
 
-        if (trendChartInstance) trendChartInstance.destroy();
-        trendChartInstance = new Chart(document.getElementById('trendChart').getContext('2d'), {
+        if (charts.trend) charts.trend.destroy();
+        charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), {
           type: 'line', data: { labels: xLabels, datasets: tDatasets },
           options: { responsive: true, maintainAspectRatio: false, layout: { padding: { right: 10 } }, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, datalabels: { display: function(ctx){ const d=ctx.dataset.data; let i=d.length-1; while(i>=0&&d[i]===null)i--; return ctx.dataIndex===i; }, align: 'right', color: ctx=>ctx.dataset.borderColor, font: {size: 10, weight:'bold', family:'Noto Sans JP'}, formatter: (v,ctx)=>ctx.dataset.label } }, scales: { x: { grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8', font:{size:9}} }, y: { title:{display:true, text:'スコア (T)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8', font:{size:9}} } } }
         });
@@ -836,7 +868,7 @@
       if(tData.length > 0) {
         tData.forEach(d => {
           const dObj = new Date(d.date); const dayStr = ['日', '月', '火', '水', '木', '金', '土'][dObj.getDay()];
-          const cIndex = tNames.indexOf(d.name); const dotColor = tNames.length <= 5 ? CHART_PALETTE[cIndex] : '#94a3b8';
+          const cIndex = tNames.indexOf(d.name); const dotColor = tNames.length <= 10 ? CHART_PALETTE[cIndex % CHART_PALETTE.length] : '#94a3b8';
           listEl.insertAdjacentHTML('beforeend', `
             <li class="grid grid-cols-5 text-center items-center py-2.5 border-b border-slate-700/50 hover:bg-slate-800/40">
               <div class="text-[10px] text-slate-300 font-bold leading-tight relative">
