@@ -43,6 +43,7 @@
 </head>
 <body class="pb-20">
 
+  <!-- ================= ヘッダー & 常時表示コントロール ================= -->
   <div class="sticky top-0 z-50 w-full flex flex-col shadow-lg bg-slate-900/95 backdrop-blur-md border-b border-slate-700">
     <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 border-b border-indigo-500/30 flex justify-center items-center relative">
       <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
@@ -52,7 +53,8 @@
       <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap hidden sm:block"></div>
     </header>
     
-    <div id="main-tabs-container" class="w-full border-b border-slate-700/50" style="display:none;">
+    <!-- タブメニュー -->
+    <div class="w-full border-b border-slate-700/50">
       <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
         <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
         <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個別考察</button>
@@ -61,8 +63,10 @@
       </div>
     </div>
 
+    <!-- グローバルコントロール（タブ別完全分離） -->
     <div id="global-controls-panel" class="max-w-2xl mx-auto w-full px-2 sm:px-4 py-2 transition-all">
       
+      <!-- 🏆 総合順位 コントロール -->
       <div id="ctrl-ranking" class="block">
         <div class="flex gap-1">
           <select id="sel-rank-date" onchange="setRankPeriod(this.value)" class="flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
@@ -72,6 +76,7 @@
         </div>
       </div>
 
+      <!-- 👤 個別考察 コントロール -->
       <div id="ctrl-personal" class="hidden">
         <div class="flex gap-1 mb-1.5">
           <button id="btn-pers-14" onclick="setPersPeriod('last-14')" class="flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors">2週間</button>
@@ -90,13 +95,15 @@
         </div>
       </div>
 
+      <!-- 👑 長老用 -->
       <div id="ctrl-elder" class="hidden">
         <select id="elder-week-select" onchange="setElderWeek(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded-md text-sm p-1.5 outline-none text-white shadow-inner cursor-pointer font-bold"></select>
       </div>
 
+      <!-- ⚠️ 未参加用 -->
       <div id="ctrl-activity" class="hidden">
         <div class="flex gap-1 overflow-x-auto scrollbar-hide">
-          <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">2週間</button>
+          <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">2週間</button>
           <button id="act-period-30" onclick="setActPeriod('30')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1ヶ月</button>
           <button id="act-period-90" onclick="setActPeriod('90')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3ヶ月</button>
         </div>
@@ -104,6 +111,7 @@
     </div>
   </div>
 
+  <!-- ================= メインコンテンツ ================= -->
   <div class="max-w-2xl mx-auto px-2 sm:px-4 pt-4">
     
     <div id="loading" class="flex flex-col items-center justify-center py-20 text-indigo-400">
@@ -113,6 +121,7 @@
 
     <div id="dashboard-content" style="display:none;">
       
+      <!-- メンバーフィルター -->
       <div id="filter-section" class="mb-4">
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
@@ -138,9 +147,10 @@
         </div>
       </div>
 
+      <!-- 🏆【総合順位】 -->
       <div id="view-ranking" class="block">
         <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
-          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 現在一部のメンバーのみ表示中</span>
+          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 一部のメンバーのみ表示中</span>
           <button onclick="toggleAllMembers(true)" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow-sm transition">全員表示に戻す</button>
         </div>
         
@@ -166,8 +176,10 @@
         <div class="glass-card overflow-hidden"><ul id="rankingList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
+      <!-- 👤【個別考察】 -->
       <div id="view-personal" class="hidden">
         
+        <!-- サジェストエリア -->
         <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
           <p id="rival-suggest-title" class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -176,6 +188,7 @@
           <div id="rival-suggest-buttons" class="flex flex-wrap gap-2"></div>
         </div>
 
+        <!-- 考察レポート表 -->
         <div id="diagnostic-area" class="mb-5 hidden">
           <div class="glass-card overflow-hidden border-indigo-500/50 border shadow-lg relative">
             <div id="diagnostic-title" class="bg-indigo-900/80 p-2 text-sm font-bold text-indigo-100 border-b border-indigo-500/50"></div>
@@ -190,6 +203,7 @@
         </div>
         
         <div id="rich-analysis-area" class="hidden">
+          <!-- 立ち位置（散布図） -->
           <div class="glass-card p-3 mb-4 relative">
             <div class="flex flex-wrap justify-between items-center mb-1.5 pl-1 gap-2">
               <p class="text-[11px] font-bold text-slate-300 flex items-center gap-1"><svg class="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6c0 4 6 10 6 10s6-6 6-10a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z"/></svg> 全体の中での立ち位置</p>
@@ -205,11 +219,13 @@
             <div class="relative w-full h-[280px]"><canvas id="scatterChartPersonal"></canvas></div>
           </div>
 
+          <!-- 得意不得意（レーダー） -->
           <div id="radar-container" class="glass-card p-3 mb-4 hidden">
             <p class="text-[11px] font-bold text-slate-300 mb-1 pl-1">🎯 ボス別 平均スコア適性</p>
             <div class="relative w-full h-[250px]"><canvas id="radarChart"></canvas></div>
           </div>
 
+          <!-- トレンド＆予測（折れ線） -->
           <div class="glass-card p-3 mb-4 relative overflow-hidden">
             <div class="absolute top-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10 shadow-md">未来予測</div>
             <p class="text-[11px] font-bold text-slate-300 mb-2 pl-1">📈 スコア推移 と <span class="text-rose-400">来週の予測（点線）</span></p>
@@ -233,6 +249,7 @@
         </div>
       </div>
 
+      <!-- 👑【長老選抜】 -->
       <div id="view-elder" class="hidden">
         <div class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3 mb-4 text-[11px] sm:text-xs text-amber-200 leading-relaxed shadow-inner">
           <strong class="text-amber-400 block mb-1 flex items-center gap-1 text-xs sm:text-[13px]">
@@ -246,6 +263,7 @@
         <div class="glass-card overflow-hidden"><ul id="elderList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
+      <!-- ⚠️【未参加数】 -->
       <div id="view-activity" class="hidden">
         <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] sm:text-xs text-indigo-200 leading-relaxed shadow-inner">
           <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
@@ -261,6 +279,7 @@
     </div>
   </div>
 
+  <!-- JavaScript領域 -->
   <script>
     // --- State Management ---
     let state = { 
@@ -310,7 +329,6 @@
         
         prepareData(); initElderWeeks(); 
         
-        // 総合順位のデフォルトは最新日
         state.rankPeriod = availableDates.length > 0 ? availableDates[0] : ''; 
         setupDateSelects();
         
@@ -319,8 +337,6 @@
         });
         latestMemberInfo.forEach(info => { globalFilterState[info.name] = true; });
         
-        if(activeMembers.length > 0) state.selectedPersonal = [activeMembers[0]];
-
         updateUIState();
         if(document.getElementById('loading')) document.getElementById('loading').style.display = 'none';
         if(document.getElementById('main-tabs-container')) document.getElementById('main-tabs-container').style.display = 'block'; 
@@ -499,9 +515,11 @@
       if(el) { el.innerHTML = '<option value="" disabled hidden>単日指定</option>'; availableDates.forEach((date, i) => { el.insertAdjacentHTML('beforeend', `<option value="${date}">${i===0?date+'(最新)':date}</option>`); }); }
     }
     function updatePeriodButtons() {
+      // Ranking
       const rDate = !state.rankPeriod.startsWith('last-'); const rEl = document.getElementById('sel-rank-date');
       if(rEl) { rEl.value = rDate ? state.rankPeriod : ""; rEl.className = rDate ? "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-indigo-600 text-white border-indigo-500 shadow-md" : "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-slate-900 text-slate-300 border-slate-600"; }
       ['14', '30', '90'].forEach(v => { const b = document.getElementById(`btn-rank-${v}`); if(b) b.className = (`last-${v}` === state.rankPeriod) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
+      // Personal
       ['14', '30', '90'].forEach(v => { const b = document.getElementById(`btn-pers-${v}`); if(b) b.className = (`last-${v}` === state.persPeriod) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
     }
     function updateBossButtons() { ['all','1','2','3','4','5','6','0'].forEach(v => { const b = document.getElementById(`boss-${v}`); if(b) { if(v===state.persBoss){b.classList.remove('btn-inactive');b.classList.add('btn-active');}else{b.classList.remove('btn-active');b.classList.add('btn-inactive');} }}); }
@@ -549,7 +567,10 @@
         state.selectedPersonal.unshift(name);
       }
       state.tab = 'personal'; 
-      updateUIState(); renderView(); window.scrollTo({top:0, behavior:'smooth'}); pushHistoryState(); 
+      updateUIState(); 
+      const p = document.getElementById('common-filter-panel'); if(p) p.classList.remove('hidden');
+      const i = document.getElementById('filter-panel-icon'); if(i) i.textContent = '▲'; 
+      renderView(); window.scrollTo({top:0, behavior:'smooth'}); pushHistoryState(); 
     }
 
     function calculateRegressionLine(data) {
