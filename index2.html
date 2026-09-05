@@ -23,35 +23,24 @@
   <style>
     body { 
       font-family: 'Noto Sans JP', sans-serif; 
-      background-color: #0f172a; 
-      color: #e2e8f0;
+      background-color: #0f172a; color: #e2e8f0;
       background-image: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 100%);
       background-attachment: fixed;
     }
     .num-font { font-family: 'Montserrat', sans-serif; }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    
     .btn-active { 
       background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%) !important; 
-      color: white !important; 
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
-      border: 1px solid #6366f1 !important; 
+      color: white !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #6366f1 !important; 
     }
     .btn-inactive { 
-      background-color: rgba(30, 41, 59, 0.6); 
-      color: #94a3b8; 
-      border: 1px solid transparent;
+      background-color: rgba(30, 41, 59, 0.6); color: #94a3b8; border: 1px solid transparent;
     }
     .glass-card { 
-      background: rgba(30, 41, 59, 0.6);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; 
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2); 
-    }
-    /* 表のセル内改行禁止用スタイル */
-    .table-compact th, .table-compact td {
-      white-space: nowrap;
     }
   </style>
 </head>
@@ -59,7 +48,6 @@
 
   <!-- ================= ヘッダー & 常時表示コントロール ================= -->
   <div class="sticky top-0 z-50 w-full flex flex-col shadow-lg bg-slate-900/95 backdrop-blur-md border-b border-slate-700">
-    
     <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 border-b border-indigo-500/30 flex justify-center items-center relative">
       <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
         <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -68,20 +56,18 @@
       <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap hidden sm:block"></div>
     </header>
     
-    <!-- 4大タブ -->
     <div id="main-tabs-container" class="w-full border-b border-slate-700/50" style="display:none;">
       <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
-        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
-        <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個別考察</button>
-        <button id="nav-elder" onclick="setTab('elder')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
-        <button id="nav-activity" onclick="setTab('activity')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 未参加数</button>
+        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
+        <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個別考察</button>
+        <button id="nav-elder" onclick="setTab('elder')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
+        <button id="nav-activity" onclick="setTab('activity')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 未参加数</button>
       </div>
     </div>
 
     <!-- グローバルコントロール -->
     <div id="global-controls-panel" class="max-w-2xl mx-auto w-full px-2 sm:px-4 py-2 transition-all">
-      
-      <!-- ランキング・個別考察用 -->
+      <!-- 総合順位・個別考察用 -->
       <div id="ctrl-daily" class="block">
         <div class="flex gap-1 mb-1.5">
           <select id="period-date-global" onchange="setPeriod(this.value)" class="flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
@@ -105,27 +91,23 @@
           </div>
         </div>
       </div>
-
       <!-- 長老用 -->
       <div id="ctrl-elder" class="hidden">
         <select id="elder-week-select" onchange="setElderWeek(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded-md text-sm p-1.5 outline-none text-white shadow-inner cursor-pointer font-bold"></select>
       </div>
-
       <!-- 未参加用 -->
       <div id="ctrl-activity" class="hidden">
         <div class="flex gap-1 overflow-x-auto scrollbar-hide">
-          <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">2週間</button>
-          <button id="act-period-30" onclick="setActPeriod('30')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">1ヶ月</button>
+          <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">2週間</button>
+          <button id="act-period-30" onclick="setActPeriod('30')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap">1ヶ月</button>
           <button id="act-period-90" onclick="setActPeriod('90')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">3ヶ月</button>
         </div>
       </div>
-
     </div>
   </div>
 
   <!-- ================= メインコンテンツ ================= -->
   <div class="max-w-2xl mx-auto px-2 sm:px-4 pt-4">
-    
     <div id="loading" class="flex flex-col items-center justify-center py-20 text-indigo-400">
       <svg class="animate-spin h-10 w-10 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
       <p class="font-bold tracking-widest text-sm">データ解析中...</p>
@@ -138,16 +120,16 @@
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-            表示メンバーの絞り込み
+            <span id="filter-title-text">表示メンバーの絞り込み</span>
             <span id="filter-count-badge" class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[10px] num-font border border-indigo-400"></span>
           </span>
-          <span id="filter-panel-icon" class="text-slate-400 text-lg">▲</span>
+          <span id="filter-panel-icon" class="text-slate-400 text-lg">▼</span>
         </button>
         
-        <div id="common-filter-panel" class="glass-card p-3 mt-1.5 border border-slate-600 shadow-xl block">
+        <div id="common-filter-panel" class="glass-card p-3 mt-1.5 border border-slate-600 shadow-xl hidden">
           <div class="flex justify-between items-start mb-2.5 flex-wrap gap-2">
             <p class="text-[11px] font-bold text-slate-400 mt-1">タップで個別にON/OFF</p>
-            <div class="flex gap-1.5 flex-wrap">
+            <div id="global-filter-presets" class="flex gap-1.5 flex-wrap">
               <button onclick="toggleAllMembers(true)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-slate-700 text-white shadow-sm hover:bg-slate-600 transition border border-slate-500">全員ON</button>
               <button onclick="toggleAllMembers(false)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-slate-900 text-slate-400 shadow-sm hover:bg-slate-800 transition border border-slate-700">全員OFF</button>
               <button onclick="toggleExecutives(true)" class="px-2.5 py-1 text-[10px] font-bold rounded bg-indigo-900/60 text-indigo-300 shadow-sm hover:bg-indigo-800/80 transition border border-indigo-700/50">幹部ON</button>
@@ -161,70 +143,65 @@
 
       <!-- 🏆【総合順位】 -->
       <div id="view-ranking" class="block">
-        
         <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
           <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 現在一部のメンバーのみ表示中</span>
           <button onclick="toggleAllMembers(true)" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow-sm transition">全員表示に戻す</button>
         </div>
-
+        
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[11px] sm:text-xs font-bold text-slate-400 pl-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>何の基準で並べる？</p>
+        </div>
         <div class="flex bg-slate-800/80 p-1 rounded-lg mb-3 overflow-x-auto scrollbar-hide border border-slate-700">
-          <button id="sort-score" onclick="setSort('score')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-active transition-colors whitespace-nowrap">👑 スコア <span class="text-[10px] ml-1 opacity-80">▼</span></button>
-          <button id="sort-maxScore" onclick="setSort('maxScore')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🔥 ハイスコア</button>
-          <button id="sort-efficiency" onclick="setSort('efficiency')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚡ 効率</button>
-          <button id="sort-power" onclick="setSort('power')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">💪 戦力</button>
-          <button id="sort-rank" onclick="setSort('rank')" class="flex-none px-3 py-2 text-xs sm:text-sm font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🏅 順位</button>
+          <button id="sort-score" onclick="setSort('score')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">👑 スコア <span class="text-[10px] ml-1 opacity-80">▼</span></button>
+          <button id="sort-maxScore" onclick="setSort('maxScore')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🔥 ハイスコア</button>
+          <button id="sort-efficiency" onclick="setSort('efficiency')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚡ 効率</button>
+          <button id="sort-power" onclick="setSort('power')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">💪 戦力</button>
+          <button id="sort-rank" onclick="setSort('rank')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">🏅 順位</button>
         </div>
 
-        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] text-indigo-200 leading-relaxed shadow-inner">
-          <div id="dynamic-guide-message" class="mb-2.5 p-2 bg-indigo-950/60 rounded border border-indigo-500/30 font-bold text-indigo-100 shadow-sm flex items-start gap-1.5"></div>
-          <ul class="space-y-1 mt-1">
+        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[10px] sm:text-[11px] text-indigo-200 leading-relaxed shadow-inner">
+          <div id="dynamic-guide-message" class="mb-2 p-2 bg-indigo-950/60 rounded border border-indigo-500/30 font-bold text-indigo-100 shadow-sm flex items-start gap-1.5"></div>
+          <ul class="space-y-1 pl-1">
             <li><span class="font-bold text-emerald-400">⚡ 効率:</span> スコア÷戦力。編成や立ち回りが優秀な証拠！</li>
             <li><span class="font-bold text-slate-300">先週比:</span> ちょうど1週間前（7日前）のスコアからの増減。</li>
-            <li>※名前をタップすると、その人の「個別考察」タブへ移動します。</li>
+            <li class="text-indigo-300 border-t border-indigo-500/30 pt-1 mt-1">※名前をタップすると、その人の「個別考察」タブへ移動します。</li>
           </ul>
         </div>
-
-        <div class="glass-card overflow-hidden">
-          <ul id="rankingList" class="divide-y divide-slate-700/50"></ul>
-        </div>
+        <div class="glass-card overflow-hidden"><ul id="rankingList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
       <!-- 👤【個別考察】 -->
       <div id="view-personal" class="hidden">
         
-        <!-- 考察レポート表 -->
-        <div id="diagnostic-area" class="mb-4 hidden">
-          <div class="glass-card overflow-hidden border-indigo-500/50 border shadow-lg">
-            <div id="diagnostic-today-boss" class="bg-indigo-900/60 p-2 text-center text-xs font-bold text-indigo-100 border-b border-indigo-500/30">
-              <!-- 今日のボス情報が入る -->
-            </div>
-            <div class="overflow-x-auto scrollbar-hide">
-              <table class="w-full text-left border-collapse text-[11px] sm:text-xs table-compact text-slate-200">
-                <thead>
-                  <tr id="diag-header-row" class="border-b border-slate-600 bg-slate-800/80 text-slate-300">
-                    <th class="p-2 font-normal whitespace-nowrap">項目</th>
-                    <!-- 動的追加 -->
-                  </tr>
-                </thead>
-                <tbody id="diag-body">
-                  <!-- 動的追加 -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- ライバルサジェスト -->
+        <!-- サジェストエリア -->
         <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
           <p id="rival-suggest-title" class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            ライバル候補を抽出中...
+            ライバル候補
           </p>
           <div id="rival-suggest-buttons" class="flex flex-wrap gap-2"></div>
         </div>
+
+        <!-- 考察レポート表 -->
+        <div id="diagnostic-area" class="mb-5 hidden">
+          <div class="glass-card overflow-hidden border-indigo-500/50 border shadow-lg">
+            <div id="diagnostic-today-boss" class="bg-indigo-900/80 p-2 text-xs text-indigo-100 border-b border-indigo-500/50"></div>
+            <div class="overflow-x-auto scrollbar-hide">
+              <table class="w-full text-left border-collapse text-[10px] sm:text-[11px] text-slate-200">
+                <thead>
+                  <tr id="diag-header-row" class="border-b border-slate-600 bg-slate-800/80 text-slate-300">
+                    <th class="p-2 font-normal whitespace-nowrap min-w-[80px]">項目 <span id="diag-period-label" class="text-[9px] block"></span></th>
+                    <!-- 動的追加 -->
+                  </tr>
+                </thead>
+                <tbody id="diag-body"></tbody>
+              </table>
+            </div>
+            <p class="text-[9px] text-slate-400 bg-slate-900/80 p-1 text-right">※横にスクロールできます</p>
+          </div>
+        </div>
         
         <div id="rich-analysis-area" class="hidden">
-          
           <!-- 立ち位置（散布図） -->
           <div class="glass-card p-3 mb-4 relative">
             <div class="flex flex-wrap justify-between items-center mb-1.5 pl-1 gap-2">
@@ -237,34 +214,26 @@
                 <button onclick="toggleScatterTier('0-10')" id="sc-tier-0-10" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap">〜10M</button>
               </div>
             </div>
-            <p class="text-[9px] text-slate-400 pl-1 mb-2">※赤点線は<span class="text-slate-200 font-bold border-b border-slate-500">表示中の背景メンバー</span>全体から算出した目標基準です。Y軸は自動ズームされます。</p>
-            <div class="relative w-full h-[280px]">
-              <canvas id="scatterChartPersonal"></canvas>
-            </div>
+            <p class="text-[9px] text-slate-400 pl-1 mb-2">※赤点線は<span class="text-slate-200 font-bold border-b border-slate-500">表示中の背景メンバー</span>の基準目標です。</p>
+            <div class="relative w-full h-[280px]"><canvas id="scatterChartPersonal"></canvas></div>
           </div>
 
           <!-- 得意不得意（レーダー） -->
           <div id="radar-container" class="glass-card p-3 mb-4 hidden">
             <p class="text-[11px] font-bold text-slate-300 mb-1 pl-1">🎯 ボス別 平均スコア適性</p>
-            <div class="relative w-full h-[250px]">
-              <canvas id="radarChart"></canvas>
-            </div>
+            <div class="relative w-full h-[250px]"><canvas id="radarChart"></canvas></div>
           </div>
 
           <!-- トレンド＆予測（折れ線） -->
           <div class="glass-card p-3 mb-4 relative overflow-hidden">
             <div class="absolute top-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10 shadow-md">未来予測</div>
-            <p class="text-[11px] font-bold text-slate-300 mb-2 pl-1">
-              📈 スコア推移 と <span class="text-rose-400">来週の予測（点線）</span>
-            </p>
-            <div class="relative w-full h-[300px]">
-              <canvas id="trendChart"></canvas>
-            </div>
+            <p class="text-[11px] font-bold text-slate-300 mb-2 pl-1">📈 スコア推移 と <span class="text-rose-400">来週の予測（点線）</span></p>
+            <div class="relative w-full h-[300px]"><canvas id="trendChart"></canvas></div>
           </div>
         </div>
 
         <div id="too-many-warning" class="hidden bg-slate-800/80 border border-slate-700 rounded-lg p-4 mb-4 text-xs text-slate-300 text-center shadow-inner">
-          グラフを表示するには、表示メンバーを<span class="text-indigo-400 font-bold px-1">10人以下</span>に絞ってください。
+          グラフを表示するには、比較メンバーを<span class="text-indigo-400 font-bold px-1">10人以下</span>に絞ってください。
         </div>
 
         <div class="glass-card overflow-hidden">
@@ -281,27 +250,27 @@
 
       <!-- 👑【長老選抜】 -->
       <div id="view-elder" class="hidden">
-        <div class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3 mb-4 text-xs text-amber-200 leading-relaxed shadow-inner">
-          <strong class="text-amber-400 block mb-1 flex items-center gap-1 text-[13px]">
+        <div class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3 mb-4 text-[11px] sm:text-xs text-amber-200 leading-relaxed shadow-inner">
+          <strong class="text-amber-400 block mb-1 flex items-center gap-1 text-xs sm:text-[13px]">
             <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             長老選抜ルール
           </strong>
-          日曜始まりで毎日のスコアランキング（<span class="text-white font-bold border-b border-amber-500 pb-0.5">全体フィルターでONのメンバー内</span>）において、<br>
+          日曜始まりの毎日のスコアランキング（<span class="text-white font-bold border-b border-amber-500 pb-0.5">全体フィルターでONのメンバー内</span>）において、<br>
           <span class="font-bold text-amber-400">1位: 4Pt / 2位: 3Pt / 3位: 2Pt / 4位: 1Pt</span> を付与。<br>
-          週単位の合計Ptで上位4名が長老候補となります。<span class="text-[10px] opacity-70">（同Ptの場合は週の合計スコアで判定）</span>
+          週合計Ptで上位4名が長老候補となります。<span class="text-[9px] opacity-70">（同Ptは総スコア判定）</span>
         </div>
         <div class="glass-card overflow-hidden"><ul id="elderList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
 
       <!-- ⚠️【未参加数】 -->
       <div id="view-activity" class="hidden">
-        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-xs text-indigo-200 leading-relaxed shadow-inner">
+        <div class="bg-indigo-900/30 border border-indigo-700/50 rounded-lg p-3 mb-4 text-[11px] sm:text-xs text-indigo-200 leading-relaxed shadow-inner">
           <strong class="text-indigo-300 block mb-1 flex items-center gap-1">
             <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             非参加数（未参加ランキング）
           </strong>
-          <span class="text-white font-bold border-b border-rose-500 pb-0.5">全体フィルターでONのメンバー</span>を対象に、<span class="text-rose-400 font-bold">参加回数が少ない順</span>に表示しています。<br>
-          <span class="text-[10px] opacity-70 mt-1 block">※既に引退・脱退したメンバーのノイズは自動で除外されます。同数の場合は同順位になります。</span>
+          <span class="text-white font-bold border-b border-rose-500 pb-0.5">全体フィルターでONのメンバー</span>を対象に、<span class="text-rose-400 font-bold">参加回数が少ない順</span>に表示。<br>
+          <span class="text-[9px] opacity-70 block mt-1">※引退メンバーのノイズは自動除外済。同数は同順位。</span>
         </div>
         <div class="glass-card overflow-hidden"><ul id="activityList" class="divide-y divide-slate-700/50"></ul></div>
       </div>
@@ -309,12 +278,12 @@
     </div>
   </div>
 
-  <!-- JavaScript領域 -->
   <script>
-    // --- 状態管理オブジェクト ---
+    // --- State Management ---
     let state = { 
-      tab: 'ranking', period: '', boss: 'all', sort: 'score', actPeriod: '14', elderWeek: '',
-      scatterTiers: ['all'] 
+      tab: 'ranking', period: 'last-30', boss: 'all', sort: 'score', actPeriod: '30', elderWeek: '',
+      scatterTiers: ['all'],
+      selectedPersonal: [] // 個別考察用の順番保持配列
     };
     
     const executives = ["てぃっしゅ", "たに", "よぴ", "かめ吉", "うえだ", "だいち", "さば"];
@@ -322,34 +291,26 @@
     const BOSS_NAMES = { '1':'墓守り', '2':'ドラゴン', '3':'バルログ', '4':'メドゥーサ', '5':'ストーンマン', '6':'一つ目', '0':'鎌' };
 
     let globalFilterState = {}; 
-    let personalFilterState = {}; 
-    let primaryPersonalUser = null; 
-
     let latestMemberInfo = []; 
     let globalRawData = []; let latestPowersDict = {};
     let processedData = []; let availableDates = [];
     let activeMembers = []; let weekMap = {}; let weeks = [];
-    
     let charts = { scatterPers: null, radar: null, trend: null };
 
     Chart.register(ChartDataLabels, window['chartjs-plugin-annotation']);
 
-    // --- ブラウザ履歴対応 ---
     window.addEventListener('popstate', (event) => {
       if (event.state) {
         state = event.state.stateObj;
         globalFilterState = event.state.gFilter;
-        personalFilterState = event.state.pFilter;
-        primaryPersonalUser = event.state.primaryUser;
         updateUIState(); renderView();
       }
     });
 
     function pushHistoryState() {
-      history.pushState({ stateObj: JSON.parse(JSON.stringify(state)), gFilter: JSON.parse(JSON.stringify(globalFilterState)), pFilter: JSON.parse(JSON.stringify(personalFilterState)), primaryUser: primaryPersonalUser }, "");
+      history.pushState({ stateObj: JSON.parse(JSON.stringify(state)), gFilter: JSON.parse(JSON.stringify(globalFilterState)) }, "");
     }
 
-    // --- 初期ロード ---
     window.onload = async () => {
       try {
         const response = await fetch(API_URL); const data = await response.json();
@@ -359,45 +320,36 @@
         activeMembers = Object.keys(latestPowersDict).sort((a, b) => a.localeCompare(b));
         
         prepareData(); initElderWeeks(); 
-        state.period = availableDates[0]; 
+        state.period = 'last-30'; state.actPeriod = '30';
         setupDateSelects();
         
         latestMemberInfo = activeMembers.map(name => {
           const pNum = parseValueString(latestPowersDict[name]); return { name: name, powerNum: pNum, tierCat: getTierCategory(pNum) };
         });
-        latestMemberInfo.forEach(info => { 
-          globalFilterState[info.name] = true; 
-          personalFilterState[info.name] = false; 
-        });
+        latestMemberInfo.forEach(info => { globalFilterState[info.name] = true; });
 
         updateUIState();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('main-tabs-container').style.display = 'block'; 
         document.getElementById('dashboard-content').style.display = 'block';
         
-        renderView();
-        history.replaceState({ stateObj: JSON.parse(JSON.stringify(state)), gFilter: JSON.parse(JSON.stringify(globalFilterState)), pFilter: JSON.parse(JSON.stringify(personalFilterState)), primaryUser: primaryPersonalUser }, "");
+        renderView(); pushHistoryState();
       } catch (error) { document.getElementById('loading').innerHTML = `<div class="text-red-500 font-bold">❌ エラー</div><div class="text-sm mt-2">${error.message}</div>`; }
     };
 
-    // --- 共通データ処理 ---
+    // --- Data Utils ---
     function parseValueString(str) {
       if (!str || str === "未登録") return 0;
       let halfStr = String(str).replace(/[Ａ-Ｚａ-ｚ０-９．]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-      const upperStr = halfStr.toUpperCase(); const num = parseFloat(upperStr.replace(/[^0-9.]/g, ''));
-      if (upperStr.includes('T')) return num * 1e12; if (upperStr.includes('B')) return num * 1e9; if (upperStr.includes('M')) return num * 1e6;
-      return num;
+      const num = parseFloat(halfStr.toUpperCase().replace(/[^0-9.]/g, ''));
+      if (halfStr.toUpperCase().includes('T')) return num * 1e12; if (halfStr.toUpperCase().includes('B')) return num * 1e9; if (halfStr.toUpperCase().includes('M')) return num * 1e6; return num;
     }
     function formatValue(num) {
       if (num === 0) return "0";
-      if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T'; if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'; if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-      return num.toLocaleString();
+      if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T'; if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'; if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M'; return num.toLocaleString();
     }
     function getTierCategory(power) {
       if (power >= 2e7) return '20'; if (power >= 1.5e7) return '15-20'; if (power >= 1e7) return '10-15'; return '0-10';
-    }
-    function getTierColor(power) {
-      if (power >= 2e7) return '#f97316'; if (power >= 1.5e7) return '#6366f1'; if (power >= 1e7) return '#0ea5e9'; return '#10b981'; 
     }
     function getTierTailwindClass(power, isButton = false) {
       if (power >= 2e7) return isButton ? 'bg-orange-900/80 text-orange-200 border-orange-700' : 'bg-orange-500/20 text-orange-400 border-orange-500/50';
@@ -407,8 +359,7 @@
     }
     function computeRanks(arr, key) {
       arr.sort((a, b) => b[key] - a[key]); let r = 1, s = 0, p = null;
-      arr.forEach(i => { if (i[key] !== p) { r += s; s = 1; p = i[key]; } else { s++; } i.displayRank = r; });
-      return arr;
+      arr.forEach(i => { if (i[key] !== p) { r += s; s = 1; p = i[key]; } else { s++; } i.displayRank = r; }); return arr;
     }
     function prepareData() {
       let data = globalRawData.map(d => {
@@ -441,15 +392,12 @@
       if(sel) { sel.innerHTML = ''; weeks.forEach(w => sel.insertAdjacentHTML('beforeend', `<option value="${w}">${weekMap[w].label}の週</option>`)); sel.value = state.elderWeek; }
     }
 
-    // --- UI/状態の更新 ---
-    function getActiveFilter() { return state.tab === 'personal' ? personalFilterState : globalFilterState; }
-
+    // --- UI/Filter Controls ---
     function updateUIState() {
       updatePeriodButtons(); updateBossButtons(); updateSortButtons(state.sort); updateScatterTierButtons();
-      
       ['ranking','personal','elder','activity'].forEach(v => {
         const b = document.getElementById(`nav-${v}`);
-        if(b) b.className = v===state.tab ? "flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-slate-700";
+        if(b) b.className = v===state.tab ? "flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-slate-700";
       });
       ['14','30','90'].forEach(v => {
         const b = document.getElementById(`act-period-${v}`);
@@ -461,105 +409,96 @@
       document.getElementById('ctrl-elder').style.display = state.tab==='elder'?'block':'none';
       document.getElementById('ctrl-activity').style.display = state.tab==='activity'?'block':'none';
 
+      document.getElementById('filter-title-text').innerText = state.tab === 'personal' ? '個別考察の比較メンバー追加' : '表示メンバーの絞り込み (全体)';
+      document.getElementById('global-filter-presets').style.display = state.tab === 'personal' ? 'none' : 'flex';
+
       renderFilterControls(); updateStickyBadge();
     }
 
-    function toggleFilterPanel() { const p = document.getElementById('common-filter-panel'); p.classList.toggle('hidden'); document.getElementById('filter-panel-icon').textContent = p.classList.contains('hidden') ? '▼' : '▲'; }
-    function autoCloseFilterPanel() { document.getElementById('common-filter-panel').classList.add('hidden'); document.getElementById('filter-panel-icon').textContent = '▼'; }
+    function toggleFilterPanel() { 
+      const p = document.getElementById('common-filter-panel'); p.classList.toggle('hidden'); 
+      document.getElementById('filter-panel-icon').textContent = p.classList.contains('hidden') ? '▼' : '▲'; 
+    }
+    function autoCloseFilterPanel() { 
+      document.getElementById('common-filter-panel').classList.add('hidden'); document.getElementById('filter-panel-icon').textContent = '▼'; 
+    }
     
     function renderFilterControls() {
-      const activeFilter = getActiveFilter();
-      const onCount = Object.values(activeFilter).filter(v => v).length;
+      const onCount = state.tab === 'personal' ? state.selectedPersonal.length : Object.values(globalFilterState).filter(v => v).length;
       document.getElementById('filter-count-badge').textContent = `${onCount}名`;
-      
       const warnRanking = document.getElementById('ranking-filter-warning');
       if(warnRanking) {
-        if(state.tab === 'ranking' && onCount < latestMemberInfo.length) warnRanking.classList.remove('hidden');
-        else warnRanking.classList.add('hidden');
+        if(state.tab === 'ranking' && onCount < latestMemberInfo.length) warnRanking.classList.remove('hidden'); else warnRanking.classList.add('hidden');
       }
 
       const tCont = document.getElementById('filter-tier-chips'); tCont.innerHTML = '';
-      [{ id: '20', l: '20M〜' }, { id: '15-20', l: '15〜20M' }, { id: '10-15', l: '10〜15M' }, { id: '0-10', l: '〜10M' }].forEach(t => {
-        const ms = latestMemberInfo.filter(d => d.tierCat === t.id); if (ms.length === 0) return;
-        const isOn = ms.some(d => activeFilter[d.name]);
-        const cls = isOn ? getTierTailwindClass(t.id==='20'?2e7:t.id==='15-20'?1.5e7:1e7, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
-        tCont.insertAdjacentHTML('beforeend', `<button onclick="toggleTier('${t.id}')" class="flex-none px-3 py-1 text-[11px] font-bold rounded-md border transition ${cls}">${t.l}</button>`);
-      });
+      if (state.tab !== 'personal') {
+        [{ id: '20', l: '20M〜' }, { id: '15-20', l: '15〜20M' }, { id: '10-15', l: '10〜15M' }, { id: '0-10', l: '〜10M' }].forEach(t => {
+          const ms = latestMemberInfo.filter(d => d.tierCat === t.id); if (ms.length === 0) return;
+          const isOn = ms.some(d => globalFilterState[d.name]);
+          const cls = isOn ? getTierTailwindClass(t.id==='20'?2e7:t.id==='15-20'?1.5e7:1e7, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
+          tCont.insertAdjacentHTML('beforeend', `<button onclick="toggleTier('${t.id}')" class="flex-none px-3 py-1 text-[11px] font-bold rounded-md border transition ${cls}">${t.l}</button>`);
+        });
+      }
 
       const mCont = document.getElementById('filter-member-chips'); mCont.innerHTML = '';
       [...latestMemberInfo].sort((a,b) => b.powerNum - a.powerNum).forEach(d => {
-        const isOn = activeFilter[d.name];
-        const cls = isOn ? getTierTailwindClass(d.powerNum, true) : 'bg-slate-800 text-slate-500 border-slate-700 line-through opacity-60 hover:bg-slate-700';
+        const isOn = state.tab === 'personal' ? state.selectedPersonal.includes(d.name) : globalFilterState[d.name];
+        const cls = isOn ? getTierTailwindClass(d.powerNum, true) : 'bg-slate-800 text-slate-500 border-slate-700 opacity-60 hover:bg-slate-700';
         mCont.insertAdjacentHTML('beforeend', `<button onclick="toggleMember('${d.name}')" class="px-2 py-0.5 text-[10px] font-bold rounded-full border transition ${cls}">${d.name}</button>`);
       });
     }
     
     function toggleTier(t) { 
-      const activeFilter = getActiveFilter();
-      const ms = latestMemberInfo.filter(d => d.tierCat === t); 
-      const isOn = ms.some(d => activeFilter[d.name]); 
-      ms.forEach(d => { activeFilter[d.name] = !isOn; checkPrimaryUser(d.name, !isOn); }); 
+      if (state.tab === 'personal') return;
+      const ms = latestMemberInfo.filter(d => d.tierCat === t); const isOn = ms.some(d => globalFilterState[d.name]); 
+      ms.forEach(d => globalFilterState[d.name] = !isOn); 
       renderFilterControls(); renderView(); pushHistoryState(); 
     }
-    
     function toggleMember(n) { 
-      const activeFilter = getActiveFilter();
-      activeFilter[n] = !activeFilter[n]; checkPrimaryUser(n, activeFilter[n]);
+      if (state.tab === 'personal') {
+        if (state.selectedPersonal.includes(n)) state.selectedPersonal = state.selectedPersonal.filter(x => x !== n);
+        else { if (state.selectedPersonal.length >= 10) { alert("比較は最大10人までです"); return; } state.selectedPersonal.push(n); }
+      } else { globalFilterState[n] = !globalFilterState[n]; }
       renderFilterControls(); renderView(); pushHistoryState(); 
     }
-    
     function toggleAllMembers(f) { 
-      const activeFilter = getActiveFilter();
-      latestMemberInfo.forEach(d => activeFilter[d.name] = f); 
-      if (!f) primaryPersonalUser = null; else if(f && activeMembers.length>0 && !primaryPersonalUser) primaryPersonalUser = activeMembers[0];
+      if (state.tab === 'personal') return;
+      latestMemberInfo.forEach(d => globalFilterState[d.name] = f); 
       renderFilterControls(); renderView(); pushHistoryState(); 
     }
-    
     function toggleExecutives(f) {
-      const activeFilter = getActiveFilter();
-      executives.forEach(n => { if (activeFilter[n] !== undefined) { activeFilter[n] = f; checkPrimaryUser(n, f); } });
+      if (state.tab === 'personal') return;
+      executives.forEach(n => { if (globalFilterState[n] !== undefined) globalFilterState[n] = f; });
       renderFilterControls(); renderView(); pushHistoryState(); 
     }
 
-    function checkPrimaryUser(name, isAdding) {
-      if (state.tab !== 'personal') return;
-      const onCount = Object.values(personalFilterState).filter(v=>v).length;
-      if (isAdding && onCount === 1) primaryPersonalUser = name;
-      else if (!isAdding && name === primaryPersonalUser) {
-        const remaining = Object.keys(personalFilterState).filter(k=>personalFilterState[k]);
-        primaryPersonalUser = remaining.length > 0 ? remaining[0] : null;
-      }
+    function movePersonalMember(name, dir) {
+      const idx = state.selectedPersonal.indexOf(name); if (idx < 0) return;
+      const newIdx = idx + dir; if (newIdx < 0 || newIdx >= state.selectedPersonal.length) return;
+      const temp = state.selectedPersonal[idx]; state.selectedPersonal[idx] = state.selectedPersonal[newIdx]; state.selectedPersonal[newIdx] = temp;
+      renderPersonal(); pushHistoryState();
     }
 
     function setupDateSelects() {
       const el = document.getElementById('period-date-global');
-      if(el) { el.innerHTML = '<option value="" disabled hidden>日付で見る</option>'; availableDates.forEach((date, i) => { el.insertAdjacentHTML('beforeend', `<option value="${date}">${i===0?date+' (最新)':date}</option>`); }); }
+      if(el) { el.innerHTML = '<option value="" disabled hidden>単日指定</option>'; availableDates.forEach((date, i) => { el.insertAdjacentHTML('beforeend', `<option value="${date}">${i===0?date+'(最新)':date}</option>`); }); }
     }
     function updatePeriodButtons() {
-      const isDate = !state.period.startsWith('last-');
-      const el = document.getElementById('period-date-global');
-      if(el) { el.value = isDate ? state.period : ""; el.className = isDate ? "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-indigo-600 text-white border-indigo-500 shadow-[0_4px_6px_rgba(0,0,0,0.3)]" : "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-slate-900 text-slate-300 border-slate-600"; }
+      const isDate = !state.period.startsWith('last-'); const el = document.getElementById('period-date-global');
+      if(el) { el.value = isDate ? state.period : ""; el.className = isDate ? "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-indigo-600 text-white border-indigo-500 shadow-md" : "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-slate-900 text-slate-300 border-slate-600"; }
       ['last-14', 'last-30', 'last-90'].forEach(v => { const b = document.getElementById(`period-${v}-global`); if(b) b.className = (v === state.period) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
     }
-    function updateBossButtons() { ['all','1','2','3','4','5','6','0'].forEach(v => { const b = document.getElementById(`boss-${v}`); if(b) { if(v===state.boss){b.classList.remove('btn-inactive');b.classList.add('btn-active');}else{b.classList.remove('btn-active');b.classList.add('btn-inactive');} }}); }
-    function updateSortButtons(k) { const l = {'score':'👑 スコア','maxScore':'🔥 ハイスコア','efficiency':'⚡ 効率','power':'💪 戦力','rank':'🏅 順位'}; ['score','maxScore','efficiency','power','rank'].forEach(s => { const b = document.getElementById(`sort-${s}`); if(b){ b.innerHTML=l[s]+(s===k?' <span class="text-[10px] ml-1 opacity-80">▼</span>':''); b.className = s===k ? "flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap"; }}); }
+    function updateBossButtons() { ['all','1','2','3','4','5','6','0'].forEach(v => { const b = document.getElementById(`boss-${v}`); if(b) { b.className = v===state.boss ? b.className.replace('btn-inactive','btn-active') : b.className.replace('btn-active','btn-inactive'); }}); }
+    function updateSortButtons(k) { const l = {'score':'👑 スコア','maxScore':'🔥 ハイスコア','efficiency':'⚡ 効率','power':'💪 戦力','rank':'🏅 順位'}; ['score','maxScore','efficiency','power','rank'].forEach(s => { const b = document.getElementById(`sort-${s}`); if(b){ b.innerHTML=l[s]+(s===k?' <span class="text-[10px] ml-1 opacity-80">▼</span>':''); b.className = s===k ? "flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap"; }}); }
     
     function toggleScatterTier(t) {
-      if (t === 'all') { state.scatterTiers = ['all']; } 
-      else {
-        state.scatterTiers = state.scatterTiers.filter(x => x !== 'all');
-        if (state.scatterTiers.includes(t)) state.scatterTiers = state.scatterTiers.filter(x => x !== t);
-        else state.scatterTiers.push(t);
-        if (state.scatterTiers.length === 0) state.scatterTiers = ['all'];
-      }
+      if (t === 'all') state.scatterTiers = ['all']; 
+      else { state.scatterTiers = state.scatterTiers.filter(x => x !== 'all'); if (state.scatterTiers.includes(t)) state.scatterTiers = state.scatterTiers.filter(x => x !== t); else state.scatterTiers.push(t); if (state.scatterTiers.length === 0) state.scatterTiers = ['all']; }
       updateScatterTierButtons(); renderPersonal(); pushHistoryState(); 
     }
-    
     function updateScatterTierButtons() {
-      ['all','20','15-20','10-15','0-10'].forEach(t => {
-        const b = document.getElementById(`sc-tier-${t}`);
-        if(b) b.className = state.scatterTiers.includes(t) ? "text-[9px] px-2 py-1 font-bold rounded transition border bg-indigo-600 text-white border-indigo-400 whitespace-nowrap" : "text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap";
-      });
+      ['all','20','15-20','10-15','0-10'].forEach(t => { const b = document.getElementById(`sc-tier-${t}`); if(b) b.className = state.scatterTiers.includes(t) ? "text-[9px] px-2 py-1 font-bold rounded transition border bg-indigo-600 text-white border-indigo-400 whitespace-nowrap" : "text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap"; });
     }
 
     function updateStickyBadge() {
@@ -572,8 +511,14 @@
       }
     }
 
-    // --- インタラクション ---
-    function setTab(t) { state.tab = t; updateUIState(); autoCloseFilterPanel(); renderView(); pushHistoryState(); }
+    // --- Actions ---
+    function setTab(t) { 
+      state.tab = t; 
+      if (['personal','elder','activity'].includes(t)) document.getElementById('common-filter-panel').classList.remove('hidden');
+      else document.getElementById('common-filter-panel').classList.add('hidden');
+      document.getElementById('filter-panel-icon').textContent = document.getElementById('common-filter-panel').classList.contains('hidden') ? '▼' : '▲';
+      updateUIState(); renderView(); pushHistoryState(); 
+    }
     function setPeriod(p) { 
       state.period = p; const o = document.getElementById('boss-disabled-overlay'); 
       if(!p.startsWith('last-')){ state.boss='all'; if(o)o.classList.remove('hidden'); } else { if(o)o.classList.add('hidden'); } 
@@ -585,21 +530,30 @@
     function setElderWeek(w) { state.elderWeek = w; updateStickyBadge(); renderElder(); pushHistoryState(); }
     
     function goToHistory(name) { 
-      latestMemberInfo.forEach(d => personalFilterState[d.name] = (d.name === name)); 
-      primaryPersonalUser = name;
-      state.tab = 'personal'; 
-      updateUIState(); autoCloseFilterPanel(); renderView(); window.scrollTo({top:0, behavior:'smooth'}); 
-      pushHistoryState(); 
+      state.selectedPersonal = [name]; state.tab = 'personal'; 
+      updateUIState(); autoCloseFilterPanel(); renderView(); window.scrollTo({top:0, behavior:'smooth'}); pushHistoryState(); 
     }
 
-    // --- データ抽出コア ---
+    function calculateRegressionLine(data) {
+      let sX=0, sY=0, sXY=0, sX2=0; const n=data.length; if(n<=1)return null;
+      data.forEach(d => { sX+=d.x; sY+=d.y; sXY+=d.x*d.y; sX2+=d.x*d.x; });
+      return { slope: (n*sXY - sX*sY)/(n*sX2 - sX*sX), intercept: (sY - (n*sXY - sX*sY)/(n*sX2 - sX*sX)*sX)/n };
+    }
+
+    // --- Main Rendering ---
+    function renderView() {
+      if (state.tab === 'ranking') renderRanking();
+      else if (state.tab === 'personal') renderPersonal();
+      else if (state.tab === 'activity') renderActivity();
+      else if (state.tab === 'elder') renderElder();
+    }
+
     function getBaseViewData(forceAllMembers = false) {
       let vData = [];
       if (!state.period.startsWith('last-')) {
         vData = processedData.filter(d => d.date === state.period).map(d => ({ name: d.name, powerNum: d.powerNum, scoreNum: d.scoreNum, efficiency: d.efficiency, diffScore: d.diffScore, tierCat: d.tierCat, isAvg: false, dailyRank: d.dailyRank, maxScoreNum: d.scoreNum, maxScoreDate: d.date, maxScoreBoss: new Date(d.date).getDay() }));
       } else {
-        let days = parseInt(state.period.split('-')[1]);
-        const pastMs = new Date(availableDates[0]).getTime() - (days * 864e5);
+        let days = parseInt(state.period.split('-')[1]); const pastMs = new Date(availableDates[0]).getTime() - (days * 864e5);
         let tDates = availableDates.filter(d => new Date(d).getTime() > pastMs);
         if (state.boss !== 'all') tDates = tDates.filter(d => new Date(d).getDay() == state.boss);
         let tData = processedData.filter(d => tDates.includes(d.date));
@@ -619,42 +573,21 @@
           }
         });
       }
-      const activeFilter = getActiveFilter();
-      return forceAllMembers ? vData : vData.filter(d => activeFilter[d.name]);
-    }
-
-    function calculateRegressionLine(data) {
-      let sX=0, sY=0, sXY=0, sX2=0; const n=data.length; if(n<=1)return null;
-      data.forEach(d => { sX+=d.x; sY+=d.y; sXY+=d.x*d.y; sX2+=d.x*d.x; });
-      return { slope: (n*sXY - sX*sY)/(n*sX2 - sX*sX), intercept: (sY - (n*sXY - sX*sY)/(n*sX2 - sX*sX)*sX)/n };
-    }
-
-    // --- メイン描画分岐 ---
-    function renderView() {
-      if (state.tab === 'ranking') renderRanking();
-      else if (state.tab === 'personal') renderPersonal();
-      else if (state.tab === 'activity') renderActivity();
-      else if (state.tab === 'elder') renderElder();
+      return forceAllMembers ? vData : vData.filter(d => globalFilterState[d.name]);
     }
 
     // 🏆 総合順位
     function renderRanking() {
       let data = getBaseViewData();
-      if (state.sort === 'score') data = computeRanks(data, 'scoreNum'); 
-      else if (state.sort === 'maxScore') data = computeRanks(data, 'maxScoreNum'); 
-      else if (state.sort === 'efficiency') data = computeRanks(data, 'efficiency'); 
-      else if (state.sort === 'power') data = computeRanks(data, 'powerNum'); 
-      else if (state.sort === 'rank') { data.sort((a,b)=>(a.isAvg?a.avgRank:a.dailyRank)-(b.isAvg?b.avgRank:b.dailyRank)); data.forEach(i=>i.displayRank=i.isAvg?i.avgRank:i.dailyRank); }
+      if (state.sort === 'score') data = computeRanks(data, 'scoreNum'); else if (state.sort === 'maxScore') data = computeRanks(data, 'maxScoreNum'); else if (state.sort === 'efficiency') data = computeRanks(data, 'efficiency'); else if (state.sort === 'power') data = computeRanks(data, 'powerNum'); else if (state.sort === 'rank') { data.sort((a,b)=>(a.isAvg?a.avgRank:a.dailyRank)-(b.isAvg?b.avgRank:b.dailyRank)); data.forEach(i=>i.displayRank=i.isAvg?i.avgRank:i.dailyRank); }
       
       const guideEl = document.getElementById('dynamic-guide-message');
       if(guideEl) {
         let pT = !state.period.startsWith('last-') ? "指定日（"+state.period.substring(5).replace('-','/')+"）" : {'last-14':'直近2週間','last-30':'直近1ヶ月','last-90':'直近3ヶ月'}[state.period];
         let bT = state.period.startsWith('last-') && state.boss !== 'all' ? BOSS_NAMES[state.boss]+" の " : "";
         let sT = state.sort === 'maxScore' ? (state.period.startsWith('last-')?"歴代ハイスコア":"データ") : (state.period.startsWith('last-')?"平均値":"データ");
-        guideEl.innerHTML = `<svg class="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          <span>現在は <span class="text-white border-b border-indigo-400 pb-0.5 tracking-wide">【 ${pT}の${bT}${sT} 】</span> を表示しています。</span>`;
+        guideEl.innerHTML = `<svg class="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>現在は <span class="text-white border-b border-indigo-400 pb-0.5 tracking-wide">【 ${pT}の${bT}${sT} 】</span> を表示しています。</span>`;
       }
-
       const listEl = document.getElementById('rankingList'); listEl.innerHTML = '';
       if (data.length === 0) { listEl.innerHTML = `<li class="p-8 text-center text-slate-500 text-sm font-bold">データなし</li>`; return; }
       
@@ -700,7 +633,7 @@
 
     // 👤 個別考察
     function renderPersonal() {
-      const tNames = latestMemberInfo.filter(d => personalFilterState[d.name]).map(d => d.name);
+      const tNames = state.selectedPersonal;
       const diagArea = document.getElementById('diagnostic-area');
       const suggArea = document.getElementById('rival-suggest-area'); const suggBtns = document.getElementById('rival-suggest-buttons');
       const richArea = document.getElementById('rich-analysis-area'); const radarCont = document.getElementById('radar-container');
@@ -709,66 +642,86 @@
       
       if (tNames.length === 0) {
         diagArea.classList.add('hidden'); suggArea.classList.add('hidden'); richArea.classList.add('hidden'); warnArea.classList.add('hidden');
-        listEl.innerHTML = `<li class="p-8 text-center text-slate-500 text-sm">上のフィルターからメンバーを選んでください</li>`;
+        listEl.innerHTML = `<li class="p-8 text-center text-slate-500 text-sm">上のフィルターからメンバーを追加してください</li>`;
         if (charts.scatterPers) charts.scatterPers.destroy(); if (charts.radar) charts.radar.destroy(); if (charts.trend) charts.trend.destroy();
         return;
       }
 
-      // === 診断レポート表（横並び） ===
+      // === 診断レポート表 ===
       let pDays = state.period.startsWith('last-') ? parseInt(state.period.split('-')[1]) : 30; 
       const validDates = availableDates.filter(d => new Date(d).getTime() > new Date(availableDates[0]).getTime() - (pDays * 864e5));
-      const allAvgsObj = {}; 
+      const allAvgsObj = {}; const allPowersObj = {};
       activeMembers.forEach(n => {
-        const sData = processedData.filter(d => d.name === n && validDates.includes(d.date)).map(d=>d.scoreNum);
-        if (sData.length > 0) allAvgsObj[n] = sData.reduce((a,b)=>a+b,0) / sData.length; 
+        const sData = processedData.filter(d => d.name === n && validDates.includes(d.date));
+        if (sData.length > 0) {
+          allAvgsObj[n] = sData.reduce((a,b)=>a+b.scoreNum,0) / sData.length; 
+          allPowersObj[n] = sData.reduce((a,b)=>a+b.powerNum,0) / sData.length;
+        }
       });
 
       const todayDow = new Date().getDay(); 
-      const todayBossStr = `👑 今日のボス（${['日','月','火','水','木','金','土'][todayDow]}曜 / ${BOSS_NAMES[todayDow]}）`;
+      const todayBossStr = `👑 今日のボス: <span class="text-amber-300 font-bold">${['日','月','火','水','木','金','土'][todayDow]}曜・${BOSS_NAMES[todayDow]}</span>`;
       
-      let htmlToday = '', htmlAvg = '', htmlBest = '', htmlWorst = '';
+      // 今日のボスの回帰直線を求める（全員分）
+      const todayDataAll = activeMembers.map(n => {
+        const sData = processedData.filter(d => d.name === n && validDates.includes(d.date) && new Date(d.date).getDay() === todayDow);
+        if(sData.length>0) return { x: sData.reduce((a,b)=>a+b.powerNum,0)/sData.length, y: sData.reduce((a,b)=>a+b.scoreNum,0)/sData.length };
+        return null;
+      }).filter(p=>p!==null);
+      const todayReg = calculateRegressionLine(todayDataAll);
+
+      let htmlAvg = '', htmlBest = '', htmlWorst = '', htmlTodayTgt = '', htmlTodayAvg = '';
       let headerHtml = '';
 
       tNames.forEach((name, i) => {
         const c = CHART_PALETTE[i % CHART_PALETTE.length];
-        headerHtml += `<th class="p-2 text-center border-l border-slate-700/50"><div class="flex justify-between items-center"><span style="color:${c}">● ${name}</span><button onclick="toggleMember('${name}')" class="text-slate-500 hover:text-rose-400 px-1 font-normal">✖</button></div></th>`;
+        headerHtml += `<th class="p-2 text-center border-l border-slate-700/50 min-w-[100px]">
+          <div class="flex justify-between items-center mb-1">
+            <button onclick="movePersonalMember('${name}', -1)" class="text-slate-500 hover:text-white px-2 py-1 leading-none rounded transition">&lt;</button>
+            <button onclick="toggleMember('${name}')" class="text-slate-500 hover:text-rose-400 px-2 py-1 leading-none rounded transition">✖</button>
+            <button onclick="movePersonalMember('${name}', 1)" class="text-slate-500 hover:text-white px-2 py-1 leading-none rounded transition">&gt;</button>
+          </div>
+          <div class="text-center" style="color:${c}">● ${name}</div>
+        </th>`;
         
         const avg = allAvgsObj[name] || 0;
+        const pwr = allPowersObj[name] || 0;
         if(avg > 0) {
           const bAvgs = [1,2,3,4,5,6,0].map(bid => {
             const s = processedData.filter(d => d.name === name && validDates.includes(d.date) && new Date(d.date).getDay()===bid).map(d=>d.scoreNum);
             return { id: bid, avg: s.length>0 ? s.reduce((a,b)=>a+b,0)/s.length : 0 };
           }).filter(x=>x.avg>0).sort((a,b)=>b.avg-a.avg);
           
-          const todayAvg = bAvgs.find(x=>x.id===todayDow)?.avg || 0;
           let myRank = 1; Object.values(allAvgsObj).forEach(v => { if(v > avg) myRank++; });
           let bestStr = bAvgs.length>0 ? `${['日','月','火','水','木','金','土'][bAvgs[0].id]}(${BOSS_NAMES[bAvgs[0].id]}) ${formatValue(bAvgs[0].avg)}` : '-';
           let worstStr = bAvgs.length>1 ? `${['日','月','火','水','木','金','土'][bAvgs[bAvgs.length-1].id]}(${BOSS_NAMES[bAvgs[bAvgs.length-1].id]}) ${formatValue(bAvgs[bAvgs.length-1].avg)}` : '-';
+          const todayAvg = bAvgs.find(x=>x.id===todayDow)?.avg || 0;
+          const todayTgt = todayReg ? (todayReg.slope * pwr + todayReg.intercept) : 0;
 
-          htmlToday += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200 bg-amber-900/10">${todayAvg>0 ? formatValue(todayAvg) : '-'}</td>`;
           htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50 text-indigo-300 font-bold">${formatValue(avg)} <span class="text-[9px] text-slate-400 font-normal">(${myRank}位)</span></td>`;
           htmlBest += `<td class="p-2 text-center border-l border-slate-700/50 text-emerald-300">${bestStr}</td>`;
           htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50 text-rose-300">${worstStr}</td>`;
+          htmlTodayTgt += `<td class="p-2 text-center border-l border-slate-700/50 text-amber-100">${todayTgt>0 ? formatValue(todayTgt) : '-'}</td>`;
+          htmlTodayAvg += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-300 bg-amber-900/20">${todayAvg>0 ? formatValue(todayAvg) : '-'}</td>`;
         } else {
-          htmlToday += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
-          htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
-          htmlBest += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
-          htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
+          htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlBest += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTodayTgt += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTodayAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
         }
       });
       
-      document.getElementById('diag-header-row').innerHTML = `<th class="p-2 font-normal whitespace-nowrap text-slate-400">項目 <span class="text-[9px]">(直近${pDays}日)</span></th>` + headerHtml;
-      document.getElementById('diagnostic-today-boss').innerHTML = todayBossStr;
+      const baseName = tNames[0];
+      document.getElementById('diag-period-label').innerText = `(直近${pDays}日)`;
+      document.getElementById('diag-header-row').innerHTML = `<th class="p-2 font-normal whitespace-nowrap text-slate-400 w-24">項目 <span class="text-[9px]">(直近${pDays}日)</span></th>` + headerHtml;
+      document.getElementById('diagnostic-today-boss').innerHTML = `<h3 class="text-indigo-200 font-bold text-sm mb-1">🎯 ${baseName} の個別レポート</h3><p class="text-xs text-slate-300">${todayBossStr}</p>`;
       document.getElementById('diag-body').innerHTML = `
-        <tr class="border-b border-slate-700/50 bg-slate-800/30"><td class="p-2 text-slate-400 font-bold">平均スコア (全体順位)</td>${htmlAvg}</tr>
+        <tr class="border-b border-slate-700/50 bg-slate-800/30"><td class="p-2 text-slate-400 font-bold">全ボス平均 <span class="text-[9px] font-normal">(全体順位)</span></td>${htmlAvg}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 font-bold">得意ボス</td>${htmlBest}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 font-bold">苦手ボス</td>${htmlWorst}</tr>
-        <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-400/80 font-bold">今日の平均</td>${htmlToday}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 font-bold">今日の目標 <span class="text-[9px] font-normal">(戦力比)</span></td>${htmlTodayTgt}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-400/80 font-bold">今日の実績 <span class="text-[9px] font-normal">(平均)</span></td>${htmlTodayAvg}</tr>
       `;
       diagArea.classList.remove('hidden');
 
-      // === ライバルサジェスト (常時表示＆トグル化) ===
-      const baseName = primaryPersonalUser || tNames[0];
+      // === ライバルサジェスト ===
       document.getElementById('rival-suggest-title').innerHTML = `🎯 <span class="text-white px-1 border-b border-indigo-400">${baseName}</span> と競り合うライバル`;
       const baseAvg = allAvgsObj[baseName] || 0;
       if (baseAvg > 0) {
@@ -799,15 +752,13 @@
 
         const pts = filteredBgData.map(d => {
           const isSelected = tNames.includes(d.name); const cIndex = isSelected ? tNames.indexOf(d.name) : -1;
-          return { x: d.powerNum/1e6, y: d.scoreNum/1e12, name: d.name, isSelected: isSelected, color: isSelected ? CHART_PALETTE[cIndex] : 'rgba(100,116,139,0.3)' };
+          return { x: d.powerNum/1e6, y: d.scoreNum/1e12, name: d.name, isSelected: isSelected, color: isSelected ? CHART_PALETTE[cIndex % CHART_PALETTE.length] : 'rgba(100,116,139,0.3)' };
         });
         
-        // オートズーム処理 (Y軸)
-        const selPts = pts.filter(p=>p.isSelected);
         let yMin = 0, yMax = 100;
-        if(selPts.length > 0) {
-          const sMin = Math.min(...selPts.map(p=>p.y)), sMax = Math.max(...selPts.map(p=>p.y));
-          yMin = Math.max(0, sMin - (sMax-sMin)*0.8); yMax = sMax + (sMax-sMin)*0.8;
+        if(pts.length > 0) {
+          const sMin = Math.min(...pts.map(p=>p.y)), sMax = Math.max(...pts.map(p=>p.y));
+          yMin = Math.max(0, sMin - (sMax-sMin)*0.1); yMax = sMax + (sMax-sMin)*0.1;
           if (yMin === yMax) { yMin *= 0.8; yMax *= 1.2; }
         }
         
@@ -818,7 +769,7 @@
         }
         if (charts.scatterPers) charts.scatterPers.destroy();
         charts.scatterPers = new Chart(document.getElementById('scatterChartPersonal').getContext('2d'), { 
-          type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: (c)=>c.raw?c.raw.color:'#000', pointRadius: (c)=>c.raw&&c.raw.isSelected?8:3, pointBorderColor: (c)=>c.raw&&c.raw.isSelected?'#fff':'transparent', pointBorderWidth: (c)=>c.raw&&c.raw.isSelected?2:0 }] }, 
+          type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: (c)=>c.raw?c.raw.color:'#000', pointRadius: (c)=>c.raw&&c.raw.isSelected?8:3, pointBorderColor: (c)=>c.raw&&c.raw.isSelected?'#fff':'transparent', pointBorderWidth: (c)=>c.raw&&c.raw.isSelected?2:0, pointHoverRadius: (c)=>c.raw&&c.raw.isSelected?12:5 }] }, 
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false}, annotation: {annotations:anno}, datalabels: { display: (c)=>c.dataset.data[c.dataIndex].isSelected, align: 'top', color: '#fff', font:{size:11, family:'Noto Sans JP', weight:'bold'}, formatter: v=>v.name }, tooltip: { callbacks: { label: (ctx)=>`${ctx.raw.y.toFixed(2)}T`, title: (ctx)=>ctx[0].raw.name } } }, scales: { x: { title:{display:true, text:'戦力 (M)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8'} }, y: { min: yMin, max: yMax, title:{display:true, text:'スコア (T)', color:'#94a3b8', font:{size:10}}, grid:{color:'rgba(51,65,85,0.3)'}, ticks:{color:'#94a3b8'} } } } 
         });
 
@@ -829,13 +780,13 @@
               const scores = processedData.filter(d => d.name === name && validDates.includes(d.date) && new Date(d.date).getDay() == bossId).map(d => d.scoreNum);
               return scores.length > 0 ? (scores.reduce((a,b)=>a+b,0)/scores.length)/1e12 : 0;
             });
-            const c = CHART_PALETTE[i]; return { label: name, data: bossAvgs, backgroundColor: c+'33', borderColor: c, pointBackgroundColor: c, borderWidth: 2 };
+            const c = CHART_PALETTE[i % CHART_PALETTE.length]; return { label: name, data: bossAvgs, backgroundColor: c+'33', borderColor: c, pointBackgroundColor: c, borderWidth: 2 };
           });
           if (charts.radar) charts.radar.destroy();
           charts.radar = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'radar', data: { labels: ['月(墓)','火(ド)','水(バ)','木(メ)','金(ス)','土(一)','日(鎌)'], datasets: radarData }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#cbd5e1', font: { family: 'Noto Sans JP', size: 10, weight: 'bold' } }, ticks: { display: false } } }, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#94a3b8', font: {size:10, family:'Noto Sans JP'} } }, datalabels: { display: false } } } });
         }
 
-        // --- 3. トレンド＆予測グラフ (バグ修正＆余白調整) ---
+        // --- 3. トレンド＆予測グラフ ---
         let bFilter = (state.period.startsWith('last-') && state.boss !== 'all') ? state.boss : null;
         let validD = bFilter !== null ? availableDates.filter(d => new Date(d).getDay() == bFilter) : availableDates;
         let chartDates = validD.slice(0, 15);
@@ -885,7 +836,7 @@
       }
     }
 
-    // ⚠️ 管理系タブ
+    // 👑 長老・未参加
     function renderActivity() {
       const listEl = document.getElementById('activityList'); listEl.innerHTML = '';
       const days = parseInt(state.actPeriod); const pastMs = new Date(availableDates[0]).getTime() - (days * 864e5);
