@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>【OtterCompany】魔物襲来ダッシュボード v4</title>
+  <title>【OtterCompany】魔物襲来ダッシュボード</title>
   
   <script>
     // ==========================================
@@ -60,7 +60,7 @@
     <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-3 border-b border-indigo-500/30 flex justify-center items-center relative">
       <h1 class="font-bold text-lg tracking-widest flex items-center gap-2">
         <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-        OtterCompany <span class="text-xs font-normal text-indigo-200 ml-1">Dash v4</span>
+        OtterCompany <span class="text-sm font-normal text-indigo-200">魔物スコア</span>
       </h1>
       <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap"></div>
     </header>
@@ -68,7 +68,7 @@
     <!-- 4大タブ -->
     <div id="main-tabs-container" class="w-full border-b border-slate-700/50" style="display:none;">
       <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
-        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
+        <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 全体ランキング</button>
         <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個別考察</button>
         <button id="nav-elder" onclick="setTab('elder')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">👑 長老選抜</button>
         <button id="nav-activity" onclick="setTab('activity')" class="flex-none px-3 py-2 text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">⚠️ 未参加数</button>
@@ -123,8 +123,16 @@
   <!-- ================= メインコンテンツ ================= -->
   <div class="max-w-2xl mx-auto px-2 sm:px-4 pt-4">
     
-    <!-- メンバーフィルター (スクロールで消える) -->
+    <!-- ★ 復活させたローディングインジケーター（これがないとJSがフリーズします） -->
+    <div id="loading" class="flex flex-col items-center justify-center py-20 text-indigo-400">
+      <svg class="animate-spin h-10 w-10 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+      <p class="font-bold tracking-widest text-sm">最新データを同期中...</p>
+    </div>
+
+    <!-- コンテンツエリア -->
     <div id="dashboard-content" style="display:none;">
+      
+      <!-- メンバーフィルター (スクロールで消える) -->
       <div id="filter-section" class="mb-4">
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
@@ -151,7 +159,7 @@
         </div>
       </div>
 
-      <!-- 🏆【総合順位】 -->
+      <!-- 🏆【全体ランキング】 -->
       <div id="view-ranking" class="block">
         
         <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
@@ -204,10 +212,10 @@
               <p class="text-[11px] font-bold text-slate-300 flex items-center gap-1"><svg class="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6c0 4 6 10 6 10s6-6 6-10a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z"/></svg> 全体の中での立ち位置</p>
               <div class="flex gap-1 overflow-x-auto scrollbar-hide pb-0.5">
                 <button onclick="setScatterTier('all')" id="sc-tier-all" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-indigo-600 text-white border-indigo-400">全員</button>
-                <button onclick="setScatterTier('20')" id="sc-tier-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600">20M〜</button>
-                <button onclick="setScatterTier('15-20')" id="sc-tier-15-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600">15-20M</button>
-                <button onclick="setScatterTier('10-15')" id="sc-tier-10-15" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600">10-15M</button>
-                <button onclick="setScatterTier('0-10')" id="sc-tier-0-10" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600">〜10M</button>
+                <button onclick="setScatterTier('20')" id="sc-tier-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">20M〜</button>
+                <button onclick="setScatterTier('15-20')" id="sc-tier-15-20" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">15-20M</button>
+                <button onclick="setScatterTier('10-15')" id="sc-tier-10-15" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">10-15M</button>
+                <button onclick="setScatterTier('0-10')" id="sc-tier-0-10" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700">〜10M</button>
               </div>
             </div>
             <p class="text-[9px] text-slate-400 pl-1 mb-2">※赤点線は<span class="text-slate-200 font-bold border-b border-slate-500">表示中の背景メンバー</span>から算出した目標基準です。Y軸は自動ズームされます。</p>
@@ -696,7 +704,7 @@
         if (sData.length > 0) allAvgsObj[n] = sData.reduce((a,b)=>a+b,0) / sData.length; 
       });
 
-      const todayDow = new Date().getDay(); // システム日付基準の曜日
+      const todayDow = new Date().getDay(); 
       const todayBossStr = `今日のボス（${['日','月','火','水','木','金','土'][todayDow]}曜・${BOSS_NAMES[todayDow]}）`;
       
       diagArea.innerHTML = '';
