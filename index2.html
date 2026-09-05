@@ -53,8 +53,7 @@
       <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap hidden sm:block"></div>
     </header>
     
-    <!-- タブメニュー -->
-    <div class="w-full border-b border-slate-700/50">
+    <div id="main-tabs-container" class="w-full border-b border-slate-700/50" style="display:none;">
       <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
         <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
         <button id="nav-personal" onclick="setTab('personal')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-indigo-500/30">👤 個別考察</button>
@@ -150,7 +149,7 @@
       <!-- 🏆【総合順位】 -->
       <div id="view-ranking" class="block">
         <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
-          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 一部のメンバーのみ表示中</span>
+          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 現在一部のメンバーのみ表示中</span>
           <button onclick="toggleAllMembers(true)" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow-sm transition">全員表示に戻す</button>
         </div>
         
@@ -179,7 +178,7 @@
       <!-- 👤【個別考察】 -->
       <div id="view-personal" class="hidden">
         
-        <!-- サジェストエリア -->
+        <!-- ライバルサジェスト -->
         <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
           <p id="rival-suggest-title" class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -336,7 +335,7 @@
           const pNum = parseValueString(latestPowersDict[name]); return { name: name, powerNum: pNum, tierCat: getTierCategory(pNum) };
         });
         latestMemberInfo.forEach(info => { globalFilterState[info.name] = true; });
-        
+
         updateUIState();
         if(document.getElementById('loading')) document.getElementById('loading').style.display = 'none';
         if(document.getElementById('main-tabs-container')) document.getElementById('main-tabs-container').style.display = 'block'; 
@@ -696,26 +695,15 @@
       // === 診断レポート表 ===
       let pDays = parseInt(state.persPeriod.split('-')[1]); 
       const validDates = availableDates.filter(d => new Date(d).getTime() > new Date(availableDates[0]).getTime() - (pDays * 864e5));
-      const allAvgsObj = {}; const allPowersObj = {};
+      const allAvgsObj = {};
       activeMembers.forEach(n => {
         const sData = processedData.filter(d => d.name === n && validDates.includes(d.date));
-        if (sData.length > 0) {
-          allAvgsObj[n] = sData.reduce((a,b)=>a+b.scoreNum,0) / sData.length; 
-          allPowersObj[n] = sData.reduce((a,b)=>a+b.powerNum,0) / sData.length;
-        }
+        if (sData.length > 0) allAvgsObj[n] = sData.reduce((a,b)=>a+b.scoreNum,0) / sData.length; 
       });
 
       const targetBossId = state.persBoss === 'all' ? new Date().getDay() : parseInt(state.persBoss);
       const targetBossName = BOSS_NAMES[targetBossId];
       const dowStr = ['日','月','火','水','木','金','土'][targetBossId];
-      
-      // 全体の目標ライン計算用 (指定ボスの回帰直線)
-      const targetDataAll = activeMembers.map(n => {
-        const sData = processedData.filter(d => d.name === n && validDates.includes(d.date) && new Date(d.date).getDay() === targetBossId);
-        if(sData.length>0) return { x: sData.reduce((a,b)=>a+b.powerNum,0)/sData.length, y: sData.reduce((a,b)=>a+b.scoreNum,0)/sData.length };
-        return null;
-      }).filter(p=>p!==null);
-      const targetReg = calculateRegressionLine(targetDataAll);
       
       // ボーダー算出(3位)
       let border3rd = 0;
@@ -725,7 +713,7 @@
         border3rd = scores.length >= 3 ? scores[2] : (scores.length>0 ? scores[scores.length-1] : 0);
       }
 
-      let htmlPrev='', htmlTgtAvg='', htmlTgtTgt='', htmlTgtBorder='', htmlAvg='', htmlBest='', htmlWorst='', htmlTrend='';
+      let htmlPrev='', htmlTgtAvg='', htmlTgtBorder='', htmlAvg='', htmlBest='', htmlWorst='', htmlTrend='';
       let headerHtml = '';
       const baseName = tNames[0];
 
@@ -740,7 +728,7 @@
           <div class="text-center font-bold" style="color:${c}">● ${name}</div>
         </th>`;
         
-        const avg = allAvgsObj[name] || 0; const pwr = allPowersObj[name] || 0;
+        const avg = allAvgsObj[name] || 0;
         if(avg > 0) {
           const bAvgs = [1,2,3,4,5,6,0].map(bid => {
             const s = processedData.filter(d => d.name === name && validDates.includes(d.date) && new Date(d.date).getDay()===bid).map(d=>d.scoreNum);
@@ -761,7 +749,15 @@
 
           const prevRec = processedData.find(d => d.name===name && validDates.includes(d.date) && new Date(d.date).getDay()===targetBossId);
           const prevStr = prevRec ? formatValue(prevRec.scoreNum) : '-';
-          const tgtTarget = targetReg ? (targetReg.slope * pwr + targetReg.intercept) : 0;
+          
+          let prevDiffStr = '';
+          if (prevRec && tgtAvg > 0) {
+            const diff = prevRec.scoreNum - tgtAvg;
+            const diffT = diff / 1e12;
+            if (diff > 0) prevDiffStr = ` <span class="text-[9px] text-red-400 font-normal">(平均比 +${diffT.toFixed(2)}T)</span>`;
+            else if (diff < 0) prevDiffStr = ` <span class="text-[9px] text-blue-400 font-normal">(平均比 ${diffT.toFixed(2)}T)</span>`;
+            else prevDiffStr = ` <span class="text-[9px] text-slate-400 font-normal">(平均比 ±0.00T)</span>`;
+          }
 
           // トレンドテキスト
           let trendStr = '-';
@@ -779,50 +775,48 @@
                 if (regB.slope >= regT.slope) trendStr = `<span class="text-emerald-400 font-bold">盤石 (+${diffStrTxt})</span>`;
                 else {
                   let weeks = diff / (regT.slope - regB.slope);
-                  if(weeks < 4) trendStr = `<span class="text-amber-400 font-bold">猛追されてる (+${diffStrTxt})</span> / <span class="text-[9px]">約${Math.ceil(weeks)}週で逆転圏内</span>`;
+                  if(weeks < 4) trendStr = `<span class="text-amber-400 font-bold">猛追されてる (+${diffStrTxt})</span> <span class="text-[9px]">約${Math.ceil(weeks)}週で逆転圏内</span>`;
                   else trendStr = `<span class="text-emerald-300 font-bold">リード (+${diffStrTxt})</span>`;
                 }
               } else {
                 if (regB.slope <= regT.slope) trendStr = `<span class="text-rose-400 font-bold">差が拡大中 (-${diffStrTxt})</span>`;
                 else {
                   let weeks = Math.abs(diff) / (regB.slope - regT.slope);
-                  if(weeks < 4) trendStr = `<span class="text-amber-300 font-bold">猛追中！ (-${diffStrTxt})</span> / <span class="text-[9px]">約${Math.ceil(weeks)}週で逆転見込</span>`;
+                  if(weeks < 4) trendStr = `<span class="text-amber-300 font-bold">猛追中！ (-${diffStrTxt})</span> <span class="text-[9px]">約${Math.ceil(weeks)}週で逆転見込</span>`;
                   else trendStr = `<span class="text-rose-300 font-bold">ビハインド (-${diffStrTxt})</span>`;
                 }
               }
             }
           }
 
-          htmlPrev += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200">${prevStr}</td>`;
+          htmlPrev += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200 bg-amber-900/10">${prevStr}${prevDiffStr}</td>`;
           htmlTgtAvg += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200">${tgtAvg>0 ? formatValue(tgtAvg) : '-'} <span class="text-[9px] text-amber-400/70 font-normal">(${tgtRank}位)</span></td>`;
-          htmlTgtTgt += `<td class="p-2 text-center border-l border-slate-700/50 text-amber-100/80">${tgtTarget>0 ? formatValue(tgtTarget) : '-'}</td>`;
-          htmlTgtBorder += `<td class="p-2 text-center border-l border-slate-700/50 text-indigo-300/80">${border3rd>0 ? formatValue(border3rd) : '-'}</td>`;
+          htmlTgtBorder += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200 bg-amber-900/10">${border3rd>0 ? formatValue(border3rd) : '-'}</td>`;
           
           htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50 text-indigo-200">${formatValue(avg)} <span class="text-[9px] text-slate-400 font-normal">(${myRank}位)</span></td>`;
           htmlBest += `<td class="p-2 text-center border-l border-slate-700/50 text-emerald-300/80">${bestStr}</td>`;
           htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50 text-rose-300/80">${worstStr}</td>`;
           htmlTrend += `<td class="p-2 text-center border-l border-slate-700/50">${trendStr}</td>`;
         } else {
-          htmlPrev += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTgtAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTgtTgt += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTgtBorder += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlBest += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTrend += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
+          htmlPrev += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTgtAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTgtBorder += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlBest += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlWorst += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`; htmlTrend += `<td class="p-2 text-center border-l border-slate-700/50">-</td>`;
         }
       });
       
-      document.getElementById('diag-header-row').innerHTML = `<th class="p-2 font-normal whitespace-nowrap sticky-col bg-slate-800 min-w-[120px]">項目 <span class="text-[9px] block text-slate-400">(直近${pDays}日)</span></th>` + headerHtml;
+      document.getElementById('diag-header-row').innerHTML = `<th class="p-2 font-normal whitespace-nowrap sticky-col bg-slate-800 min-w-[120px]">項目 <span class="text-[9px] text-slate-400 block">(直近${pDays}日)</span></th>` + headerHtml;
       document.getElementById('diagnostic-title').innerHTML = `🎯 <span class="text-white border-b border-indigo-400 px-1">${baseName}</span> の個別レポート`;
       
       document.getElementById('diag-body').innerHTML = `
-        <tr><td colspan="${tNames.length+1}" class="bg-indigo-900/50 p-1 pl-2 font-bold text-indigo-200 text-[10px]">👑 指定ボス（${dowStr}曜・${targetBossName}）の分析</td></tr>
-        <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-900">前回の結果</td>${htmlPrev}</tr>
-        <tr class="border-b border-slate-700/50 bg-amber-900/10"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-800">平均スコア <span class="text-[9px] font-normal">(順位)</span></td>${htmlTgtAvg}</tr>
-        <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-300 sticky-col bg-slate-900">目標スコア <span class="text-[9px] font-normal">(戦力比)</span></td>${htmlTgtTgt}</tr>
-        <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 sticky-col bg-slate-900">上位3位ボーダー</td>${htmlTgtBorder}</tr>
+        <tr><td colspan="${tNames.length+1}" class="bg-indigo-900/50 p-1.5 pl-2 font-bold text-indigo-200 text-xs sm:text-[13px]">👑 指定ボス（${dowStr}曜・${targetBossName}）の分析</td></tr>
+        <tr class="border-b border-slate-700/50 bg-amber-900/10"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-800">先週の結果</td>${htmlPrev}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-900">平均スコア <span class="text-[9px] font-normal">(順位)</span></td>${htmlTgtAvg}</tr>
+        <tr class="border-b border-slate-700/50 bg-amber-900/10"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-800">上位3位ボーダー</td>${htmlTgtBorder}</tr>
         
-        <tr><td colspan="${tNames.length+1}" class="bg-slate-800/80 p-1 pl-2 font-bold text-slate-300 text-[10px] border-t border-slate-600">📊 総合分析 (全ボス)</td></tr>
+        <tr><td colspan="${tNames.length+1}" class="bg-slate-800/80 p-1.5 pl-2 font-bold text-slate-300 text-[11px] sm:text-xs border-t border-slate-600">📊 総合分析 (全ボス)</td></tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-300 sticky-col bg-slate-900">全ボス平均 <span class="text-[9px] font-normal">(全体順位)</span></td>${htmlAvg}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 sticky-col bg-slate-900">得意ボス</td>${htmlBest}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 sticky-col bg-slate-900">苦手ボス</td>${htmlWorst}</tr>
 
-        <tr><td colspan="${tNames.length+1}" class="bg-slate-800/80 p-1 pl-2 font-bold text-slate-300 text-[10px] border-t border-slate-600">⚔️ ライバル比較予測 (${targetBossName})</td></tr>
+        <tr><td colspan="${tNames.length+1}" class="bg-slate-800/80 p-1.5 pl-2 font-bold text-slate-300 text-[11px] sm:text-xs border-t border-slate-600">⚔️ ライバル比較予測 (${targetBossName})</td></tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-300 sticky-col bg-slate-900">未来予測の傾向</td>${htmlTrend}</tr>
       `;
       diagArea.classList.remove('hidden');
