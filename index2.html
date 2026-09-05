@@ -53,7 +53,6 @@
       <div id="sticky-period-badge" class="absolute right-3 text-[10px] font-bold bg-indigo-600 border border-indigo-400 px-2 py-0.5 rounded-full shadow-md pointer-events-none whitespace-nowrap hidden sm:block"></div>
     </header>
     
-    <!-- タブメニュー -->
     <div class="w-full border-b border-slate-700/50">
       <div class="max-w-2xl mx-auto px-2 sm:px-4 py-2 flex flex-nowrap overflow-x-auto scrollbar-hide gap-1.5">
         <button id="nav-ranking" onclick="setTab('ranking')" class="flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap">🏆 総合順位</button>
@@ -63,8 +62,8 @@
       </div>
     </div>
 
-    <!-- グローバルコントロール（タブ別完全分離） -->
-    <div class="max-w-2xl mx-auto w-full px-2 sm:px-4 py-2 transition-all">
+    <!-- グローバルコントロール -->
+    <div id="global-controls-panel" class="max-w-2xl mx-auto w-full px-2 sm:px-4 py-2 transition-all">
       
       <!-- 🏆 総合順位 コントロール -->
       <div id="ctrl-ranking" class="block">
@@ -114,7 +113,6 @@
   <!-- ================= メインコンテンツ ================= -->
   <div class="max-w-2xl mx-auto px-2 sm:px-4 pt-4">
     
-    <!-- ローディング表示 -->
     <div id="loading" class="flex flex-col items-center justify-center py-20 text-indigo-400">
       <svg class="animate-spin h-10 w-10 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
       <p class="font-bold tracking-widest text-sm">データ解析中...</p>
@@ -133,7 +131,7 @@
           <span id="filter-panel-icon" class="text-slate-400 text-lg">▼</span>
         </button>
         
-        <div id="common-filter-panel" class="glass-card p-3 mt-1.5 border border-slate-600 shadow-xl hidden">
+        <div id="common-filter-panel" class="glass-card p-3 mt-1.5 border border-slate-600 shadow-xl block">
           <div class="flex justify-between items-start mb-2.5 flex-wrap gap-2">
             <p class="text-[11px] font-bold text-slate-400 mt-1">タップで個別にON/OFF</p>
             <div id="global-filter-presets" class="flex gap-1.5 flex-wrap">
@@ -151,7 +149,7 @@
       <!-- 🏆【総合順位】 -->
       <div id="view-ranking" class="block">
         <div id="ranking-filter-warning" class="hidden mb-3 p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg flex items-center justify-between shadow-md">
-          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 現在一部のメンバーのみ表示中</span>
+          <span class="text-[10px] sm:text-[11px] text-indigo-200 font-bold">⚠️ 一部のメンバーのみ表示中</span>
           <button onclick="toggleAllMembers(true)" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow-sm transition">全員表示に戻す</button>
         </div>
         
@@ -180,20 +178,6 @@
       <!-- 👤【個別考察】 -->
       <div id="view-personal" class="hidden">
         
-        <!-- 考察レポート表 -->
-        <div id="diagnostic-area" class="mb-5 hidden">
-          <div class="glass-card overflow-hidden border-indigo-500/50 border shadow-lg relative">
-            <div id="diagnostic-today-boss" class="bg-indigo-900/80 p-2 text-xs text-indigo-100 border-b border-indigo-500/50"></div>
-            <div class="overflow-x-auto scrollbar-hide">
-              <table class="w-full text-left border-collapse text-[10px] sm:text-[11px] text-slate-200 table-compact">
-                <thead><tr id="diag-header-row" class="bg-slate-800/80 text-slate-300"></tr></thead>
-                <tbody id="diag-body"></tbody>
-              </table>
-            </div>
-            <p class="text-[9px] text-slate-400 bg-slate-900/80 p-1 pr-2 text-right border-t border-slate-700/50">※表は横にスクロールできます</p>
-          </div>
-        </div>
-
         <!-- ライバルサジェスト -->
         <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
           <p id="rival-suggest-title" class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
@@ -201,6 +185,20 @@
             ライバル候補
           </p>
           <div id="rival-suggest-buttons" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- 考察レポート表 -->
+        <div id="diagnostic-area" class="mb-5 hidden">
+          <div class="glass-card overflow-hidden border-indigo-500/50 border shadow-lg relative">
+            <div id="diagnostic-title" class="bg-indigo-900/80 p-2 text-sm font-bold text-indigo-100 border-b border-indigo-500/50"></div>
+            <div class="overflow-x-auto scrollbar-hide">
+              <table class="w-full text-left border-collapse text-[10px] sm:text-[11px] text-slate-200">
+                <thead><tr id="diag-header-row" class="bg-slate-800/80 text-slate-300"></tr></thead>
+                <tbody id="diag-body"></tbody>
+              </table>
+            </div>
+            <p class="text-[9px] text-slate-400 bg-slate-900/80 p-1 pr-2 text-right border-t border-slate-700/50">※表は横にスクロールできます</p>
+          </div>
         </div>
         
         <div id="rich-analysis-area" class="hidden">
@@ -216,7 +214,7 @@
                 <button onclick="toggleScatterTier('0-10')" id="sc-tier-0-10" class="text-[9px] px-2 py-1 font-bold rounded transition border bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 whitespace-nowrap">〜10M</button>
               </div>
             </div>
-            <p class="text-[9px] text-slate-400 pl-1 mb-2">※赤点線は<span class="text-slate-200 font-bold border-b border-slate-500">上のフィルタで表示中のメンバー</span>の基準目標です。</p>
+            <p class="text-[9px] text-slate-400 pl-1 mb-2">※赤点線は<span class="text-slate-200 font-bold border-b border-slate-500">上のフィルタで表示中の全員</span>から算出した目標基準です。Y軸は自動ズームされます。</p>
             <div class="relative w-full h-[280px]"><canvas id="scatterChartPersonal"></canvas></div>
           </div>
 
@@ -407,6 +405,7 @@
     // --- UI/Filter Controls ---
     function updateUIState() {
       updatePeriodButtons(); updateBossButtons(); updateSortButtons(state.sort); updateScatterTierButtons();
+      
       ['ranking','personal','elder','activity'].forEach(v => {
         const b = document.getElementById(`nav-${v}`);
         if(b) b.className = v===state.tab ? "flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-3 py-2 text-[11px] sm:text-xs font-bold rounded-md btn-inactive transition-colors whitespace-nowrap border border-slate-700";
@@ -416,11 +415,15 @@
         if(b) b.className = v===state.actPeriod ? "flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-active transition-colors whitespace-nowrap" : "flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap";
       });
 
-      ['ranking','personal','elder','activity'].forEach(id => document.getElementById(`view-${id}`).style.display = id===state.tab?'block':'none');
-      document.getElementById('ctrl-ranking').style.display = state.tab === 'ranking' ? 'block':'none';
-      document.getElementById('ctrl-personal').style.display = state.tab === 'personal' ? 'block':'none';
-      document.getElementById('ctrl-elder').style.display = state.tab==='elder'?'block':'none';
-      document.getElementById('ctrl-activity').style.display = state.tab==='activity'?'block':'none';
+      ['ranking','personal','elder','activity'].forEach(id => {
+        const view = document.getElementById(`view-${id}`);
+        if(view) view.style.display = id===state.tab ? 'block':'none';
+      });
+
+      const ctrlR = document.getElementById('ctrl-ranking'); if(ctrlR) ctrlR.style.display = state.tab === 'ranking' ? 'block':'none';
+      const ctrlP = document.getElementById('ctrl-personal'); if(ctrlP) ctrlP.style.display = state.tab === 'personal' ? 'block':'none';
+      const ctrlE = document.getElementById('ctrl-elder'); if(ctrlE) ctrlE.style.display = state.tab === 'elder'?'block':'none';
+      const ctrlA = document.getElementById('ctrl-activity'); if(ctrlA) ctrlA.style.display = state.tab === 'activity'?'block':'none';
 
       document.getElementById('filter-title-text').innerText = state.tab === 'personal' ? '個別考察のメンバー追加 (最大10人)' : '表示メンバーの絞り込み (全体用)';
       document.getElementById('global-filter-presets').style.display = state.tab === 'personal' ? 'none' : 'flex';
@@ -436,6 +439,7 @@
     function renderFilterControls() {
       const onCount = state.tab === 'personal' ? state.selectedPersonal.length : Object.values(globalFilterState).filter(v => v).length;
       document.getElementById('filter-count-badge').textContent = `${onCount}名`;
+      
       const warnRanking = document.getElementById('ranking-filter-warning');
       if(warnRanking) {
         if(state.tab === 'ranking' && onCount < latestMemberInfo.length) warnRanking.classList.remove('hidden'); else warnRanking.classList.add('hidden');
@@ -495,9 +499,11 @@
       if(el) { el.innerHTML = '<option value="" disabled hidden>単日指定</option>'; availableDates.forEach((date, i) => { el.insertAdjacentHTML('beforeend', `<option value="${date}">${i===0?date+'(最新)':date}</option>`); }); }
     }
     function updatePeriodButtons() {
+      // Ranking
       const rDate = !state.rankPeriod.startsWith('last-'); const rEl = document.getElementById('sel-rank-date');
       if(rEl) { rEl.value = rDate ? state.rankPeriod : ""; rEl.className = rDate ? "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-indigo-600 text-white border-indigo-500 shadow-md" : "flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer bg-slate-900 text-slate-300 border-slate-600"; }
       ['14', '30', '90'].forEach(v => { const b = document.getElementById(`btn-rank-${v}`); if(b) b.className = (`last-${v}` === state.rankPeriod) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
+      // Personal
       ['14', '30', '90'].forEach(v => { const b = document.getElementById(`btn-pers-${v}`); if(b) b.className = (`last-${v}` === state.persPeriod) ? "flex-1 py-1 text-[11px] font-bold rounded-md btn-active transition-colors" : "flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors"; });
     }
     function updateBossButtons() { ['all','1','2','3','4','5','6','0'].forEach(v => { const b = document.getElementById(`boss-${v}`); if(b) { if(v===state.persBoss){b.classList.remove('btn-inactive');b.classList.add('btn-active');}else{b.classList.remove('btn-active');b.classList.add('btn-inactive');} }}); }
@@ -532,7 +538,6 @@
       document.getElementById('filter-panel-icon').textContent = document.getElementById('common-filter-panel').classList.contains('hidden') ? '▼' : '▲';
       updateUIState(); renderView(); pushHistoryState(); 
     }
-    function setPeriod(p) { state.rankPeriod = p; updateUIState(); renderView(); pushHistoryState(); }
     function setRankPeriod(p) { state.rankPeriod = p; updateUIState(); renderView(); pushHistoryState(); }
     function setPersPeriod(p) { state.persPeriod = p; updateUIState(); renderView(); pushHistoryState(); }
     function setPersBoss(b) { state.persBoss = b; updateUIState(); renderView(); pushHistoryState(); }
@@ -788,17 +793,20 @@
       });
       
       document.getElementById('diag-header-row').innerHTML = `<th class="p-2 font-normal whitespace-nowrap sticky-col bg-slate-800 min-w-[120px]">項目 <span class="text-[9px] block text-slate-400">(直近${pDays}日)</span></th>` + headerHtml;
-      document.getElementById('diagnostic-today-boss').innerHTML = `<h3 class="text-indigo-200 font-bold text-sm mb-1">🎯 <span class="text-white border-b border-indigo-400 px-1">${baseName}</span> の個別レポート</h3><p class="text-xs text-slate-300">👑 指定ボス（${dowStr}曜・${targetBossName}）の分析</p>`;
+      document.getElementById('diagnostic-title').innerHTML = `🎯 <span class="text-white border-b border-indigo-400 px-1">${baseName}</span> の個別レポート`;
       
       document.getElementById('diag-body').innerHTML = `
+        <tr><td colspan="${tNames.length+1}" class="bg-indigo-900/50 p-1 pl-2 font-bold text-indigo-200 text-[10px]">👑 指定ボス（${dowStr}曜・${targetBossName}）の分析</td></tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-900">前回の結果</td>${htmlPrev}</tr>
         <tr class="border-b border-slate-700/50 bg-amber-900/10"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-800">平均スコア <span class="text-[9px] font-normal">(順位)</span></td>${htmlTgtAvg}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-300 sticky-col bg-slate-900">目標スコア <span class="text-[9px] font-normal">(戦力比)</span></td>${htmlTgtTgt}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 sticky-col bg-slate-900">上位3位ボーダー</td>${htmlTgtBorder}</tr>
+        
         <tr><td colspan="${tNames.length+1}" class="bg-slate-800/80 p-1 pl-2 font-bold text-slate-300 text-[10px] border-t border-slate-600">📊 総合分析 (全ボス)</td></tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-300 sticky-col bg-slate-900">全ボス平均 <span class="text-[9px] font-normal">(全体順位)</span></td>${htmlAvg}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 sticky-col bg-slate-900">得意ボス</td>${htmlBest}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-400 sticky-col bg-slate-900">苦手ボス</td>${htmlWorst}</tr>
+
         <tr><td colspan="${tNames.length+1}" class="bg-slate-800/80 p-1 pl-2 font-bold text-slate-300 text-[10px] border-t border-slate-600">⚔️ ライバル比較予測 (${targetBossName})</td></tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-300 sticky-col bg-slate-900">未来予測の傾向</td>${htmlTrend}</tr>
       `;
@@ -827,7 +835,7 @@
         radarCont.classList.toggle('hidden', tNames.length > 5);
         
         // --- 1. 散布図 ---
-        const allData = getBaseViewData(true, true); // 全員取得
+        const allData = getBaseViewData(true, true); 
         let filteredBgData = allData;
         if (!state.scatterTiers.includes('all')) {
           filteredBgData = allData.filter(d => state.scatterTiers.includes(d.tierCat) || tNames.includes(d.name));
@@ -838,7 +846,6 @@
           return { x: d.powerNum/1e6, y: d.scoreNum/1e12, name: d.name, isSelected: isSelected, color: isSelected ? CHART_PALETTE[cIndex % CHART_PALETTE.length] : 'rgba(100,116,139,0.3)' };
         });
         
-        // オートズーム処理 (Y軸) ※フィルタで表示中の全員が収まるように
         let yMin = 0, yMax = 100;
         if(pts.length > 0) {
           const sMin = Math.min(...pts.map(p=>p.y)), sMax = Math.max(...pts.map(p=>p.y));
@@ -875,7 +882,7 @@
         chartDates.reverse();
 
         const xLabels = chartDates.map(d=>d.substring(5).replace('-','/'));
-        xLabels.push("来週予測", " ", " ", " "); // 右側に予測用の余白を広く確保
+        xLabels.push("来週予測", " ", " ", " "); 
 
         const tDatasets = tNames.map((name, i) => {
           const c = CHART_PALETTE[i % CHART_PALETTE.length];
