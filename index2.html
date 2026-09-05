@@ -62,10 +62,8 @@
       </div>
     </div>
 
-    <!-- グローバルコントロール（タブ別完全分離） -->
     <div id="global-controls-panel" class="max-w-2xl mx-auto w-full px-2 sm:px-4 py-2 transition-all">
       
-      <!-- 🏆 総合順位 コントロール -->
       <div id="ctrl-ranking" class="block">
         <div class="flex gap-1">
           <select id="sel-rank-date" onchange="setRankPeriod(this.value)" class="flex-none px-2 py-1 text-[11px] font-bold rounded-md outline-none transition-colors border cursor-pointer"></select>
@@ -75,7 +73,6 @@
         </div>
       </div>
 
-      <!-- 👤 個別考察 コントロール -->
       <div id="ctrl-personal" class="hidden">
         <div class="flex gap-1 mb-1.5">
           <button id="btn-pers-14" onclick="setPersPeriod('last-14')" class="flex-1 py-1 text-[11px] font-bold rounded-md btn-inactive transition-colors">2週間</button>
@@ -94,12 +91,10 @@
         </div>
       </div>
 
-      <!-- 👑 長老用 -->
       <div id="ctrl-elder" class="hidden">
         <select id="elder-week-select" onchange="setElderWeek(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded-md text-sm p-1.5 outline-none text-white shadow-inner cursor-pointer font-bold"></select>
       </div>
 
-      <!-- ⚠️ 未参加用 -->
       <div id="ctrl-activity" class="hidden">
         <div class="flex gap-1 overflow-x-auto scrollbar-hide">
           <button id="act-period-14" onclick="setActPeriod('14')" class="flex-none px-4 py-1.5 text-[11px] font-bold rounded-md btn-inactive transition-colors whitespace-nowrap">2週間</button>
@@ -120,7 +115,6 @@
 
     <div id="dashboard-content" style="display:none;">
       
-      <!-- メンバーフィルター -->
       <div id="filter-section" class="mb-4">
         <button onclick="toggleFilterPanel()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-xs font-bold text-slate-200 flex justify-between items-center shadow-lg transition-colors hover:bg-slate-700">
           <span class="flex items-center gap-2">
@@ -178,7 +172,7 @@
       <!-- 👤【個別考察】 -->
       <div id="view-personal" class="hidden">
         
-        <!-- ライバルサジェスト -->
+        <!-- サジェストエリア -->
         <div id="rival-suggest-area" class="hidden mb-4 bg-gradient-to-r from-slate-800 to-indigo-900/40 border border-indigo-500/50 rounded-lg p-3 shadow-inner">
           <p id="rival-suggest-title" class="text-[11px] font-bold text-indigo-300 mb-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -335,7 +329,7 @@
           const pNum = parseValueString(latestPowersDict[name]); return { name: name, powerNum: pNum, tierCat: getTierCategory(pNum) };
         });
         latestMemberInfo.forEach(info => { globalFilterState[info.name] = true; });
-
+        
         updateUIState();
         if(document.getElementById('loading')) document.getElementById('loading').style.display = 'none';
         if(document.getElementById('main-tabs-container')) document.getElementById('main-tabs-container').style.display = 'block'; 
@@ -427,14 +421,6 @@
 
       const fTitle = document.getElementById('filter-title-text'); if(fTitle) fTitle.innerText = state.tab === 'personal' ? '個別考察のメンバー追加 (最大10人)' : '表示メンバーの絞り込み (全体用)';
       const fPresets = document.getElementById('global-filter-presets'); if(fPresets) fPresets.style.display = state.tab === 'personal' ? 'none' : 'flex';
-
-      // タブごとのフィルターパネルの初期開閉
-      const fPanel = document.getElementById('common-filter-panel');
-      const fIcon = document.getElementById('filter-panel-icon');
-      if(fPanel && fIcon) {
-        if (state.tab === 'ranking') { fPanel.classList.add('hidden'); fIcon.textContent = '▼'; }
-        else { fPanel.classList.remove('hidden'); fIcon.textContent = '▲'; }
-      }
 
       renderFilterControls(); updateStickyBadge();
     }
@@ -698,7 +684,9 @@
       const allAvgsObj = {};
       activeMembers.forEach(n => {
         const sData = processedData.filter(d => d.name === n && validDates.includes(d.date));
-        if (sData.length > 0) allAvgsObj[n] = sData.reduce((a,b)=>a+b.scoreNum,0) / sData.length; 
+        if (sData.length > 0) {
+          allAvgsObj[n] = sData.reduce((a,b)=>a+b.scoreNum,0) / sData.length; 
+        }
       });
 
       const targetBossId = state.persBoss === 'all' ? new Date().getDay() : parseInt(state.persBoss);
@@ -789,9 +777,9 @@
             }
           }
 
-          htmlPrev += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200 bg-amber-900/10">${prevStr}${prevDiffStr}</td>`;
+          htmlPrev += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200">${prevStr}${prevDiffStr}</td>`;
           htmlTgtAvg += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200">${tgtAvg>0 ? formatValue(tgtAvg) : '-'} <span class="text-[9px] text-amber-400/70 font-normal">(${tgtRank}位)</span></td>`;
-          htmlTgtBorder += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200 bg-amber-900/10">${border3rd>0 ? formatValue(border3rd) : '-'}</td>`;
+          htmlTgtBorder += `<td class="p-2 text-center border-l border-slate-700/50 font-bold text-amber-200">${border3rd>0 ? formatValue(border3rd) : '-'}</td>`;
           
           htmlAvg += `<td class="p-2 text-center border-l border-slate-700/50 text-indigo-200">${formatValue(avg)} <span class="text-[9px] text-slate-400 font-normal">(${myRank}位)</span></td>`;
           htmlBest += `<td class="p-2 text-center border-l border-slate-700/50 text-emerald-300/80">${bestStr}</td>`;
@@ -807,9 +795,9 @@
       
       document.getElementById('diag-body').innerHTML = `
         <tr><td colspan="${tNames.length+1}" class="bg-indigo-900/50 p-1.5 pl-2 font-bold text-indigo-200 text-xs sm:text-[13px]">👑 指定ボス（${dowStr}曜・${targetBossName}）の分析</td></tr>
-        <tr class="border-b border-slate-700/50 bg-amber-900/10"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-800">先週の結果</td>${htmlPrev}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-900">先週の結果</td>${htmlPrev}</tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-900">平均スコア <span class="text-[9px] font-normal">(順位)</span></td>${htmlTgtAvg}</tr>
-        <tr class="border-b border-slate-700/50 bg-amber-900/10"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-800">上位3位ボーダー</td>${htmlTgtBorder}</tr>
+        <tr class="border-b border-slate-700/50"><td class="p-2 text-amber-200 font-bold sticky-col bg-slate-900">上位3位ボーダー</td>${htmlTgtBorder}</tr>
         
         <tr><td colspan="${tNames.length+1}" class="bg-slate-800/80 p-1.5 pl-2 font-bold text-slate-300 text-[11px] sm:text-xs border-t border-slate-600">📊 総合分析 (全ボス)</td></tr>
         <tr class="border-b border-slate-700/50"><td class="p-2 text-slate-300 sticky-col bg-slate-900">全ボス平均 <span class="text-[9px] font-normal">(全体順位)</span></td>${htmlAvg}</tr>
