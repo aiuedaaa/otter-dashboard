@@ -422,17 +422,37 @@
       }
     };
 
-    function parseValueString(str) {
-      if (!str || str === "未登録") return 0;
-      let halfStr = String(str).replace(/[Ａ-Ｚａ-ｚ０-９．]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-      const num = parseFloat(halfStr.toUpperCase().replace(/[^0-9.]/g, ''));
-      if (halfStr.toUpperCase().includes('T')) return num * 1e12; if (halfStr.toUpperCase().includes('B')) return num * 1e9; if (halfStr.toUpperCase().includes('M')) return num * 1e6; return num;
-    }
+function parseNumericValue(value) {
+  if (typeof value === 'number') return Number.isFinite(value) && value >= 0 ? { number: value, value: value } : null;
+  if (typeof value !== 'string') return null;
+  const s = value.replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).trim();
+  let n;
+  if (/^(?:\d+(?:\.\d*)?|\.\d+)[eE][+-]?\d+$/.test(s)) n = Number(s);
+  else {
+    const m = /^((?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d*)?|\.\d+)\s*([MBTE]?)$/i.exec(s);
+    if (!m) return null;
+    n = Number(m[1].replace(/,/g, '')) * ({ M: 1e6, B: 1e9, T: 1e12, E: 1e15 }[m[2].toUpperCase()] || 1);
+  }
+  return Number.isFinite(n) && n >= 0 ? { number: n, value: s.toUpperCase() } : null;
+}
+    function parseValueString(value) { const p = parseNumericValue(value); return p ? p.number : NaN; }
     function formatValue(num) {
-      if (num === 0) return "0";
-      if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T'; if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'; if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M'; return num.toLocaleString();
+      if (!Number.isFinite(num)) return '未登録/未対応/解析不能';
+      if (num === 0) return '0';
+      for (const [unit, scale] of [['E',1e15],['T',1e12],['B',1e9],['M',1e6]])
+        if (Math.abs(num) >= scale) return (num / scale).toFixed(2) + unit;
+      return num.toLocaleString();
     }
+    function parseCivilDate(value) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value));
+      if (!m) return null;
+      const d = new Date(0); d.setUTCFullYear(+m[1], +m[2]-1, +m[3]); d.setUTCHours(0,0,0,0);
+      return d.getUTCFullYear() === +m[1] && d.getUTCMonth() === +m[2]-1 && d.getUTCDate() === +m[3] ? d : null;
+    }
+    function formatCivilDate(d) { return d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') + '-' + String(d.getUTCDate()).padStart(2,'0'); }
+    function scoreChartValue(value) { return formatValue(Number(value) * 1e12); }
     function getTierCategory(power) {
+      if (!Number.isFinite(power)) return 'unknown';
       if (power >= 2e7) return '20'; if (power >= 1.5e7) return '15-20'; if (power >= 1e7) return '10-15'; return '0-10';
     }
     function getTierTailwindClass(power, isButton = false) {
@@ -446,31 +466,41 @@
       arr.forEach(i => { if (i[key] !== p) { r += s; s = 1; p = i[key]; } else { s++; } i.displayRank = r; }); return arr;
     }
     function prepareData() {
-      let data = globalRawData.map(d => {
+      let invalidDates = 0, invalidScores = 0, unknownPowers = 0;
+      let data = globalRawData.filter(d => {
+        if (!parseCivilDate(d.date)) { invalidDates++; return false; }
+        if (!Number.isFinite(parseValueString(d.score))) { invalidScores++; return false; }
+        if (!Number.isFinite(parseValueString(d.power))) unknownPowers++;
+        return true;
+      }).map(d => {
         const s = parseValueString(d.score), p = parseValueString(d.power);
         return { ...d, scoreNum: s, powerNum: p, efficiency: p > 0 ? (s/1e9)/(p/1e6) : 0, dailyRank: 0, tierCat: getTierCategory(p) };
       });
+      let note = document.getElementById('data-quality-note');
+      if (!note) { note = document.createElement('div'); note.id = 'data-quality-note'; note.className = 'text-amber-300 text-xs p-3'; document.getElementById('dashboard-content').prepend(note); }
+      note.textContent = invalidDates || invalidScores || unknownPowers ? `集計対象外：無効日付${invalidDates}件・解析不能スコア${invalidScores}件。戦力未登録/解析不能${unknownPowers}件は戦力集計から除外。元データは変更していません。` : '';
+      if (!data.length) throw new Error('集計できる有効な日付・スコアがありません。');
       availableDates = [...new Set(data.map(d => d.date))].sort().reverse();
       availableDates.forEach(date => {
         let dItems = data.filter(d => d.date === date); dItems = computeRanks(dItems, 'scoreNum'); dItems.forEach(i => { i.dailyRank = i.displayRank; });
       });
       const mData = {}; data.forEach(d => { if (!mData[d.name]) mData[d.name] = {}; mData[d.name][d.date] = d.scoreNum; });
       data.forEach(d => {
-        const [y, m, day] = d.date.split('-'); const dObj = new Date(y, m - 1, day); dObj.setDate(dObj.getDate() - 7);
-        const wAgo = dObj.getFullYear() + '-' + String(dObj.getMonth() + 1).padStart(2, '0') + '-' + String(dObj.getDate()).padStart(2, '0');
+        const dObj = parseCivilDate(d.date); dObj.setUTCDate(dObj.getUTCDate() - 7);
+        const wAgo = formatCivilDate(dObj);
         d.diffScore = (mData[d.name] && mData[d.name][wAgo] !== undefined) ? d.scoreNum - mData[d.name][wAgo] : null;
       });
-      data.sort((a, b) => new Date(b.date) - new Date(a.date)); processedData = data;
+      data.sort((a, b) => parseCivilDate(b.date) - parseCivilDate(a.date)); processedData = data;
     }
     function initElderWeeks() {
       weekMap = {}; weeks = [];
       availableDates.forEach(dateStr => {
-        const d = new Date(dateStr); const day = d.getDay(); const startD = new Date(d); startD.setDate(d.getDate() - day);
-        const startStr = startD.getFullYear() + '-' + String(startD.getMonth()+1).padStart(2,'0') + '-' + String(startD.getDate()).padStart(2,'0');
+        const d = parseCivilDate(dateStr); const day = d.getUTCDay(); const startD = new Date(d); startD.setUTCDate(d.getUTCDate() - day);
+        const startStr = formatCivilDate(startD);
         if (!weekMap[startStr]) { weekMap[startStr] = { label: startStr.replace(/-/g,'/'), dates: [] }; weeks.push(startStr); }
         weekMap[startStr].dates.push(dateStr);
       });
-      weeks.sort((a,b) => new Date(b) - new Date(a));
+      weeks.sort((a,b) => parseCivilDate(b) - parseCivilDate(a));
       if(weeks.length > 0) state.elderWeek = weeks[0];
       const sel = document.getElementById('elder-week-select');
       if(sel) { sel.innerHTML = ''; weeks.forEach(w => sel.insertAdjacentHTML('beforeend', `<option value="${w}">${weekMap[w].label}の週</option>`)); sel.value = state.elderWeek; }
@@ -655,11 +685,11 @@
       const bossStr = isPersonal ? state.persBoss : (state.rankPeriod.startsWith('last-') ? state.rankBoss : 'all');
 
       if (!periodStr.startsWith('last-')) { 
-        vData = processedData.filter(d => d.date === periodStr).map(d => ({ name: d.name, powerNum: d.powerNum, scoreNum: d.scoreNum, efficiency: d.efficiency, diffScore: d.diffScore, tierCat: d.tierCat, isAvg: false, dailyRank: d.dailyRank, maxScoreNum: d.scoreNum, maxScoreDate: d.date, maxScoreBoss: new Date(d.date).getDay() }));
+        vData = processedData.filter(d => d.date === periodStr).map(d => ({ name: d.name, powerNum: d.powerNum, scoreNum: d.scoreNum, efficiency: d.efficiency, diffScore: d.diffScore, tierCat: d.tierCat, isAvg: false, dailyRank: d.dailyRank, maxScoreNum: d.scoreNum, maxScoreDate: d.date, maxScoreBoss: parseCivilDate(d.date).getUTCDay() }));
       } else {
-        let days = parseInt(periodStr.split('-')[1]); const pastMs = new Date(availableDates[0]).getTime() - (days * 864e5);
-        let tDates = availableDates.filter(d => new Date(d).getTime() > pastMs);
-        if (bossStr !== 'all') tDates = tDates.filter(d => new Date(d).getDay() == bossStr);
+        let days = parseInt(periodStr.split('-')[1]); const pastMs = parseCivilDate(availableDates[0]).getTime() - (days * 864e5);
+        let tDates = availableDates.filter(d => parseCivilDate(d).getTime() > pastMs);
+        if (bossStr !== 'all') tDates = tDates.filter(d => parseCivilDate(d).getUTCDay() == bossStr);
         let tData = processedData.filter(d => tDates.includes(d.date));
         
         let minC = 1; if(bossStr==='all'){ minC = days===14?4:days===30?8:20; } else { minC = days>=30?2:1; }
@@ -667,12 +697,12 @@
         tData.forEach(d => {
           if (!agg[d.name]) agg[d.name] = { sSum: 0, pSum: 0, pCnt: 0, rSum: 0, cnt: 0, maxS: 0, maxD: '', maxB: 0 };
           agg[d.name].sSum += d.scoreNum; agg[d.name].rSum += d.dailyRank; agg[d.name].cnt++;
-          if (d.powerNum > 0) { agg[d.name].pSum += d.powerNum; agg[d.name].pCnt++; }
-          if (d.scoreNum > agg[d.name].maxS) { agg[d.name].maxS = d.scoreNum; agg[d.name].maxD = d.date; agg[d.name].maxB = new Date(d.date).getDay(); }
+          if (Number.isFinite(d.powerNum)) { agg[d.name].pSum += d.powerNum; agg[d.name].pCnt++; }
+          if (d.scoreNum > agg[d.name].maxS) { agg[d.name].maxS = d.scoreNum; agg[d.name].maxD = d.date; agg[d.name].maxB = parseCivilDate(d.date).getUTCDay(); }
         });
         Object.keys(agg).forEach(n => {
           const i = agg[n]; if (i.cnt >= minC) {
-            const aS = i.sSum/i.cnt, aP = i.pCnt>0?i.pSum/i.pCnt:0;
+            const aS = i.sSum/i.cnt, aP = i.pCnt>0?i.pSum/i.pCnt:NaN;
             vData.push({ name: n, powerNum: aP, scoreNum: aS, efficiency: aP>0?(aS/1e9)/(aP/1e6):0, avgRank: i.rSum/i.cnt, joinCount: i.cnt, targetDays: tDates.length, tierCat: getTierCategory(aP), isAvg: true, maxScoreNum: i.maxS, maxScoreDate: i.maxD, maxScoreBoss: i.maxB });
           }
         });
@@ -755,7 +785,7 @@
       }
 
       let pDays = parseInt(state.persPeriod.split('-')[1]); 
-      const validDates = availableDates.filter(d => new Date(d).getTime() > new Date(availableDates[0]).getTime() - (pDays * 864e5));
+      const validDates = availableDates.filter(d => parseCivilDate(d).getTime() > parseCivilDate(availableDates[0]).getTime() - (pDays * 864e5));
       const allAvgsObj = {};
       activeMembers.forEach(n => {
         const sData = processedData.filter(d => d.name === n && validDates.includes(d.date));
@@ -769,7 +799,7 @@
       
       let border3rd = 0;
       if (!isAllBoss) {
-        const tDate = validDates.find(d => new Date(d).getDay() === targetBossId);
+        const tDate = validDates.find(d => parseCivilDate(d).getUTCDay() === targetBossId);
         if(tDate) {
           const scores = processedData.filter(d=>d.date===tDate).map(d=>d.scoreNum).sort((a,b)=>b-a);
           border3rd = scores.length >= 3 ? scores[2] : (scores.length>0 ? scores[scores.length-1] : 0);
@@ -803,7 +833,7 @@
         const avg = allAvgsObj[name] || 0;
         if(avg > 0) {
           const bAvgs = [1,2,3,4,5,6,0].map(bid => {
-            const s = processedData.filter(d => d.name === name && validDates.includes(d.date) && new Date(d.date).getDay()===bid).map(d=>d.scoreNum);
+            const s = processedData.filter(d => d.name === name && validDates.includes(d.date) && parseCivilDate(d.date).getUTCDay()===bid).map(d=>d.scoreNum);
             return { id: bid, avg: s.length>0 ? s.reduce((a,b)=>a+b,0)/s.length : 0 };
           }).filter(x=>x.avg>0).sort((a,b)=>b.avg-a.avg);
           
@@ -825,18 +855,18 @@
             const tgtAvgObj = bAvgs.find(x=>x.id===targetBossId);
             tgtAvg = tgtAvgObj?.avg || 0;
             activeMembers.forEach(n => {
-              const s = processedData.filter(d => d.name === n && validDates.includes(d.date) && new Date(d.date).getDay()===targetBossId).map(d=>d.scoreNum);
+              const s = processedData.filter(d => d.name === n && validDates.includes(d.date) && parseCivilDate(d.date).getUTCDay()===targetBossId).map(d=>d.scoreNum);
               const nAvg = s.length>0 ? s.reduce((a,b)=>a+b,0)/s.length : 0;
               if(nAvg > tgtAvg) tgtRank++;
             });
-            const prevRec = processedData.find(d => d.name===name && validDates.includes(d.date) && new Date(d.date).getDay()===targetBossId);
+            const prevRec = processedData.find(d => d.name===name && validDates.includes(d.date) && parseCivilDate(d.date).getUTCDay()===targetBossId);
             if(prevRec) {
               prevStr = formatValue(prevRec.scoreNum);
               if (tgtAvg > 0) {
                 const diff = prevRec.scoreNum - tgtAvg; const diffT = diff / 1e12;
-                if (diff > 0) prevDiffStr = ` <span class="text-[9px] text-rose-400 font-normal">(平均比 +${diffT.toFixed(2)}T)</span>`;
-                else if (diff < 0) prevDiffStr = ` <span class="text-[9px] text-sky-400 font-normal">(平均比 ${diffT.toFixed(2)}T)</span>`;
-                else prevDiffStr = ` <span class="text-[9px] text-slate-400 font-normal">(平均比 ±0.00T)</span>`;
+                if (diff > 0) prevDiffStr = ` <span class="text-[9px] text-rose-400 font-normal">(平均比 +${formatValue(diff)})</span>`;
+                else if (diff < 0) prevDiffStr = ` <span class="text-[9px] text-sky-400 font-normal">(平均比 ${formatValue(diff)})</span>`;
+                else prevDiffStr = ` <span class="text-[9px] text-slate-400 font-normal">(平均比 ±0)</span>`;
               }
             }
           }
@@ -844,14 +874,14 @@
           let trendStr = '-';
           if (name === baseName) trendStr = '<span class="text-cyan-500/70 font-bold">基準メンバー</span>';
           else {
-            let dBase = processedData.filter(d=>d.name===baseName && (isAllBoss || new Date(d.date).getDay()===targetBossId)).sort((a,b)=>new Date(a.date)-new Date(b.date));
-            let dTarget = processedData.filter(d=>d.name===name && (isAllBoss || new Date(d.date).getDay()===targetBossId)).sort((a,b)=>new Date(a.date)-new Date(b.date));
+            let dBase = processedData.filter(d=>d.name===baseName && (isAllBoss || parseCivilDate(d.date).getUTCDay()===targetBossId)).sort((a,b)=>parseCivilDate(a.date)-parseCivilDate(b.date));
+            let dTarget = processedData.filter(d=>d.name===name && (isAllBoss || parseCivilDate(d.date).getUTCDay()===targetBossId)).sort((a,b)=>parseCivilDate(a.date)-parseCivilDate(b.date));
             if(dBase.length>=2 && dTarget.length>=2) {
               let regB = calculateRegressionLine(dBase.map((d,idx)=>({x:idx, y:d.scoreNum/1e12})));
               let regT = calculateRegressionLine(dTarget.map((d,idx)=>({x:idx, y:d.scoreNum/1e12})));
               let curB = regB.slope * dBase.length + regB.intercept;
               let curT = regT.slope * dTarget.length + regT.intercept;
-              let diff = curB - curT; let diffStrTxt = Math.abs(diff).toFixed(2) + 'T';
+              let diff = curB - curT; let diffStrTxt = formatValue(Math.abs(diff) * 1e12);
               if (diff > 0) {
                 if (regB.slope >= regT.slope) trendStr = `<span class="text-emerald-400 font-bold">盤石 (+${diffStrTxt})</span>`;
                 else {
@@ -930,7 +960,7 @@
           filteredBgData = allData.filter(d => state.scatterTiers.includes(d.tierCat) || tNames.includes(d.name));
         }
 
-        const pts = filteredBgData.map(d => {
+        const pts = filteredBgData.filter(d => Number.isFinite(d.powerNum)).map(d => {
           const isSelected = tNames.includes(d.name); const cIndex = isSelected ? tNames.indexOf(d.name) : -1;
           return { x: d.powerNum/1e6, y: d.scoreNum/1e12, name: d.name, isSelected: isSelected, color: isSelected ? CHART_PALETTE[cIndex % CHART_PALETTE.length] : 'rgba(100,116,139,0.35)' };
         });
@@ -950,22 +980,22 @@
         if (charts.scatterPers) charts.scatterPers.destroy();
         charts.scatterPers = new Chart(document.getElementById('scatterChartPersonal').getContext('2d'), { 
           type: 'scatter', data: { datasets: [{ data: pts, backgroundColor: (c)=>c.raw?c.raw.color:'#000', pointRadius: (c)=>c.raw&&c.raw.isSelected?8:3, pointBorderColor: (c)=>c.raw&&c.raw.isSelected?'#fff':'transparent', pointBorderWidth: (c)=>c.raw&&c.raw.isSelected?2:0, pointHoverRadius: (c)=>c.raw&&c.raw.isSelected?12:5 }] }, 
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false}, annotation: {annotations:anno}, datalabels: { display: (c)=>c.dataset.data[c.dataIndex].isSelected, align: 'top', color: '#fff', font:{size:11, family:'Noto Sans JP', weight:'bold'}, formatter: v=>v.name }, tooltip: { callbacks: { label: (ctx)=>`${ctx.raw.y.toFixed(2)}T`, title: (ctx)=>ctx[0].raw.name } } }, scales: { x: { title:{display:true, text:'戦力 (M)', color:'#67e8f9', font:{size:10}}, grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8'} }, y: { min: yMin, max: yMax, title:{display:true, text:'スコア (T)', color:'#67e8f9', font:{size:10}}, grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8'} } } } 
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false}, annotation: {annotations:anno}, datalabels: { display: (c)=>c.dataset.data[c.dataIndex].isSelected, align: 'top', color: '#fff', font:{size:11, family:'Noto Sans JP', weight:'bold'}, formatter: v=>v.name }, tooltip: { callbacks: { label: (ctx)=>scoreChartValue(ctx.raw.y), title: (ctx)=>ctx[0].raw.name } } }, scales: { x: { title:{display:true, text:'戦力', color:'#67e8f9', font:{size:10}}, grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8', callback:v=>formatValue(Number(v)*1e6)} }, y: { min: yMin, max: yMax, title:{display:true, text:'スコア', color:'#67e8f9', font:{size:10}}, grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8', callback:scoreChartValue} } } }
         });
 
         if (tNames.length <= 5) {
           const radarData = tNames.map((name, i) => {
             const bossAvgs = [1,2,3,4,5,6,0].map(bossId => {
-              const scores = processedData.filter(d => d.name === name && validDates.includes(d.date) && new Date(d.date).getDay() == bossId).map(d => d.scoreNum);
+              const scores = processedData.filter(d => d.name === name && validDates.includes(d.date) && parseCivilDate(d.date).getUTCDay() == bossId).map(d => d.scoreNum);
               return scores.length > 0 ? (scores.reduce((a,b)=>a+b,0)/scores.length)/1e12 : 0;
             });
             const c = CHART_PALETTE[i % CHART_PALETTE.length]; return { label: name, data: bossAvgs, backgroundColor: c+'33', borderColor: c, pointBackgroundColor: c, borderWidth: 2 };
           });
           if (charts.radar) charts.radar.destroy();
-          charts.radar = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'radar', data: { labels: ['月(墓)','火(ド)','水(バ)','木(メ)','金(ス)','土(一)','日(鎌)'], datasets: radarData }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: 'rgba(0,240,255,0.15)' }, angleLines: { color: 'rgba(0,240,255,0.15)' }, pointLabels: { color: '#e2e8f0', font: { family: 'Noto Sans JP', size: 10, weight: 'bold' } }, ticks: { display: false } } }, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#cbd5e1', font: {size:10, family:'Noto Sans JP'} } }, datalabels: { display: false } } } });
+          charts.radar = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'radar', data: { labels: ['月(墓)','火(ド)','水(バ)','木(メ)','金(ス)','土(一)','日(鎌)'], datasets: radarData }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: 'rgba(0,240,255,0.15)' }, angleLines: { color: 'rgba(0,240,255,0.15)' }, pointLabels: { color: '#e2e8f0', font: { family: 'Noto Sans JP', size: 10, weight: 'bold' } }, ticks: { display: false } } }, plugins: { tooltip: { callbacks: { label:ctx=>ctx.dataset.label + ': ' + scoreChartValue(ctx.raw) } }, legend: { display: true, position: 'bottom', labels: { color: '#cbd5e1', font: {size:10, family:'Noto Sans JP'} } }, datalabels: { display: false } } } });
         }
 
-        let chartDates = availableDates.filter(d => isAllBoss || new Date(d).getDay() === targetBossId).slice(0, 15);
+        let chartDates = availableDates.filter(d => isAllBoss || parseCivilDate(d).getUTCDay() === targetBossId).slice(0, 15);
         chartDates.reverse();
         const xLabels = chartDates.map(d=>d.substring(5).replace('-','/'));
         xLabels.push("来週予測", " ", " ", " "); 
@@ -984,15 +1014,15 @@
         if (charts.trend) charts.trend.destroy();
         charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), {
           type: 'line', data: { labels: xLabels, datasets: tDatasets },
-          options: { responsive: true, maintainAspectRatio: false, layout: { padding: { right: 10 } }, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, datalabels: { display: function(ctx){ const d=ctx.dataset.data; let i=d.length-1; while(i>=0&&d[i]===null)i--; return ctx.dataIndex===i; }, align: 'right', color: ctx=>ctx.dataset.borderColor, font: {size: 10, weight:'bold', family:'Noto Sans JP'}, formatter: (v,ctx)=>ctx.dataset.label } }, scales: { x: { grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8', font:{size:9}} }, y: { title:{display:true, text:'スコア (T)', color:'#67e8f9', font:{size:10}}, grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8', font:{size:9}} } } }
+          options: { responsive: true, maintainAspectRatio: false, layout: { padding: { right: 10 } }, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label:ctx=>ctx.dataset.label + ': ' + scoreChartValue(ctx.raw) } }, legend: { display: false }, datalabels: { display: function(ctx){ const d=ctx.dataset.data; let i=d.length-1; while(i>=0&&d[i]===null)i--; return ctx.dataIndex===i; }, align: 'right', color: ctx=>ctx.dataset.borderColor, font: {size: 10, weight:'bold', family:'Noto Sans JP'}, formatter: (v,ctx)=>ctx.dataset.label } }, scales: { x: { grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8', font:{size:9}} }, y: { title:{display:true, text:'スコア', color:'#67e8f9', font:{size:10}}, grid:{color:'rgba(0,240,255,0.1)'}, ticks:{color:'#94a3b8', font:{size:9}, callback:scoreChartValue} } } }
         });
       }
 
-      let tData = processedData.filter(d => tNames.includes(d.name) && (isAllBoss || new Date(d.date).getDay() === targetBossId));
+      let tData = processedData.filter(d => tNames.includes(d.name) && (isAllBoss || parseCivilDate(d.date).getUTCDay() === targetBossId));
       if(tData.length > 0) {
         tData.forEach(d => {
           const cIndex = tNames.indexOf(d.name); const dotColor = tNames.length <= 10 ? CHART_PALETTE[cIndex % CHART_PALETTE.length] : '#94a3b8';
-          let localDow = ['日','月','火','水','木','金','土'][new Date(d.date).getDay()];
+          let localDow = ['日','月','火','水','木','金','土'][parseCivilDate(d.date).getUTCDay()];
           listEl.insertAdjacentHTML('beforeend', `
             <li class="grid grid-cols-5 text-center items-center py-2.5 border-b border-cyan-500/15 hover:bg-slate-800/40">
               <div class="text-[10px] text-slate-300 font-bold leading-tight relative num-font">
@@ -1011,8 +1041,8 @@
 
     function renderActivity() {
       const listEl = document.getElementById('activityList'); listEl.innerHTML = '';
-      const days = parseInt(state.actPeriod); const pastMs = new Date(availableDates[0]).getTime() - (days * 864e5);
-      const tDates = availableDates.filter(d => new Date(d).getTime() > pastMs); const aDays = tDates.length;
+      const days = parseInt(state.actPeriod); const pastMs = parseCivilDate(availableDates[0]).getTime() - (days * 864e5);
+      const tDates = availableDates.filter(d => parseCivilDate(d).getTime() > pastMs); const aDays = tDates.length;
       if (aDays===0 || activeMembers.length===0) { listEl.innerHTML = `<li class="p-8 text-center text-slate-500">データなし</li>`; return; }
       const tData = processedData.filter(d => tDates.includes(d.date));
       const aData = activeMembers.map(n => { const c = tData.filter(d => d.name===n && d.scoreNum>0).length; return {name:n, count:aDays-c, rate:(aDays-c)/aDays}; }).sort((a,b)=>b.count-a.count || a.name.localeCompare(b.name));
